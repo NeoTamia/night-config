@@ -7,8 +7,8 @@ repositories {
     mavenCentral()
 }
 
-// java {
-//     toolchain {
-//         languageVersion = JavaLanguageVersion.of(11)
-//     }
-// }
+ java {
+     toolchain {
+         languageVersion = JavaLanguageVersion.of(21)
+     }
+ }

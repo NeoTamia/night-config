@@ -4,12 +4,12 @@ plugins {
 }
 
 multiRelease {
-    targetVersions(8, 11, 17)
+    targetVersions(21)
 }
 
 dependencies {
 	api(project(":core"))
-	implementation(libs.snakeYaml)
+	implementation(libs.snakeYamlEngine)
 
 	testImplementation(project(":test-shared"))
 }

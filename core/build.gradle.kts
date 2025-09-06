@@ -12,6 +12,6 @@ dependencies {
 // Build a multi-release JAR with the following java versions
 // (the first version is the base one, with sources located in src/java)
 multiRelease {
-    targetVersions(8, 11, 17)
+    targetVersions(21)
 }
 

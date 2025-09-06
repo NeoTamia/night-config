@@ -1,10 +1,14 @@
-sub: {'null': null, nullObject: null}
+sub:
+  'null': null
+  nullObject: null
 'null': null
 string: this is a string
 not.a.subconfig: works
 nullObject: null
-list: [10, 12]
-enum: !!com.electronwill.sharedtests.BasicTestEnum 'A'
+list:
+- 10
+- 12
+enum: A
 objectList:
-- {foo: bar}
-- {baz: true}
+- foo: bar
+- baz: true

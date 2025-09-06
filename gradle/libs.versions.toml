@@ -1,8 +1,10 @@
 [versions]
 junit5 = "5.10.2"
-snakeYaml = "1.33"
+snakeYaml = "2.0"
+snakeYamlEngine = "2.10"
 typesafeConfig = "1.4.3"
 
 [libraries]
-typesafeConfig = { module = "com.typesafe:config", version.ref = "typesafeConfig" }
 snakeYaml = { module = "org.yaml:snakeyaml", version.ref = "snakeYaml" }
+snakeYamlEngine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "snakeYamlEngine" }
+typesafeConfig = { module = "com.typesafe:config", version.ref = "typesafeConfig" }

@@ -6,8 +6,8 @@ import com.electronwill.nightconfig.core.concurrent.ConcurrentConfig;
 import com.electronwill.nightconfig.core.io.ConfigParser;
 import com.electronwill.nightconfig.core.io.ParsingException;
 import com.electronwill.nightconfig.core.io.ParsingMode;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
 import java.io.Reader;
 import java.util.List;
@@ -15,12 +15,12 @@ import java.util.Map;
 import java.util.Collections;
 
 /**
- * A YAML parser that uses the snakeYaml library.
+ * A YAML parser that uses the SnakeYaml Engine V2 library.
  *
  * @author TheElectronWill
  */
 public final class YamlParser implements ConfigParser<Config> {
-	private final Yaml yaml;
+	private final Load yaml;
 	private final ConfigFormat<Config> configFormat;
 
 	public YamlParser() {
@@ -32,13 +32,13 @@ public final class YamlParser implements ConfigParser<Config> {
 		this.configFormat = configFormat;
 	}
 
-	public YamlParser(Yaml yaml) {
+	public YamlParser(Load yaml) {
 		this.yaml = yaml;
 		this.configFormat = YamlFormat.configuredInstance(yaml);
 	}
 
-	public YamlParser(LoaderOptions options) {
-		this(new Yaml(options));
+	public YamlParser(LoadSettings settings) {
+		this(new Load(settings));
 	}
 
 	@Override
@@ -56,15 +56,21 @@ public final class YamlParser implements ConfigParser<Config> {
 	@Override
 	public void parse(Reader reader, Config destination, ParsingMode parsingMode) {
 		if (destination instanceof ConcurrentConfig) {
-			((ConcurrentConfig)destination).bulkUpdate(view -> {
+			((ConcurrentConfig)destination).bulkUpdate((view) -> {
 				parse(reader, view, parsingMode);
 			});
 			return;
 		}
 
 		try {
+			// SnakeYaml Engine V2 uses loadFromReader(Reader) method
+			Object loadedData = yaml.loadFromReader(reader);
+			if (loadedData == null) {
+				return; // Empty document
+			}
+
 			@SuppressWarnings("unchecked")
-			Map<String, Object> map = yaml.loadAs(reader, Map.class);
+			Map<String, Object> map = (Map<String, Object>) loadedData;
 			parsingMode.prepareParsing(destination);
 			for (Map.Entry<String, Object> entry : map.entrySet()) {
 				parsingMode.put(destination, Collections.singletonList(entry.getKey()), convertValue(entry.getValue(), destination));

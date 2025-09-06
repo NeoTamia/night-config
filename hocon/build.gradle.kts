@@ -4,7 +4,7 @@ plugins {
 }
 
 multiRelease {
-    targetVersions(8, 11, 17)
+    targetVersions(21)
 }
 
 dependencies {

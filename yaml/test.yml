@@ -6,9 +6,9 @@ string: this is a string
 not.a.subconfig: works
 nullObject: null
 list:
-- 10
-- 12
-enum: A
+  - 10
+  - 12
+enum: !!com.electronwill.sharedtests.BasicTestEnum 'A'
 objectList:
-- foo: bar
-- baz: true
+  - foo: bar
+  - baz: true

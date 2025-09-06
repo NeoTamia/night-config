@@ -1,0 +1,13 @@
+# Server configuration
+server:
+  host: localhost  # The hostname to bind to
+  port: 8080      # The port number
+
+# Database settings
+database:
+  url: jdbc:postgresql://localhost/mydb  # Database connection URL
+  username: user                         # Database username
+
+# Logging configuration
+logging:
+  level: INFO  # Log level: DEBUG, INFO, WARN, ERROR

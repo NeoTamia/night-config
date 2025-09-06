@@ -2,6 +2,7 @@ package com.electronwill.nightconfig.core.serde;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.electronwill.nightconfig.core.Config;
@@ -134,5 +135,26 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	public <R> R deserializeFields(UnmodifiableConfig source,
 			Supplier<? extends R> destinationSupplier) {
 		return super.deserializeFields(source, destinationSupplier);
+	}
+
+	/**
+	 * Deserializes a {@code Config} to a record of type {@code R} by transforming the config entries
+	 * into record's components.
+	 *
+	 * @param <R>         type of the record
+	 * @param source      config to deserialize
+	 * @param recordClass class of the record
+	 * @return a new, deserialized record
+	 */
+	@SuppressWarnings("unchecked")
+	public <R extends Record> R deserializeToRecord(UnmodifiableConfig source, Class<R> recordClass) {
+		if (!recordClass.isRecord()) {
+			throw new IllegalArgumentException(
+				"Argument recordClass = " + recordClass
+					+ " is not the class of a record! Please don't silence errors about incompatible types :)");
+		}
+		DeserializerContext ctx = new DeserializerContext(this);
+		TypeConstraint t = new TypeConstraint(recordClass);
+		return (R) ctx.deserializeValue(source, Optional.of(t));
 	}
 }

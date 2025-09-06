@@ -63,11 +63,8 @@ public final class YamlParser implements ConfigParser<Config> {
 		}
 
 		try {
-			// SnakeYaml Engine V2 uses loadFromReader(Reader) method
 			Object loadedData = yaml.loadFromReader(reader);
-			if (loadedData == null) {
-				return; // Empty document
-			}
+			if (loadedData == null) return;
 
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String, Object>) loadedData;

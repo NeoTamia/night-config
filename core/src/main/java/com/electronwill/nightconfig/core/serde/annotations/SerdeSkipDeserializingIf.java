@@ -106,11 +106,11 @@ public @interface SerdeSkipDeserializingIf {
 	 * be skipped. The predicate is applied on the raw config value,
 	 * as returned by {@link UnmodifiableConfig#getRaw(java.util.List)}.
 	 *
-	 * <h2>Constraints on methods</h2>
+	 * <strong>Constraints on methods</strong>
 	 * The predicate method must take exactly one parameter of type {@code Object}.
 	 * If {@link #customClass()} is set to its non-default value, the method must be static.
 	 *
-	 * <h2>Constraints on fields</h2>
+	 * <strong>Constraints on fields</strong>
 	 * The predicate field must be of type {@code java.util.function.Predicate<Object>}.
 	 * In most cases, the predicate field should be declared with the
 	 * {@code transient} keyword, to prevent it from being (de)serialized.

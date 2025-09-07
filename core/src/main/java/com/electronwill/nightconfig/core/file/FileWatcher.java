@@ -174,9 +174,9 @@ public final class FileWatcher {
 	 * <p>
 	 * This method returns a {@code CompletableFuture} that is completed when the
 	 * handler is registered and ready to be notified of file events.
-	 *
-	 * <h2>Examples</h2>
-	 *
+	 * <p>
+	 * <strong>Examples</strong>
+	 * <p>
 	 * Waiting for the FileWatcher to register one handler:
 	 * <pre>
 	 * {@code

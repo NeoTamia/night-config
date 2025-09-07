@@ -40,9 +40,7 @@ final class TableWriter {
 		output.write('}');
 	}
 
-	static void writeTopLevel(UnmodifiableConfig config, List<String> configPath,
-			CharacterOutput output, TomlWriter writer) {
-
+	static void writeTopLevel(UnmodifiableConfig config, List<String> configPath, CharacterOutput output, TomlWriter writer) {
 		UnmodifiableCommentedConfig commentedConfig = UnmodifiableCommentedConfig.fake(config);
 
 		writeWithHeader(commentedConfig, null, false, false, configPath, output, writer);

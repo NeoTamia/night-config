@@ -73,9 +73,8 @@ public final class TomlParser implements ConfigParser<CommentedConfig> {
 
 			if (hasPendingComment()) {// Handles comments that are before the table declaration
 				String comment = consumeComment();
-				if (parentConfig instanceof CommentedConfig) {
-					((CommentedConfig)parentConfig).setComment(lastPath, comment);
-				}
+				if (parentConfig instanceof CommentedConfig cc)
+                    cc.setComment(lastPath, comment);
 			}
 			if (isArray) {// It's an element of an array of tables
 				if (parentConfig == null) {
@@ -109,10 +108,9 @@ public final class TomlParser implements ConfigParser<CommentedConfig> {
 					CommentedConfig table = TableParser.parseNormal(commentedConfig, input, this);
 					parsingMode.put(parentConfig, lastPath, table);
 				} else {
-					if (alreadyDeclared instanceof Config) {
+					if (alreadyDeclared instanceof Config table) {
 						// check that there is no conflict with the existing declaration
-						Config table = (Config)alreadyDeclared;
-						checkContainsOnlySubtables(table, path);
+                        checkContainsOnlySubtables(table, path);
 						CommentedConfig commentedTable = CommentedConfig.fake(table);
 						TableParser.parseNormal(input, this, commentedTable);
 					} else if (configWasEmpty) {

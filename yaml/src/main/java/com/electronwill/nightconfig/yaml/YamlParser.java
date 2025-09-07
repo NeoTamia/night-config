@@ -1,5 +1,6 @@
 package com.electronwill.nightconfig.yaml;
 
+import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.ConfigFormat;
 import com.electronwill.nightconfig.core.concurrent.ConcurrentConfig;
@@ -8,6 +9,8 @@ import com.electronwill.nightconfig.core.io.ParsingException;
 import com.electronwill.nightconfig.core.io.ParsingMode;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.api.lowlevel.Compose;
+import org.snakeyaml.engine.v2.composer.Composer;
 
 import java.io.Reader;
 import java.util.List;
@@ -19,50 +22,54 @@ import java.util.Collections;
  *
  * @author TheElectronWill
  */
-public final class YamlParser implements ConfigParser<Config> {
+public final class YamlParser implements ConfigParser<CommentedConfig> {
 	private final Load yaml;
-	private final ConfigFormat<Config> configFormat;
+    private final LoadSettings loadSettings;
+	private final ConfigFormat<CommentedConfig> configFormat;
 
 	public YamlParser() {
 		this(YamlFormat.defaultInstance());
 	}
 
 	public YamlParser(YamlFormat configFormat) {
-		this.yaml = configFormat.yaml;
+		this.yaml = configFormat.getYaml();
+        this.loadSettings = configFormat.getLoadSettings();
 		this.configFormat = configFormat;
 	}
 
-	public YamlParser(Load yaml) {
-		this.yaml = yaml;
-		this.configFormat = YamlFormat.configuredInstance(yaml);
-	}
-
-	public YamlParser(LoadSettings settings) {
-		this(new Load(settings));
+	public YamlParser(LoadSettings loadSettings) {
+		this.yaml = new Load(loadSettings);
+        this.loadSettings = loadSettings;
+		this.configFormat = YamlFormat.configuredInstance(loadSettings);
 	}
 
 	@Override
-	public ConfigFormat<Config> getFormat() {
+	public ConfigFormat<CommentedConfig> getFormat() {
 		return configFormat;
 	}
 
 	@Override
-	public Config parse(Reader reader) {
-		Config config = configFormat.createConfig();
+	public CommentedConfig parse(Reader reader) {
+        CommentedConfig config = configFormat.createConfig();
 		parse(reader, config, ParsingMode.MERGE);
 		return config;
 	}
 
 	@Override
 	public void parse(Reader reader, Config destination, ParsingMode parsingMode) {
-		if (destination instanceof ConcurrentConfig) {
-			((ConcurrentConfig)destination).bulkUpdate((view) -> {
+		if (destination instanceof ConcurrentConfig concurrentConfig) {
+			concurrentConfig.bulkUpdate((view) -> {
 				parse(reader, view, parsingMode);
 			});
 			return;
 		}
 
 		try {
+            var compose = new Compose(this.loadSettings);
+            var node = compose.composeReader(reader);
+            if (node.isEmpty()) return;
+            System.out.println(node);
+
 			Object loadedData = yaml.loadFromReader(reader);
 			if (loadedData == null) return;
 

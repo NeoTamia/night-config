@@ -51,8 +51,7 @@ final class TableParser {
 		}
 	}
 
-	static <T extends CommentedConfig> T parseNormal(CharacterInput input, TomlParser parser,
-													 T config) {
+	static <T extends CommentedConfig> T parseNormal(CharacterInput input, TomlParser parser, T config) {
 		boolean configWasInitiallyEmpty = config.isEmpty();
 		while (true) {
 			List<CharsWrapper> commentsList = new ArrayList<>(2);

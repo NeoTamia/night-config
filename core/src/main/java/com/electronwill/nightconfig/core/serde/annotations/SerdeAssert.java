@@ -66,13 +66,13 @@ public @interface SerdeAssert {
 	 * in order to test whether the field that we are (de)serializing
 	 * satisfies a condition. The predicate is applied on the field's value.
 	 *
-	 * <h2>Constraints on methods</h2>
+	 * <strong>Constraints on methods</strong>
 	 * The predicate method must take exactly one parameter of type {@code T}, where
 	 * {@code T} is the type of the field to (de)serialize.
 	 * If {@link #customClass()} is set to its non-default value, the method must be
 	 * static.
 	 *
-	 * <h2>Constraints on fields</h2>
+	 * <strong>Constraints on fields</strong>
 	 * The predicate field must be of type {@code java.util.function.Predicate<T>},
 	 * where {@code T} is the type of the field to (de)serialize.
 	 * In most cases, the predicate field should be declared with the

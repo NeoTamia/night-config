@@ -101,11 +101,11 @@ public @interface SerdeDefault {
 	/**
 	 * The name of the method or field that provides the default value.
 	 *
-	 * <h2>Constraints on methods</h2>
+	 * <strong>Constraints on methods</strong>
 	 * The provider method must take no parameter.
 	 * If {@link #cls()} is set to its non-default value, the method must be static.
 	 *
-	 * <h2>Constraints on fields</h2>
+	 * <strong>Constraints on fields</strong>
 	 * The provider field must be of type {@code java.util.function.Supplier<T>}
 	 * where {@code T} is the type of the field to (de)serialize.
 	 * In most cases, the provider field should be declared with the

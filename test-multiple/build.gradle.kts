@@ -13,7 +13,7 @@ dependencies {
     testImplementation(project(":test-shared"))
 }
 
-// Use Java 11.
+// Use Java 21.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -24,7 +24,7 @@ java {
 val versionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 val junitVersion = versionCatalog.findVersion("junit5")
     .orElseThrow{ RuntimeException("missing version in libs.versions.toml: junit5") }
-    .getRequiredVersion()
+    .requiredVersion
 
 // Use JUnit5.
 testing {

@@ -118,13 +118,13 @@ public final class YamlWriter implements ConfigWriter {
                 List<CommentLine> blockComments = new ArrayList<>();
                 // Split multi-line comments and add each line
                 String[] commentLines = comment.split("\n");
-                boolean firstLine = true;
                 for (String commentLine : commentLines) {
-                    if (!commentLine.startsWith("#") && !firstLine) {
-                        commentLine = "# " + commentLine.trim();
-                    }
-                    blockComments.add(new CommentLine(Optional.empty(), Optional.empty(), commentLine, CommentType.BLOCK));
-                    firstLine = false;
+                    String trimmedLine = commentLine.trim();
+                    // Remove leading # if present, SnakeYAML will add it automatically with proper spacing
+                    if (trimmedLine.startsWith("#"))
+                        trimmedLine = trimmedLine.substring(1).trim();
+                    // Pass comment with leading space for proper formatting
+                    blockComments.add(new CommentLine(Optional.empty(), Optional.empty(), " " + trimmedLine, CommentType.BLOCK));
                 }
                 keyNode.setBlockComments(blockComments);
             }

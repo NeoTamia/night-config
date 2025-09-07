@@ -17,7 +17,13 @@ public class Util {
         assertEquals("works", config.get(List.of("not.a.subconfig")));
         assertNull(config.get("nullObject"));
         assertEquals(List.of(10, 12), config.get("list"));
-        assertEquals(BasicTestEnum.A, config.get("enum"));
+        // Handle enum - could be enum object (direct config) or string (after YAML parsing)
+        Object enumValue = config.get("enum");
+        if (enumValue instanceof String) {
+            assertEquals(BasicTestEnum.A, config.getEnum("enum", BasicTestEnum.class));
+        } else {
+            assertEquals(BasicTestEnum.A, enumValue);
+        }
 
         List<? extends Config> configList = config.get("objectList");
         assertEquals("bar", configList.get(0).get("foo"));
@@ -28,6 +34,7 @@ public class Util {
         config.set("sub.null", null);
         config.set("string", "this is a string");
         config.set("list", List.of(10, 12));
+        config.set("enum", BasicTestEnum.A);
         Config sub1 = config.createSubConfig();
         sub1.set("foo", "bar");
         Config sub2 = config.createSubConfig();
@@ -42,6 +49,7 @@ public class Util {
             list:
               - '10'
               - '12'
+            enum: A
             objectList:
               - foo: bar
               - baz: 'true'

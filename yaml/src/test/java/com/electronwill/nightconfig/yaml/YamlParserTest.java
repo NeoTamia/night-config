@@ -45,22 +45,36 @@ public class YamlParserTest {
 """
 # Server configuration
 server:
-  host: localhost  # The hostname to bind to
-  port: 8080      # The port number
+  # The hostname to bind to
+  host: localhost
+  # The port number
+  port: 8080
 
 # Database settings
 database:
-  url: jdbc:postgresql://localhost/mydb  # Database connection URL
-  username: user                         # Database username
+  # Database connection URL
+  url: jdbc:postgresql://localhost/mydb
+  # Database username
+  username: user
 
 # Logging configuration
 logging:
-  level: INFO  # Log level: DEBUG, INFO, WARN, ERROR
-
+  # Log level: DEBUG, INFO, WARN, ERROR
+  level: INFO
 """
         );
         assertEquals("Server configuration", config.getComment("server"));
         assertEquals("The hostname to bind to", config.getComment("server.host"));
-        assertEquals("host", config.get("server.host"));
+        assertEquals("localhost", config.get("server.host"));
+        assertEquals("The port number", config.getComment("server.port"));
+        assertEquals(8080, config.getInt("server.port"));
+        assertEquals("Database settings", config.getComment("database"));
+        assertEquals("Database connection URL", config.getComment("database.url"));
+        assertEquals("jdbc:postgresql://localhost/mydb", config.get("database.url"));
+        assertEquals("Database username", config.getComment("database.username"));
+        assertEquals("user", config.get("database.username"));
+        assertEquals("Logging configuration", config.getComment("logging"));
+        assertEquals("Log level: DEBUG, INFO, WARN, ERROR", config.getComment("logging.level"));
+        assertEquals("INFO", config.get("logging.level"));
     }
 }

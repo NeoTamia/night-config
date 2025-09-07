@@ -432,7 +432,7 @@ public interface Config extends UnmodifiableConfig {
 
 	/**
 	 * Checks if the newly created configs keep the insertion order of their content.
-	 * By default this is not the case. This can be controlled with the `nightconfig.ordered`
+	 * By default this is the case. This can be controlled with the `nightconfig.ordered`
 	 * system property or by calling {@link #setInsertionOrderPreserved(boolean)}.
 	 * <p>
 	 * This setting does not apply to configurations created from a Map, from another Config,
@@ -443,7 +443,7 @@ public interface Config extends UnmodifiableConfig {
 	 */
 	static boolean isInsertionOrderPreserved() {
 		String prop = System.getProperty("nightconfig.preserveInsertionOrder");
-		return (prop != null) && (prop.equals("true") || prop.equals("1"));
+        return prop == null || Boolean.parseBoolean(prop);
 	}
 
 	/**

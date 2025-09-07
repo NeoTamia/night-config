@@ -35,11 +35,15 @@ public class Util {
         config.set("objectList", List.of(sub1, sub2));
     }
 
-    static final String EXPECTED_SERIALIZED = "sub: {'null': null}\n" + //
-            "string: this is a string\n" + //
-            "list: [10, 12]\n" + //
-            "objectList:\n" + //
-            "- {foo: bar}\n" + //
-            "- {baz: true}\n" + //
-            "";
+    static final String EXPECTED_SERIALIZED = """
+            sub:
+              'null': null
+            string: this is a string
+            list:
+              - '10'
+              - '12'
+            objectList:
+              - foo: bar
+              - baz: 'true'
+            """;
 }

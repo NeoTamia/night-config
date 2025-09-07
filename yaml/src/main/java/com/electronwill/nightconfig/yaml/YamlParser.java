@@ -65,11 +65,6 @@ public final class YamlParser implements ConfigParser<CommentedConfig> {
 		}
 
 		try {
-            var compose = new Compose(this.loadSettings);
-            var node = compose.composeReader(reader);
-            if (node.isEmpty()) return;
-            System.out.println(node);
-
 			Object loadedData = yaml.loadFromReader(reader);
 			if (loadedData == null) return;
 

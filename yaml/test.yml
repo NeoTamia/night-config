@@ -8,7 +8,7 @@ nullObject: null
 list:
   - 10
   - 12
-enum: !!com.electronwill.sharedtests.BasicTestEnum 'A'
+enum: A
 objectList:
   - foo: bar
   - baz: true

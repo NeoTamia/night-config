@@ -10,6 +10,7 @@ repositories {
 dependencies {
 	api(project(":toml"))
 	api(project(":json"))
+	api(project(":yaml"))
     testImplementation(project(":test-shared"))
 }
 

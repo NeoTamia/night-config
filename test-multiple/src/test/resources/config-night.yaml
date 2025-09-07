@@ -1,0 +1,30 @@
+toto: 42
+settings:
+  key1: value1
+  key2: value2
+test: OWO
+resource:
+  path: resource_path
+  namespace: example
+doubleValue: 0.123456789
+version: 2
+nested:
+  count: 10
+  description: Nested Config
+  innerConfig:
+    flag: false
+    ratio: 3.14
+# Whether the configuration is enabled
+isEnabled: true
+decimals: 0.5
+multiline: |-
+  This is a multiline
+  string example.
+  It preserves line breaks.
+name: Config
+uneVariableOuLeNomPeutEtreTresLong: true
+titi: 24
+items:
+  - item1
+  - item2
+  - item3

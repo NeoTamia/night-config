@@ -1,0 +1,31 @@
+toto = 42
+test = "OWO"
+doubleValue = 0.123456789
+version = 2
+#Whether the configuration is enabled
+isEnabled = true
+decimals = 0.5
+multiline = """
+This is a multiline
+string example.
+It preserves line breaks."""
+name = "Config"
+uneVariableOuLeNomPeutEtreTresLong = true
+titi = 24
+items = ["item1", "item2", "item3"]
+
+[settings]
+	key1 = "value1"
+	key2 = "value2"
+
+[resource]
+	path = "resource_path"
+	namespace = "example"
+
+[nested]
+	count = 10
+	description = "Nested Config"
+
+	[nested.innerConfig]
+		flag = false
+		ratio = 3.14

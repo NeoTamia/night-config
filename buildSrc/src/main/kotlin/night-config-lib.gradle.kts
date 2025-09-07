@@ -111,7 +111,7 @@ project.afterEvaluate {
 
 // Set project metadata for publishing
 group = "com.electronwill.night-config"
-version = "3.8.3"
+version = "3.9.0"
 
 // Publish the library as a Maven artifact.
 publishing {
@@ -164,9 +164,9 @@ publishing {
     }
 }
 
-// Sign maven artifacts
-signing {
-    useGpgCmd()
-    sign(publishing.publications["mavenJava"])
-}
+//// Sign maven artifacts
+//signing {
+//    useGpgCmd()
+//    sign(publishing.publications["mavenJava"])
+//}
 

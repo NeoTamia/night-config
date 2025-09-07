@@ -156,6 +156,16 @@ public final class YamlWriter implements ConfigWriter {
             return new SequenceNode(Tag.SEQ, nodes, FlowStyle.BLOCK);
         } else if (value instanceof Enum<?> enumValue) {
             return new ScalarNode(Tag.STR, enumValue.name(), ScalarStyle.PLAIN);
+        } else if (value instanceof String str) {
+            // Use literal style for multiline strings
+            ScalarStyle style = str.contains("\n") ? ScalarStyle.LITERAL : ScalarStyle.PLAIN;
+            return new ScalarNode(Tag.STR, str, style);
+        } else if (value instanceof Float || value instanceof Double) {
+            return new ScalarNode(Tag.FLOAT, value.toString(), ScalarStyle.PLAIN);
+        } else if (value instanceof Integer || value instanceof Long || value instanceof Short || value instanceof Byte) {
+            return new ScalarNode(Tag.INT, value.toString(), ScalarStyle.PLAIN);
+        } else if (value instanceof Boolean bool) {
+            return new ScalarNode(Tag.BOOL, bool.toString(), ScalarStyle.PLAIN);
         }
         return new ScalarNode(Tag.STR, String.valueOf(value), ScalarStyle.PLAIN);
     }

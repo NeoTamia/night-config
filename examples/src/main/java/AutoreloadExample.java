@@ -1,4 +1,4 @@
-import com.electronwill.nightconfig.core.file.FileConfig;
+import re.neotamia.nightconfig.core.file.FileConfig;
 
 import java.io.File;
 import java.io.FileWriter;

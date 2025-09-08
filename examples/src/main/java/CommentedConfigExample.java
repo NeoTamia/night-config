@@ -1,6 +1,6 @@
-import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
-import com.electronwill.nightconfig.toml.TomlWriter;
+import re.neotamia.nightconfig.core.CommentedConfig;
+import re.neotamia.nightconfig.core.io.WritingMode;
+import re.neotamia.nightconfig.toml.TomlWriter;
 import java.io.File;
 
 /**

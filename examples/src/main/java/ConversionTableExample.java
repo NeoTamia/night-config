@@ -1,6 +1,6 @@
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.core.conversion.ConversionTable;
-import com.electronwill.nightconfig.core.utils.StringUtils;
+import re.neotamia.nightconfig.core.Config;
+import re.neotamia.nightconfig.core.conversion.ConversionTable;
+import re.neotamia.nightconfig.core.utils.StringUtils;
 import java.util.List;
 
 /**

@@ -15,14 +15,14 @@ import java.util.*;
 
 import org.junit.jupiter.api.*;
 
-import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.core.file.FileNotFoundAction;
-import com.electronwill.nightconfig.core.io.ParsingException;
-import com.electronwill.nightconfig.json.JsonParser;
-import com.electronwill.nightconfig.toml.TomlFormat;
-import com.electronwill.nightconfig.toml.TomlParser;
-import com.electronwill.nightconfig.toml.TomlWriter;
+import re.neotamia.nightconfig.core.CommentedConfig;
+import re.neotamia.nightconfig.core.Config;
+import re.neotamia.nightconfig.core.file.FileNotFoundAction;
+import re.neotamia.nightconfig.core.io.ParsingException;
+import re.neotamia.nightconfig.json.JsonParser;
+import re.neotamia.nightconfig.toml.TomlFormat;
+import re.neotamia.nightconfig.toml.TomlParser;
+import re.neotamia.nightconfig.toml.TomlWriter;
 
 /**
  * Executes standard toml tests from https://github.com/toml-lang/toml-test.

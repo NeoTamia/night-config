@@ -1,5 +1,5 @@
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.core.conversion.ObjectConverter;
+import re.neotamia.nightconfig.core.Config;
+import re.neotamia.nightconfig.core.conversion.ObjectConverter;
 
 /**
  * @author TheElectronWill

@@ -1,11 +1,9 @@
-import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.core.concurrent.SynchronizedConfig;
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.file.FileConfig;
-import com.electronwill.nightconfig.core.serde.ObjectSerializer;
-import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
-import com.electronwill.nightconfig.core.serde.annotations.SerdeKey;
+import re.neotamia.nightconfig.core.concurrent.SynchronizedConfig;
+import re.neotamia.nightconfig.core.file.CommentedFileConfig;
+import re.neotamia.nightconfig.core.file.FileConfig;
+import re.neotamia.nightconfig.core.serde.ObjectSerializer;
+import re.neotamia.nightconfig.core.serde.annotations.SerdeComment;
+import re.neotamia.nightconfig.core.serde.annotations.SerdeKey;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SerializerTest {
     @BeforeAll
     public static void setup() {
-        com.electronwill.nightconfig.core.Config.setInsertionOrderPreserved(true);
+        re.neotamia.nightconfig.core.Config.setInsertionOrderPreserved(true);
     }
 
     @Test

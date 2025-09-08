@@ -38,8 +38,8 @@ java {
 // Add Automatic-Module-Name for JPMS support, and some other attributes for OSGI
 tasks.jar {
 	manifest {
-		attributes["Automatic-Module-Name"] = "com.electronwill.nightconfig.${project.name}"
-		attributes["Bundle-SymbolicName"] = "com.electronwill.nightconfig.${project.name}"
+		attributes["Automatic-Module-Name"] = "re.neotamia.nightconfig.${project.name}"
+		attributes["Bundle-SymbolicName"] = "re.neotamia.nightconfig.${project.name}"
 		attributes["Bundle-Name"] = "night-config:${project.name}"
 		attributes["Bundle-Version"] = "${project.version}"
 	}
@@ -110,7 +110,7 @@ project.afterEvaluate {
 }
 
 // Set project metadata for publishing
-group = "com.electronwill.night-config"
+group = "re.neotamia.night-config"
 version = "3.9.0"
 
 // Publish the library as a Maven artifact.

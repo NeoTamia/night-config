@@ -1,5 +1,5 @@
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.core.file.FileConfig;
+import re.neotamia.nightconfig.core.Config;
+import re.neotamia.nightconfig.core.file.FileConfig;
 import java.util.Arrays;
 
 /**

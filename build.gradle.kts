@@ -40,8 +40,8 @@ tasks.register<JapicmpTask>("japicmp") {
 	} + listOf("METHOD_NEW_DEFAULT")
 
 	val excludedClasses = listOf(
-		"com.electronwill.nightconfig.core.file.FileConfigBuilder",
-		"com.electronwill.nightconfig.core.file.CommentedFileConfigBuilder",
+		"re.neotamia.nightconfig.core.file.FileConfigBuilder",
+		"re.neotamia.nightconfig.core.file.CommentedFileConfigBuilder",
 	)
 	logger.info("japicmp excluded changes: $excludedChanges")
 	logger.info("japicmp excluded classes: $excludedClasses")

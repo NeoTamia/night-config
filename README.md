@@ -1,7 +1,7 @@
 ![Night Config](logo.png)
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.electronwill.night-config/core.svg)](https://central.sonatype.com/search?q=g%3Acom.electronwill.night-config)
-[![javadoc](https://javadoc.io/badge2/com.electronwill.night-config/core/javadoc.svg)](https://javadoc.io/doc/com.electronwill.night-config/core)
+[![Maven Central](https://img.shields.io/maven-central/v/re.neotamia.night-config/core.svg)](https://central.sonatype.com/search?q=g%3Are.neotamia.night-config)
+[![javadoc](https://javadoc.io/badge2/re.neotamia.night-config/core/javadoc.svg)](https://javadoc.io/doc/re.neotamia.night-config/core)
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/TheElectronWill/night-config/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/TheElectronWill/night-config/tree/master)
 
 # Introduction
@@ -63,7 +63,7 @@ The file be compiled automatically, and the given main class will be executed.
 
 NightConfig is built with Gradle. The project is divided in several modules, the "core" module plus one module per supported configuration format. Please [read the wiki for more information](https://github.com/TheElectronWill/Night-Config/wiki/Modules-and-dependencies).
 
-The releases are available on [Maven Central](https://search.maven.org/search?q=com.electronwill.night-config) and [JitPack](https://jitpack.io/#TheElectronWill/Night-Config).
+The releases are available on [Maven Central](https://search.maven.org/search?q=re.neotamia.night-config) and [JitPack](https://jitpack.io/#TheElectronWill/Night-Config).
 
 ## Old Android modules
 

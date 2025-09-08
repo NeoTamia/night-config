@@ -1,9 +1,9 @@
 import org.junit.jupiter.api.Test;
 
-import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.file.FileConfig;
+import re.neotamia.nightconfig.core.CommentedConfig;
+import re.neotamia.nightconfig.core.Config;
+import re.neotamia.nightconfig.core.file.CommentedFileConfig;
+import re.neotamia.nightconfig.core.file.FileConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
 

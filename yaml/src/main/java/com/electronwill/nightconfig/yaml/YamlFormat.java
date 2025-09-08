@@ -92,8 +92,10 @@ public final class YamlFormat implements ConfigFormat<CommentedConfig> {
     }
 
     static {
-        FormatDetector.registerExtension("yaml", YamlFormat::defaultInstance);
-        FormatDetector.registerExtension("yml", YamlFormat::defaultInstance);
+        if (FormatDetector.isAutoRegisterEnabled()) {
+            FormatDetector.registerExtension("yaml", YamlFormat::defaultInstance);
+            FormatDetector.registerExtension("yml", YamlFormat::defaultInstance);
+        }
     }
 
     private final LoadSettings loadSettings;

@@ -395,8 +395,7 @@ public interface Config extends UnmodifiableConfig {
 	 * @param format     the config's format
 	 * @return a copy of the config
 	 */
-	static Config copy(UnmodifiableConfig config, Supplier<Map<String, Object>> mapCreator,
-			ConfigFormat<?> format) {
+	static Config copy(UnmodifiableConfig config, Supplier<Map<String, Object>> mapCreator, ConfigFormat<?> format) {
 		return new SimpleConfig(config, mapCreator, format);
 	}
 
@@ -475,8 +474,7 @@ public interface Config extends UnmodifiableConfig {
 	static <T> Supplier<Map<String, T>> getDefaultMapCreator(boolean concurrent,
 			boolean insertionOrderPreserved) {
 		if (insertionOrderPreserved) {
-			return concurrent ? () -> Collections.synchronizedMap(new LinkedHashMap<>())
-					: LinkedHashMap::new;
+			return concurrent ? () -> Collections.synchronizedMap(new LinkedHashMap<>()) : LinkedHashMap::new;
 		}
 		return concurrent ? ConcurrentHashMap::new : HashMap::new;
 	}

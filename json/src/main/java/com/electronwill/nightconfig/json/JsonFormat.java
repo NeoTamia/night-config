@@ -110,7 +110,8 @@ public abstract class JsonFormat<W extends ConfigWriter> implements ConfigFormat
 	}
 
 	static {
-		FormatDetector.registerExtension("json", FANCY);
+        if (FormatDetector.isAutoRegisterEnabled())
+            FormatDetector.registerExtension("json", FANCY);
 	}
 
 	private JsonFormat() {}

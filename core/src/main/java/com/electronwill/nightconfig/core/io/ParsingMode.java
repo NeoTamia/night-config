@@ -57,8 +57,7 @@ public enum ParsingMode {
 	private final PutAction putAction;
 	private final MapPutAction mapPutAction;
 
-	ParsingMode(Consumer<? super Config> preparationAction, PutAction putAction,
-				MapPutAction mapPutAction) {
+	ParsingMode(Consumer<? super Config> preparationAction, PutAction putAction, MapPutAction mapPutAction) {
 		this.preparationAction = preparationAction;
 		this.putAction = putAction;
 		this.mapPutAction = mapPutAction;

@@ -43,7 +43,8 @@ public final class TomlFormat implements ConfigFormat<CommentedConfig> {
 	}
 
 	static {
-		FormatDetector.registerExtension("toml", INSTANCE);
+        if (FormatDetector.isAutoRegisterEnabled())
+            FormatDetector.registerExtension("toml", INSTANCE);
 	}
 
 	private TomlFormat() {}

@@ -98,7 +98,7 @@ public @interface SerdeAssert {
 	 * <p>
 	 * An exception is thrown if the field does not satisfy the condition.
 	 */
-	public static enum AssertThat {
+    enum AssertThat {
 		/**
 		 * Throw an exception if the field is null.
 		 */

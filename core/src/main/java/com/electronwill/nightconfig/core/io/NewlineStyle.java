@@ -25,7 +25,7 @@ public enum NewlineStyle {
 	 * @return the system's newline
 	 */
 	public static NewlineStyle system() {
-		String systemNewline = System.getProperty("line.separator");
+		String systemNewline = System.lineSeparator();
 		if (systemNewline.equals("\n")) {
 			return UNIX;
 		} else if (systemNewline.equals("\r\n")) {

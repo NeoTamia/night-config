@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
- * Utility class for detecting the format of configurations files.
+ * Utility class for detecting the format of configuration files.
  *
  * @author TheElectronWill
  */
@@ -34,8 +34,7 @@ public final class FormatDetector {
 	 * @param fileExtension  the file extension
 	 * @param formatSupplier the Supplier of the config format
 	 */
-	public static void registerExtension(String fileExtension,
-										 Supplier<ConfigFormat<?>> formatSupplier) {
+	public static void registerExtension(String fileExtension, Supplier<ConfigFormat<?>> formatSupplier) {
 		registry.put(fileExtension, formatSupplier);
 	}
 
@@ -67,10 +66,15 @@ public final class FormatDetector {
 	 */
 	public static ConfigFormat<?> detectByName(String fileName) {
 		List<String> splitted = StringUtils.split(fileName, '.');
-		String fileExtension = splitted.get(splitted.size() - 1);//the last part
+		String fileExtension = splitted.getLast();//the last part
 		Supplier<ConfigFormat<?>> supplier = registry.get(fileExtension);
 		return (supplier == null) ? null : supplier.get();
 	}
+
+    public static boolean isAutoRegisterEnabled() {
+        String prop = System.getProperty("nightconfig.autoRegisterEnabled");
+        return "true".equalsIgnoreCase(prop);
+    }
 
 	// Automatic registration of the officialy supported formats
 	// Custom formats must be loaded by the user
@@ -82,6 +86,7 @@ public final class FormatDetector {
 	}
 
 	private static void tryLoad(String className) {
+        if (!isAutoRegisterEnabled()) return;
 		try {
 			Class.forName(className);
 		} catch (ClassNotFoundException e) {

@@ -21,9 +21,7 @@ public final class SerializerContext {
 	final Supplier<? extends ConfigFormat<?>> formatSupplier;
 	final Supplier<? extends Config> configSupplier;
 
-	SerializerContext(ObjectSerializer settings,
-			Supplier<? extends ConfigFormat<?>> formatSupplier,
-			Supplier<? extends Config> configSupplier) {
+	SerializerContext(ObjectSerializer settings, Supplier<? extends ConfigFormat<?>> formatSupplier, Supplier<? extends Config> configSupplier) {
 		this.settings = settings;
 		this.formatSupplier = formatSupplier;
 		this.configSupplier = configSupplier;

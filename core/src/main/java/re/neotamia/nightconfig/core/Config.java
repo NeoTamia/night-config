@@ -471,8 +471,7 @@ public interface Config extends UnmodifiableConfig {
 	 *             instead.
 	 */
 	@Deprecated
-	static <T> Supplier<Map<String, T>> getDefaultMapCreator(boolean concurrent,
-			boolean insertionOrderPreserved) {
+	static <T> Supplier<Map<String, T>> getDefaultMapCreator(boolean concurrent, boolean insertionOrderPreserved) {
 		if (insertionOrderPreserved) {
 			return concurrent ? () -> Collections.synchronizedMap(new LinkedHashMap<>()) : LinkedHashMap::new;
 		}

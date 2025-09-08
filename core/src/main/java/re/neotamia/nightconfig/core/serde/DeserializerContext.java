@@ -87,10 +87,7 @@ public final class DeserializerContext {
 							Optional<TypeConstraint> type = Optional.of(resultType);
 							deserialized = deserializer.deserialize(value, type, this);
 						} catch (Exception ex) {
-							throw new SerdeException(
-									"Error during deserialization of value `" + value + "` to field `"
-											+ field + "` with deserializer " + deserializer,
-									ex);
+							throw new SerdeException("Error during deserialization of value `" + value + "` to field `" + field + "` with deserializer " + deserializer, ex);
 						}
 					}
 
@@ -103,8 +100,7 @@ public final class DeserializerContext {
 					try {
 						field.set(destination, deserialized);
 					} catch (Exception e) {
-						throw new SerdeException("Could not assign the deserialized value `" + deserialized
-								+ "` to the field " + field + ". The original config value was " + value);
+						throw new SerdeException("Could not assign the deserialized value `" + deserialized + "` to the field " + field + ". The original config value was " + value);
 					}
 				}
 			}
@@ -115,9 +111,7 @@ public final class DeserializerContext {
 	private Object normalizeForDeserialization(Object configValue, List<String> path, Field field) {
 		if (configValue == null) {
 			// missing value
-			throw new SerdeException(
-					"Missing configuration entry " + path + " for field `" + field
-							+ "` declared in " + field.getDeclaringClass());
+			throw new SerdeException("Missing configuration entry " + path + " for field `" + field + "` declared in " + field.getDeclaringClass());
 		} else if (configValue == NullObject.NULL_OBJECT) {
 			// null value
 			return null;

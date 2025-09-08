@@ -34,30 +34,32 @@ public final class ObjectSerializerBuilder {
         return new ObjectSerializer(this);
     }
 
-    public <V, R> void withSerializerForExactClass(Class<V> cls,
-            ValueSerializer<? super V, ? extends R> serializer) {
+    public <V, R> ObjectSerializerBuilder withSerializerForExactClass(Class<V> cls, ValueSerializer<? super V, ? extends R> serializer) {
         classBasedSerializers.put(cls, serializer);
+        return this;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public <V, R> void withSerializerForClass(Class<V> cls,
-            ValueSerializer<? super V, ? extends R> serializer) {
+    public <V, R> ObjectSerializerBuilder withSerializerForClass(Class<V> cls, ValueSerializer<? super V, ? extends R> serializer) {
         generalProviders.add(
                 (valueClass, ctx) -> valueClass != null && Util.canAssign(cls, valueClass)
                         ? (ValueSerializer) serializer
                         : null);
+        return this;
     }
 
-    public <V, R> void withSerializerProvider(ValueSerializerProvider<V, R> provider) {
-        generalProviders.add((ValueSerializerProvider<?, ?>) provider);
+    public <V, R> ObjectSerializerBuilder withSerializerProvider(ValueSerializerProvider<V, R> provider) {
+        generalProviders.add(provider);
+        return this;
     }
 
-    public <V, R> void withDefaultSerializerProvider(ValueSerializerProvider<V, R> provider) {
+    public <V, R> ObjectSerializerBuilder withDefaultSerializerProvider(ValueSerializerProvider<V, R> provider) {
         defaultProvider = provider;
+        return this;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void withDefaultSerializerProvider() {
+    public ObjectSerializerBuilder withDefaultSerializerProvider() {
         ValueSerializer trivialSer = new StandardSerializers.TrivialSerializer();
         ValueSerializer fieldsSer = new StandardSerializers.FieldsToConfigSerializer();
         ValueSerializer numberToIntSer = (value, ctx) -> ((Number) value).intValue();
@@ -67,9 +69,7 @@ public final class ObjectSerializerBuilder {
             ConfigFormat<?> format = ctx.configFormat();
             if (format == null || format.supportsType(valueClass)) {
                 return trivialSer;
-            } else if (valueClass != null
-                    && (Util.isPrimitiveOrWrapper(valueClass) || valueClass == String.class
-                            || valueClass.isArray())) {
+            } else if (valueClass != null && (Util.isPrimitiveOrWrapper(valueClass) || valueClass == String.class || valueClass.isArray())) {
                 // Cannot access the fields of the value!
                 // try to convert to int, if supported
                 if (format.supportsType(int.class)) {
@@ -88,13 +88,15 @@ public final class ObjectSerializerBuilder {
                 return fieldsSer;
             }
         };
+        return this;
     }
 
 	/**
 	 * Serialize transient fields instead of ignoring them.
 	 */
-    public void serializeTransientFields() {
+    public ObjectSerializerBuilder serializeTransientFields() {
         this.applyTransientModifier = false;
+        return this;
     }
 
     /** registers the standard serializers */

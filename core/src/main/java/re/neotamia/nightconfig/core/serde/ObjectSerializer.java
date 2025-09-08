@@ -220,8 +220,7 @@ public final class ObjectSerializer {
 		return AnnotationProcessor.resolveConfigDefaultProvider(applicableDefault, instance);
 	}
 
-	static SerdeException noSerializerFound(Object value, Class<?> valueClass,
-			SerializerContext ctx) {
+	static SerdeException noSerializerFound(Object value, Class<?> valueClass, SerializerContext ctx) {
 		ConfigFormat<?> format = ctx.configFormat();
 		String supportedStr;
 		if (format == null) {
@@ -232,8 +231,6 @@ public final class ObjectSerializer {
 			supportedStr = "The value's type is NOT supported by the ConfigFormat of the current SerializerContext.";
 		}
 		String ofTypeStr = valueClass == null ? "" : " of type " + valueClass;
-		return new SerdeException(
-				"No suitable serializer found for value" + ofTypeStr + ": " + value + ". "
-						+ supportedStr);
+		return new SerdeException("No suitable serializer found for value" + ofTypeStr + ": " + value + ". " + supportedStr);
 	}
 }

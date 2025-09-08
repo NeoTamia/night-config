@@ -19,8 +19,7 @@ final class StandardDeserializers {
 	 */
     static final class TrivialDeserializer implements ValueDeserializer<Object, Object> {
 		@Override
-		public Object deserialize(Object value, Optional<TypeConstraint> resultType,
-				DeserializerContext ctx) {
+		public Object deserialize(Object value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
 			return value;
 		}
 	}
@@ -31,9 +30,7 @@ final class StandardDeserializers {
 	static final class MapDeserializer implements ValueDeserializer<Object, Map<String, ?>> {
 
 		@Override
-		public Map<String, ?> deserialize(Object mapValue,
-				Optional<TypeConstraint> resultType,
-				DeserializerContext ctx) {
+		public Map<String, ?> deserialize(Object mapValue, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
 
 			int size;
 			if (mapValue instanceof UnmodifiableConfig) {
@@ -142,14 +139,10 @@ final class StandardDeserializers {
 	/**
 	 * Deserializes {@code Collection<Value>} to {@code Collection<Result>}.
 	 */
-	static final class CollectionDeserializer
-			implements ValueDeserializer<Collection<?>, Collection<?>> {
+	static final class CollectionDeserializer implements ValueDeserializer<Collection<?>, Collection<?>> {
 
 		@Override
-		public Collection<?> deserialize(Collection<?> collectionValue,
-				Optional<TypeConstraint> resultType,
-				DeserializerContext ctx) {
-
+		public Collection<?> deserialize(Collection<?> collectionValue, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
 			int size = collectionValue.size();
 			Collection<Object> res;
 			Optional<TypeConstraint> valueType;
@@ -191,8 +184,7 @@ final class StandardDeserializers {
 			}
 		}
 
-		private static Optional<TypeConstraint> extractCollectionValueType(
-				TypeConstraint collType) {
+		private static Optional<TypeConstraint> extractCollectionValueType(TypeConstraint collType) {
 			return collType.resolveTypeArgumentsFor(Collection.class).map(c -> c[0]);
 		}
 	}
@@ -200,8 +192,7 @@ final class StandardDeserializers {
 	/**
 	 * Deserializes a {@code Collection<V>} to an {@code Array<R>} (i.e. {@code R[]}).
 	 */
-	static final class CollectionToArrayDeserializer
-			implements ValueDeserializer<Collection<?>, Object> {
+	static final class CollectionToArrayDeserializer implements ValueDeserializer<Collection<?>, Object> {
 
 		@Override
 		public Object deserialize(Collection<?> collectionValue,
@@ -241,8 +232,7 @@ final class StandardDeserializers {
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public Enum<?> deserialize(String value, Optional<TypeConstraint> resultType,
-				DeserializerContext ctx) {
+		public Enum<?> deserialize(String value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
 			TypeConstraint enumType = resultType.orElseThrow(() -> new SerdeException(
 					"Cannot deserialize a value to an enum without knowing the enum type"));
 			Class<?> cls = enumType.getSatisfyingRawType()
@@ -282,9 +272,7 @@ final class StandardDeserializers {
 			TypeConstraint numberType = resultType.orElseThrow(() -> new SerdeException(
 					"Cannot deserialize a value with a risky number conversion without knowing the number type"));
 			Class<?> resultCls = numberType.getSatisfyingRawType()
-					.orElseThrow(() -> new SerdeException(
-							"Could not find a concrete number type that can satisfy the constraint "
-									+ numberType));
+					.orElseThrow(() -> new SerdeException("Could not find a concrete number type that can satisfy the constraint " + numberType));
 			Class<?> valueCls = value.getClass();
 
 			if (valueCls == Long.class) {
@@ -320,7 +308,7 @@ final class StandardDeserializers {
 							valueCls, resultCls));
 				}
 			} else if (valueCls == Integer.class) {
-				int i = ((Number) value).intValue();
+				int i = value.intValue();
 				if (resultCls == Short.class || resultCls == short.class) {
 					// int to short
 					short s = (short) i;
@@ -338,13 +326,10 @@ final class StandardDeserializers {
 						// error: lossy
 					}
 				} else {
-					throw new SerdeException(String.format(
-							"Cannot deserialize from %s to %s: risky conversion not implemented, you should change your types.",
-							valueCls, resultCls));
+					throw new SerdeException(String.format("Cannot deserialize from %s to %s: risky conversion not implemented, you should change your types.", valueCls, resultCls));
 				}
 			}
-			throw new SerdeException(String.format(
-					"Cannot deserialize %s to %s: the conversion would be lossy", value, resultCls));
+			throw new SerdeException(String.format("Cannot deserialize %s to %s: the conversion would be lossy", value, resultCls));
 		}
 	}
 }

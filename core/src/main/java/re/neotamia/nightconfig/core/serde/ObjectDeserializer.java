@@ -92,8 +92,7 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param valueClass      class of the values in the collection
 	 * @return the deserialized collection
 	 */
-	public <C extends Collection<V>, V> C deserializeToCollection(Object configValue,
-			Class<C> collectionClass, Class<V> valueClass) {
+	public <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass, Class<V> valueClass) {
 		return super.deserializeToCollection(configValue, collectionClass, valueClass);
 	}
 
@@ -107,8 +106,7 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param valueClass  class of the values in the collection
 	 * @return the deserialized map
 	 */
-	public <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass,
-			Class<V> valueClass) {
+	public <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass, Class<V> valueClass) {
 		return super.deserializeToMap(configValue, mapClass, valueClass);
 	}
 
@@ -132,8 +130,7 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param destinationSupplier supplier of the resulting object
 	 * @return the deserialized object
 	 */
-	public <R> R deserializeFields(UnmodifiableConfig source,
-			Supplier<? extends R> destinationSupplier) {
+	public <R> R deserializeFields(UnmodifiableConfig source, Supplier<? extends R> destinationSupplier) {
 		return super.deserializeFields(source, destinationSupplier);
 	}
 
@@ -149,9 +146,7 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	@SuppressWarnings("unchecked")
 	public <R extends Record> R deserializeToRecord(UnmodifiableConfig source, Class<R> recordClass) {
 		if (!recordClass.isRecord()) {
-			throw new IllegalArgumentException(
-				"Argument recordClass = " + recordClass
-					+ " is not the class of a record! Please don't silence errors about incompatible types :)");
+			throw new IllegalArgumentException("Argument recordClass = " + recordClass + " is not the class of a record! Please don't silence errors about incompatible types :)");
 		}
 		DeserializerContext ctx = new DeserializerContext(this);
 		TypeConstraint t = new TypeConstraint(recordClass);

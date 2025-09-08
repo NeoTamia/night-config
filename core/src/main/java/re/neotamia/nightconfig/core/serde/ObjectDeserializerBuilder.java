@@ -55,17 +55,13 @@ public final class ObjectDeserializerBuilder {
 	 * @param resultClass  class of the deserialization result
 	 * @param deserializer deserializer to register
 	 */
-	public <V, R> void withDeserializerForClass(Class<V> valueClass, Class<R> resultClass,
-			ValueDeserializer<? super V, ? extends R> deserializer) {
-
-		withDeserializerProvider(((valueCls, resultType) -> {
-			return resultType.getSatisfyingRawType().map(resultCls -> {
-				if (valueCls.isAssignableFrom(valueClass) && resultCls.isAssignableFrom(resultClass)) {
-					return deserializer;
-				}
-				return null;
-			}).orElse(null);
-		}));
+	public <V, R> ObjectDeserializerBuilder withDeserializerForClass(Class<V> valueClass, Class<R> resultClass, ValueDeserializer<? super V, ? extends R> deserializer) {
+		withDeserializerProvider(((valueCls, resultType) -> resultType.getSatisfyingRawType().map(resultCls -> {
+            if (valueCls.isAssignableFrom(valueClass) && resultCls.isAssignableFrom(resultClass))
+                return deserializer;
+            return null;
+        }).orElse(null)));
+        return this;
 	}
 
 	/**
@@ -76,8 +72,9 @@ public final class ObjectDeserializerBuilder {
 	 * @param <R>      resulting type of the deserialization
 	 * @param provider provider to register
 	 */
-	public <V, R> void withDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
+	public <V, R> ObjectDeserializerBuilder withDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
 		deserializerProviders.add(provider);
+        return this;
 	}
 
 	/**
@@ -90,8 +87,9 @@ public final class ObjectDeserializerBuilder {
 	 * @param <R>      resulting type of the deserialization
 	 * @param provider the new default serializer
 	 */
-	public <V, R> void withDefaultDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
+	public <V, R> ObjectDeserializerBuilder withDefaultDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
 		defaultProvider = provider;
+        return this;
 	}
 
 	/**
@@ -102,7 +100,7 @@ public final class ObjectDeserializerBuilder {
 	 * @see #withDefaultDeserializerProvider(ValueDeserializerProvider)
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void withDefaultDeserializerProvider() {
+	public ObjectDeserializerBuilder withDefaultDeserializerProvider() {
 		ValueDeserializer pojoDe = new ConfigToPojoDeserializer();
 		defaultProvider = (valueClass, resultType) -> {
 			if (UnmodifiableConfig.class.isAssignableFrom(valueClass)) {
@@ -111,6 +109,7 @@ public final class ObjectDeserializerBuilder {
 				return null;
 			}
 		};
+        return this;
 	}
 
 	/** registers the standard serializers */

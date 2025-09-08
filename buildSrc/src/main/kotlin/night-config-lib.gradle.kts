@@ -1,7 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-// Common setup shared by all nightconfig libraries (core, toml, ...)
-
 plugins {
     `java-library`
     `maven-publish`
@@ -10,7 +8,6 @@ plugins {
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
@@ -18,7 +15,7 @@ repositories {
 val versionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 val junitVersion = versionCatalog.findVersion("junit5")
     .orElseThrow{ RuntimeException("missing version in libs.versions.toml: junit5") }
-    .getRequiredVersion()
+    .requiredVersion
 
 // Use JUnit5 for all tests (that support the Gradle "JVM test suite" API, see further)
 testing {
@@ -109,11 +106,9 @@ project.afterEvaluate {
 	}
 }
 
-// Set project metadata for publishing
 group = "re.neotamia.night-config"
-version = "3.9.0"
+version = "3.9.1"
 
-// Publish the library as a Maven artifact.
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
@@ -122,7 +117,7 @@ publishing {
             pom {
                 name = "NightConfig ${project.name}"
                 description = "A multi-format configuration library, ${project.name} module."
-                url = "https://github.com/TheElectronWill/night-config"
+                url = "https://github.com/NeoTamia/night-config"
 
                 licenses {
                     license {
@@ -135,38 +130,26 @@ publishing {
                         id = "TheElectronWill"
                         url = "https://github.com/TheElectronWill"
                     }
+                    developer {
+                        id = "NeoTamia"
+                        url = "https://github.com/NeoTamia"
+                    }
                 }
                 scm {
-                    connection = "scm:git:https://github.com/TheElectronWill/night-config.git"
-                    developerConnection = "scm:git:ssh://git@github.com:TheElectronWill/night-config.git"
-                    url = "https://github.com/TheElectronWill/night-config"
+                    connection = "scm:git:https://github.com/NeoTamia/night-config.git"
+                    developerConnection = "scm:git:ssh://git@github.com:NeoTamia/night-config.git"
+                    url = "https://github.com/NeoTamia/night-config"
                 }
             }
             from(components["java"])
         }
     }
-    // Publish to Sonatype OSSRH Staging API Service (OSSRH has been shut down)
     repositories {
         maven {
-			// See https://central.sonatype.org/pages/ossrh-eol/
-			// See https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#getting-started-for-maven-api-like-plugins
-			// NOTE: after running "gradle publish", an additional POST request is necessary.
-			// See https://ossrh-staging-api.central.sonatype.com/swagger-ui/#/default/manual_upload_default_repository
-			name = "ossrh-staging-api"
-            url = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
-            credentials(PasswordCredentials::class) {
-                // Read the credentials from gradle's properties.
-                // The true credentials are provided by $HOME/.gradle/gradle.properties
-                username = property("ossrhUser") as String
-                password = property("ossrhPassword") as String
-            }
+			name = "neotamiaSnapshots"
+            url = uri("https://repo.neotamia.re/snapshots")
         }
     }
 }
 
-//// Sign maven artifacts
-//signing {
-//    useGpgCmd()
-//    sign(publishing.publications["mavenJava"])
-//}
 

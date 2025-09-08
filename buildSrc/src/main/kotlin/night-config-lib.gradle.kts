@@ -148,6 +148,10 @@ publishing {
         maven {
 			name = "neotamiaSnapshots"
             url = uri("https://repo.neotamia.re/snapshots")
+            credentials(PasswordCredentials::class) {
+                username = property("${name}Username") as String
+                password = property("${name}Password") as String
+            }
         }
     }
 }

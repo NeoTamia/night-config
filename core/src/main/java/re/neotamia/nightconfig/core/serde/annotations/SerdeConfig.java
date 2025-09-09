@@ -29,7 +29,6 @@ public @interface SerdeConfig {
     /**
      * Default values to apply to the field during (de)serialization if the field is
      * missing in the config. <br/>
-     * Only one {@link SerdeDefault}
      *
      * @return the default values to apply
      */
@@ -44,7 +43,8 @@ public @interface SerdeConfig {
     SerdeKey[] key() default {};
 
     /**
-     * Skip rules to apply during (de)serialization. Only one {@link SerdeSkip}
+     * Skip rules to apply during (de)serialization. <br />
+     * Only one {@link SerdeSkip}
      *
      * @return the skip rules to apply
      */

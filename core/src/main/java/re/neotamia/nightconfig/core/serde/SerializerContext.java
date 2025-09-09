@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 /**
  * Holds serialization settings and provides some base serialization logic.
  */
-public final class SerializerContext {
+public final class SerializerContext extends AbstractDeSerializerContext {
     final ObjectSerializer settings;
     final Supplier<? extends ConfigFormat<?>> formatSupplier;
     final Supplier<? extends Config> configSupplier;
@@ -126,22 +126,17 @@ public final class SerializerContext {
         }
     }
 
-    private String configKey(Field field) {
-        SerdeKey keyAnnot = field.getAnnotation(SerdeKey.class);
-        return keyAnnot == null ? field.getName() : keyAnnot.value();
-    }
-
     private String configComment(Field field) {
+        // Check for SerdeConfig first
+        SerdeConfig configAnnot = field.getAnnotation(SerdeConfig.class);
+        if (configAnnot != null) {
+            String configComment = AnnotationProcessor.resolveSerdeConfigComment(configAnnot);
+            if (configComment != null) return configComment;
+        }
+
+        // Check for standalone SerdeComment annotations
         SerdeComment[] commentAnnots = field.getDeclaredAnnotationsByType(SerdeComment.class);
-        if (commentAnnots.length == 0) {
-            return null;
-        }
-        StringBuilder comment = new StringBuilder(commentAnnots[0].value());
-        for (int i = 1; i < commentAnnots.length; i++) {
-            comment.append("\n");
-            comment.append(commentAnnots[i].value());
-        }
-        return comment.toString();
+        return AnnotationProcessor.getSerdeComment(commentAnnots);
     }
 
     /**
@@ -204,13 +199,26 @@ public final class SerializerContext {
      */
     @SuppressWarnings("unchecked")
     private boolean assertField(Field field, Object fieldContainer, Object fieldValue) {
+        // Check for SerdeConfig first
+        SerdeConfig configAnnot = field.getAnnotation(SerdeConfig.class);
+        if (configAnnot != null) {
+            try {
+                Predicate<?> assertPredicate = AnnotationProcessor.resolveSerdeConfigAssertPredicate(configAnnot, fieldContainer, SerdePhase.SERIALIZING, field);
+                if (assertPredicate != null && !((Predicate<Object>) assertPredicate).test(fieldValue))
+                    return false;
+            } catch (Exception e) {
+                String msg = "Failed to resolve or apply assertion from SerdeConfig for serialization of field " + field;
+                throw new SerdeException(msg, e);
+            }
+        }
+
+        // Check for standalone SerdeAssert annotations
         SerdeAssert[] annot = field.getAnnotationsByType(SerdeAssert.class);
         if (annot.length == 0) return true;
         try {
             Predicate<?> assertPredicate = AnnotationProcessor.resolveAssertPredicate(annot, fieldContainer, SerdePhase.SERIALIZING, field);
-            if (assertPredicate == null) {
+            if (assertPredicate == null)
                 return true;
-            }
             return ((Predicate<Object>) assertPredicate).test(fieldValue);
         } catch (Exception e) {
             String msg = "Failed to resolve or apply assertion for serialization of field " + field;
@@ -220,15 +228,12 @@ public final class SerializerContext {
 
     private boolean preCheck(Field field) {
         int mods = field.getModifiers();
-        if (Modifier.isStatic(mods) || field.isSynthetic()) {
+        if (Modifier.isStatic(mods) || field.isSynthetic())
             return false;
-        }
-        if (Modifier.isTransient(mods) && settings.applyTransientModifier) {
+        if (Modifier.isTransient(mods) && settings.applyTransientModifier)
             return false;
-        }
-        if (Modifier.isFinal(mods) || !Modifier.isPublic(mods)) {
+        if (Modifier.isFinal(mods) || !Modifier.isPublic(mods))
             field.setAccessible(true);
-        }
         return true;
     }
 }

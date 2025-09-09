@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.serde;
 
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.NullObject;
 import re.neotamia.nightconfig.core.serde.annotations.*;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeAssert.AssertThat;
@@ -512,6 +513,44 @@ final class AnnotationProcessor {
         if (skipAnnotations.length == 0) return null;
         if (skipAnnotations.length > 1) throw new SerdeException("SerdeConfig can only contain one SerdeSkipSerializingIf annotation");
         return resolveSkipSerializingIfPredicate(skipAnnotations[0], currentInstance, field);
+    }
+
+    /**
+     * Extracts SerdeAssert annotations from SerdeConfig and processes them.
+     */
+    static Predicate<?> resolveSerdeConfigAssertPredicate(SerdeConfig config, Object currentInstance, SerdePhase currentPhase, Field field) {
+        SerdeAssert[] assertAnnotations = config.asserts();
+        if (assertAnnotations.length == 0) return null;
+        return resolveAssertPredicate(assertAnnotations, currentInstance, currentPhase, field);
+    }
+
+    /**
+     * Extracts SerdeComment annotations from SerdeConfig and builds a comment string.
+     */
+    static String resolveSerdeConfigComment(SerdeConfig config) {
+        SerdeComment[] commentAnnotations = config.comments();
+        return getSerdeComment(commentAnnotations);
+    }
+
+    @Nullable
+    public static String getSerdeComment(SerdeComment[] commentAnnots) {
+        if (commentAnnots.length == 0) return null;
+        StringBuilder comment = new StringBuilder(commentAnnots[0].value());
+        for (int i = 1; i < commentAnnots.length; i++) {
+            comment.append("\n");
+            comment.append(commentAnnots[i].value());
+        }
+        return comment.toString();
+    }
+
+    /**
+     * Extracts SerdeKey annotation from SerdeConfig and returns the key value.
+     */
+    static String resolveSerdeConfigKey(SerdeConfig config, String fieldName) {
+        SerdeKey[] keyAnnotations = config.key();
+        if (keyAnnotations.length == 0) return fieldName;
+        if (keyAnnotations.length > 1) throw new SerdeException("SerdeConfig can only contain one SerdeKey annotation");
+        return keyAnnotations[0].value();
     }
 
     // ====== Printing ======

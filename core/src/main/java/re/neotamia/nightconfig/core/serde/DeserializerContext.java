@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 /**
  * Holds deserialization settings and provides some base deserialization logic.
  */
-public final class DeserializerContext {
+public final class DeserializerContext extends AbstractDeSerializerContext {
     final AbstractObjectDeserializer settings;
 
     DeserializerContext(AbstractObjectDeserializer settings) {
@@ -115,11 +115,6 @@ public final class DeserializerContext {
         return configValue;
     }
 
-    private String configKey(Field field) {
-        SerdeKey keyAnnot = field.getAnnotation(SerdeKey.class);
-        return keyAnnot == null ? field.getName() : keyAnnot.value();
-    }
-
     /**
      * @return true if the field should be skipped
      */
@@ -180,6 +175,20 @@ public final class DeserializerContext {
      */
     @SuppressWarnings("unchecked")
     private boolean assertField(Field field, Object fieldContainer, Object fieldValue) {
+        // Check for SerdeConfig first
+        SerdeConfig configAnnot = field.getAnnotation(SerdeConfig.class);
+        if (configAnnot != null) {
+            try {
+                Predicate<?> assertPredicate = AnnotationProcessor.resolveSerdeConfigAssertPredicate(configAnnot, fieldContainer, SerdePhase.DESERIALIZING, field);
+                if (assertPredicate != null && !((Predicate<Object>) assertPredicate).test(fieldValue))
+                    return false;
+            } catch (Exception e) {
+                String msg = "Failed to resolve or apply assertion from SerdeConfig for deserialization of field " + field;
+                throw new SerdeException(msg, e);
+            }
+        }
+
+        // Check for standalone SerdeAssert annotations
         SerdeAssert[] annot = field.getAnnotationsByType(SerdeAssert.class);
         if (annot.length == 0) {
             return true;

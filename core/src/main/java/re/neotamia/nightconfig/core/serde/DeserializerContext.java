@@ -88,8 +88,8 @@ public final class DeserializerContext extends AbstractDeSerializerContext {
                     }
 
                     // check the value of the field
-                    if (!assertField(field, destination, value)) {
-                        throw new SerdeAssertException("Field `" + field + "` has an invalid value: " + value);
+                    if (!assertField(field, destination, deserialized)) {
+                        throw new SerdeAssertException("Field `" + field + "` has an invalid value: " + deserialized);
                     }
 
                     // set the field

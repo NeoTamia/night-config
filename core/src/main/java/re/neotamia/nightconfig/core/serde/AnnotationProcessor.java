@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.serde;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.NullObject;
 import re.neotamia.nightconfig.core.serde.annotations.*;
@@ -12,10 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -273,6 +271,31 @@ final class AnnotationProcessor {
         return byPhase;
     }
 
+    static @NotNull EnumMap<SerdePhase, EnumMap<SerdeDefault.WhenValue, SerdeDefault>> createSerdePhaseEnumMapEnumMap(Field field) {
+        EnumMap<SerdePhase, EnumMap<SerdeDefault.WhenValue, SerdeDefault>> defaultAnnotations = AnnotationProcessor.getConfigDefaultAnnotations(field);
+
+        // Check for SerdeConfig and merge its defaults
+        SerdeConfig configAnnot = field.getAnnotation(SerdeConfig.class);
+        if (configAnnot != null) {
+            EnumMap<SerdePhase, EnumMap<SerdeDefault.WhenValue, SerdeDefault>> configDefaults =
+                    AnnotationProcessor.resolveSerdeConfigDefaultAnnotations(configAnnot, field);
+
+            // Merge SerdeConfig defaults with standalone defaults
+            // SerdeConfig takes precedence over standalone annotations
+            for (Map.Entry<SerdePhase, EnumMap<SerdeDefault.WhenValue, SerdeDefault>> phaseEntry : configDefaults.entrySet()) {
+                SerdePhase phase = phaseEntry.getKey();
+                EnumMap<SerdeDefault.WhenValue, SerdeDefault> configPhaseDefaults = phaseEntry.getValue();
+
+                EnumMap<SerdeDefault.WhenValue, SerdeDefault> mergedPhaseDefaults = defaultAnnotations.computeIfAbsent(phase,
+                        p -> new EnumMap<>(SerdeDefault.WhenValue.class));
+
+                // Add config defaults, they override standalone ones
+                mergedPhaseDefaults.putAll(configPhaseDefaults);
+            }
+        }
+        return defaultAnnotations;
+    }
+
     static Supplier<?> resolveConfigDefaultProvider(SerdeDefault annotation, Object currentInstance) {
         Class<?> cls = annotation.cls();
         String methodOrFieldName = annotation.provider();
@@ -364,7 +387,7 @@ final class AnnotationProcessor {
                     // ignore
                 }
             }
-            // try method (no parameter)
+            // try method (with parameter)
             try {
                 return cls.getDeclaredMethod(name, methodParameters);
             } catch (NoSuchMethodException e) {
@@ -551,6 +574,46 @@ final class AnnotationProcessor {
         if (keyAnnotations.length == 0) return fieldName;
         if (keyAnnotations.length > 1) throw new SerdeException("SerdeConfig can only contain one SerdeKey annotation");
         return keyAnnotations[0].value();
+    }
+
+    /**
+     * Extracts SerdeDefault annotations from SerdeConfig and processes them.
+     */
+    static EnumMap<SerdePhase, EnumMap<SerdeDefault.WhenValue, SerdeDefault>> resolveSerdeConfigDefaultAnnotations(SerdeConfig config, Field field) {
+        SerdeDefault[] defaultAnnotations = config.defaults();
+        if (defaultAnnotations.length == 0) return new EnumMap<>(SerdePhase.class);
+
+        // Use the same logic as getConfigDefaultAnnotations but with SerdeConfig defaults
+        EnumMap<SerdePhase, EnumMap<SerdeDefault.WhenValue, SerdeDefault>> byPhase = new EnumMap<>(SerdePhase.class);
+
+        for (SerdeDefault annot : defaultAnnotations) {
+            // normalize phases: BOTH counts as SERIALIZING and DESERIALIZING
+            SerdePhase[] phases;
+            if (annot.phase() == BOTH) {
+                phases = new SerdePhase[]{BOTH, SERIALIZING, DESERIALIZING};
+            } else {
+                phases = new SerdePhase[]{annot.phase()};
+            }
+
+            // gather all annotation in the two-levels map
+            for (SerdePhase phase : phases) {
+                // init second-level map
+                EnumMap<SerdeDefault.WhenValue, SerdeDefault> byWhen = byPhase.computeIfAbsent(phase,
+                        p -> new EnumMap<>(SerdeDefault.WhenValue.class));
+
+                // populate with annotations and check for conflict
+                for (SerdeDefault.WhenValue when : annot.whenValue()) {
+                    SerdeDefault conflict = byWhen.put(when, annot);
+                    if (conflict != null) {
+                        String msg = String.format(
+                                "Annotation %s is conflicting with annotation %s on field `%s` in SerdeConfig. Only one @SerdeDefault must be applicable in a given situation.",
+                                annotToString(annot), annotToString(conflict), field);
+                        throw new SerdeException(msg);
+                    }
+                }
+            }
+        }
+        return byPhase;
     }
 
     // ====== Printing ======

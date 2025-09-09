@@ -4,8 +4,10 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.lang.reflect.Field;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.NullObject;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
+import re.neotamia.nightconfig.core.serde.annotations.SerdeConfig;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeDefault;
 import re.neotamia.nightconfig.core.serde.annotations.SerdePhase;
 
@@ -116,9 +118,9 @@ class AbstractObjectDeserializer {
 	}
 
 	protected Supplier<?> findDefaultValueSupplier(Object rawConfigValue, Field field, Object instance) {
-		EnumMap<SerdeDefault.WhenValue, SerdeDefault> defaultForDeserializing = AnnotationProcessor
-				.getConfigDefaultAnnotations(field)
-				.get(SerdePhase.DESERIALIZING);
+		// Start with standalone SerdeDefault annotations
+        EnumMap<SerdePhase, EnumMap<SerdeDefault.WhenValue, SerdeDefault>> defaultAnnotations = AnnotationProcessor.createSerdePhaseEnumMapEnumMap(field);
+        EnumMap<SerdeDefault.WhenValue, SerdeDefault> defaultForDeserializing = defaultAnnotations.get(SerdePhase.DESERIALIZING);
 
 		if (defaultForDeserializing == null) {
 			return null; // no default

@@ -107,7 +107,7 @@ project.afterEvaluate {
 }
 
 group = "re.neotamia.night-config"
-version = "3.9.4"
+version = "3.9.5"
 
 publishing {
     publications {

@@ -140,7 +140,7 @@ public @interface SerdeDefault {
 	 * <p>
 	 * The default value is used if the condition is true.
 	 */
-	public static enum WhenValue {
+	enum WhenValue {
 		/**
 		 * When deserializing a field, call the default value provider if the value is
 		 * missing from the config.

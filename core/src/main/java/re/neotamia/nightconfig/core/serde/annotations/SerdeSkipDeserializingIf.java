@@ -125,7 +125,11 @@ public @interface SerdeSkipDeserializingIf {
 	 * <p>
 	 * The field is skipped if the condition is true.
 	 */
-	public static enum SkipDeIf {
+    enum SkipDeIf {
+        /**
+         * Always skip the field.
+         */
+        ALWAYS,
 		/**
 		 * Skip the field if the corresponding config entry is missing.
 		 */

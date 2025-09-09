@@ -110,7 +110,11 @@ public @interface SerdeSkipSerializingIf {
 	 * <p>
 	 * The field is skipped if the condition is true.
 	 */
-	public static enum SkipSerIf {
+    enum SkipSerIf {
+        /**
+         * Always skip the field.
+         */
+        ALWAYS,
 		/**
 		 * Skip the field if it's null.
 		 */

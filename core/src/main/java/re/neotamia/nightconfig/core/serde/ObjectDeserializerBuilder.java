@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 import re.neotamia.nightconfig.core.serde.StandardDeserializers.RiskyNumberDeserializer;
 
@@ -16,6 +17,11 @@ import re.neotamia.nightconfig.core.serde.StandardDeserializers.RiskyNumberDeser
 public final class ObjectDeserializerBuilder {
 
 	final List<ValueDeserializerProvider<?, ?>> deserializerProviders = new ArrayList<>();
+    /**
+     * strategy for transforming field names, defaults to {@link NamingStrategy#IDENTITY}
+     */
+    @NotNull
+    NamingStrategy namingStrategy = NamingStrategy.IDENTITY;
 
 	/** the last-resort serializer provider, used when no other provider matches */
 	ValueDeserializerProvider<?, ?> defaultProvider = NoProvider.INSTANCE;
@@ -37,6 +43,17 @@ public final class ObjectDeserializerBuilder {
 	public ObjectDeserializer build() {
 		return new ObjectDeserializer(this);
 	}
+
+    /**
+     * Sets the naming strategy to use for transforming field names.
+     *
+     * @param strategy the naming strategy to use
+     * @return this builder for method chaining
+     */
+    public ObjectDeserializerBuilder withNamingStrategy(@NotNull NamingStrategy strategy) {
+        this.namingStrategy = strategy;
+        return this;
+    }
 
 	/**
 	 * Deserialize transient fields instead of ignoring them.

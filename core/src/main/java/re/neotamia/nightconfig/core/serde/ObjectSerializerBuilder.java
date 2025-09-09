@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 
@@ -24,10 +25,15 @@ public final class ObjectSerializerBuilder {
     /** setting: skip transient fields as requested by the modifier */
     boolean applyTransientModifier = true;
 
+    /**
+     * strategy for transforming field names, defaults to {@link NamingStrategy#IDENTITY}
+     */
+    @NotNull
+    NamingStrategy namingStrategy = NamingStrategy.IDENTITY;
+
     ObjectSerializerBuilder(boolean standards) {
-        if (standards) {
+        if (standards)
             registerStandardSerializers();
-        }
     }
 
     public ObjectSerializer build() {
@@ -96,6 +102,17 @@ public final class ObjectSerializerBuilder {
 	 */
     public ObjectSerializerBuilder serializeTransientFields() {
         this.applyTransientModifier = false;
+        return this;
+    }
+
+    /**
+     * Sets the naming strategy to use for transforming field names.
+     *
+     * @param strategy the naming strategy to use
+     * @return this builder for method chaining
+     */
+    public ObjectSerializerBuilder withNamingStrategy(@NotNull NamingStrategy strategy) {
+        this.namingStrategy = strategy;
         return this;
     }
 

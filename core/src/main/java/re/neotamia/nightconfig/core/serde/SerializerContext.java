@@ -26,6 +26,11 @@ public final class SerializerContext extends AbstractDeSerializerContext {
         this.configSupplier = configSupplier;
     }
 
+    @Override
+    protected NamingStrategy getNamingStrategy() {
+        return settings.namingStrategy;
+    }
+
     /**
      * @return the current {@code ConfigFormat}
      */

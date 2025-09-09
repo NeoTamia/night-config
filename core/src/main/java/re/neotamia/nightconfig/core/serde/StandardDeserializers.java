@@ -326,4 +326,14 @@ final class StandardDeserializers {
 			throw new SerdeException(String.format("Cannot deserialize %s to %s: the conversion would be lossy", value, resultCls));
 		}
 	}
+
+    /**
+     * Deserializes a {@code Double} into a {@code Float}.
+     */
+    static final class FloatDeserializer implements ValueDeserializer<Double, Float> {
+        @Override
+        public Float deserialize(Double value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
+            return value.floatValue();
+        }
+    }
 }

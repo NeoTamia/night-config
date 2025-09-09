@@ -124,6 +124,7 @@ public final class ObjectDeserializerBuilder {
 		ValueDeserializer enumDe = new StandardDeserializers.EnumDeserializer();
 		ValueDeserializer uuidDe = new StandardDeserializers.UuidDeserializer();
 		ValueDeserializer numberDe = new StandardDeserializers.RiskyNumberDeserializer();
+        ValueDeserializer floatDe = new StandardDeserializers.FloatDeserializer();
 
 		withDeserializerProvider(((valueClass, resultType) -> {
 			Type fullType = resultType.getFullType();
@@ -135,25 +136,23 @@ public final class ObjectDeserializerBuilder {
 					// which means that there are type parameters and that we cannot just blindly assign.
 				}
 				if (Collection.class.isAssignableFrom(valueClass)) {
-					if (Collection.class.isAssignableFrom(resultClass)) {
+					if (Collection.class.isAssignableFrom(resultClass))
 						return collDe; // collection<value> to collection<T>
-					} else if (resultClass.isArray()) {
+					else if (resultClass.isArray())
 						return arrDe; // collection<value> to array<T>
-					}
 				}
 				if ((UnmodifiableConfig.class.isAssignableFrom(valueClass) || Map.class.isAssignableFrom(valueClass))
                         && Map.class.isAssignableFrom(resultClass)) {
 					return mapDe; // config to map<K, V>
 				}
-				if (resultClass == UUID.class && valueClass == String.class) {
+				if (resultClass == UUID.class && valueClass == String.class)
 					return uuidDe;
-				}
-				if (valueClass == String.class && Enum.class.isAssignableFrom(resultClass)) {
+				if (valueClass == String.class && Enum.class.isAssignableFrom(resultClass))
 					return enumDe; // value to Enum
-				}
-				if (RiskyNumberDeserializer.isNumberTypeSupported(valueClass) && Util.isPrimitiveOrWrapperNumber(resultClass)) {
+				if (RiskyNumberDeserializer.isNumberTypeSupported(valueClass) && Util.isPrimitiveOrWrapperNumber(resultClass))
 					return numberDe;
-				}
+                if (resultClass.isAssignableFrom(Float.class))
+                    return floatDe;
 				return null; // no standard deserializer matches this case
 			}).orElse(null);
 		}));

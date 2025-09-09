@@ -28,7 +28,7 @@ public final class TypeConstraint {
 	}
 
 	private final Type fullType;
-	private Optional<Class<?>> rawClass = null;
+	private Class<?> rawClass = null;
 
 	/**
 	 * Creates a new TypeConstraint from a {@link Type}.
@@ -64,10 +64,9 @@ public final class TypeConstraint {
 	 * @return a class that can satisfy the type constraint, if it can be found
 	 */
 	public Optional<Class<?>> getSatisfyingRawType() {
-		if (rawClass == null) {
-			rawClass = Optional.ofNullable(findSatisfyingRawType(fullType));
-		}
-		return rawClass;
+		if (rawClass == null)
+			rawClass = findSatisfyingRawType(fullType);
+		return Optional.ofNullable(rawClass);
 	}
 
 	/**
@@ -126,7 +125,7 @@ public final class TypeConstraint {
 		return String.format("TypeConstraint[%s, rawType=%s]", fullType, getSatisfyingRawType());
 	}
 
-	private static final Class<?> findSatisfyingRawType(Type t) {
+	private static Class<?> findSatisfyingRawType(Type t) {
 		if (t instanceof Class) {
 			return (Class<?>) t;
 		}
@@ -141,12 +140,11 @@ public final class TypeConstraint {
 			}
 			return Array.newInstance(componentClass, 0).getClass();
 		}
-		if (t instanceof WildcardType) {
+		if (t instanceof WildcardType w) {
 			// For regular WildcardType returned by the reflection API, only one lower or one upper bound is possible.
 			// But we also have a custom class RefinedWildcard, which can have multiple bounds.
-			WildcardType w = (WildcardType) t;
 
-			Type[] lowerBounds = w.getLowerBounds();
+            Type[] lowerBounds = w.getLowerBounds();
 			Type[] upperBounds = w.getUpperBounds();
 
 			if (upperBounds.length == 1) {
@@ -182,8 +180,7 @@ public final class TypeConstraint {
 	 * 
 	 * @see TypeConstraint#resolveTypeArgumentsFor(Class)
 	 */
-	private static TypeConstraint[] resolveTypeArgumentsFor(Type t, Class<?> classToFind,
-			Map<TypeVariable<?>, Type> resolvedVariables) {
+	private static TypeConstraint[] resolveTypeArgumentsFor(Type t, Class<?> classToFind, Map<TypeVariable<?>, Type> resolvedVariables) {
 		if (t instanceof Class) {
 			// "raw" class without type arguments
 			if (t == classToFind) {
@@ -204,13 +201,11 @@ public final class TypeConstraint {
 			// restrict the bounds of wildcards that are less restrictive than the declaration of the type parameter
 			for (int i = 0; i < actualTypeArgs.length; i++) {
 				Type typeArg = actualTypeArgs[i];
-				if (typeArg instanceof WildcardType) {
+				if (typeArg instanceof WildcardType wildcard) {
 					// refine wildcard, otherwise we can lose some information on the bounds when we have a field
 					// declared as `MyType<?>` with `class MyType<T extends Bound>`
 
-					WildcardType wildcard = (WildcardType) typeArg;
-
-					@SuppressWarnings("unchecked")
+                    @SuppressWarnings("unchecked")
 					Class<Object> cls = (Class<Object>) rawType;
 					TypeVariable<Class<Object>> declaredTypeParam = cls.getTypeParameters()[i];
 
@@ -233,8 +228,7 @@ public final class TypeConstraint {
 					resolvedVariables.put(declaredTypeArgs[i], actualTypeArgs[i]);
 				}
 				// recursively search in supertypes (parent class and interfaces)
-				return findParent((Class<?>) rawType,
-						parent -> resolveTypeArgumentsFor(parent, classToFind, resolvedVariables));
+				return findParent((Class<?>) rawType, parent -> resolveTypeArgumentsFor(parent, classToFind, resolvedVariables));
 			}
 		}
 		if (t instanceof TypeVariable) {
@@ -253,19 +247,16 @@ public final class TypeConstraint {
 			}
 			return res;
 		}
-		if (t instanceof WildcardType) {
-			WildcardType w = (WildcardType) t;
-			TypeConstraint[] res = null;
+		if (t instanceof WildcardType w) {
+            TypeConstraint[] res = null;
 			for (Type bound : w.getUpperBounds()) {
-				res = resolveTypeArgumentsFor(resolveIfVariable(bound, resolvedVariables),
-						classToFind, resolvedVariables);
+				res = resolveTypeArgumentsFor(resolveIfVariable(bound, resolvedVariables), classToFind, resolvedVariables);
 				if (res != null) {
 					return res;
 				}
 			}
 			for (Type bound : w.getLowerBounds()) {
-				res = resolveTypeArgumentsFor(resolveIfVariable(bound, resolvedVariables),
-						classToFind, resolvedVariables);
+				res = resolveTypeArgumentsFor(resolveIfVariable(bound, resolvedVariables), classToFind, resolvedVariables);
 				if (res != null) {
 					return res;
 				}
@@ -318,12 +309,9 @@ public final class TypeConstraint {
 		return null;
 	}
 
-	static Type refineWildcard(WildcardType wildcard,
-			TypeVariable<Class<Object>> declaredTypeParam,
-			Map<TypeVariable<?>, Type> resolvedVariables) {
-
+	static Type refineWildcard(WildcardType wildcard, TypeVariable<Class<Object>> declaredTypeParam, Map<TypeVariable<?>, Type> resolvedVariables) {
 		if (wildcard instanceof RefinedWildcard) {
-			return (RefinedWildcard) wildcard;
+			return wildcard;
 		}
 
 		// actual: `? extends B` or `? super B`
@@ -391,18 +379,17 @@ public final class TypeConstraint {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof WildcardType))
+			if (!(obj instanceof WildcardType other))
 				return false;
 			if (obj == this)
 				return true;
-			WildcardType other = (WildcardType) obj;
-			return Arrays.equals(lowerBounds, other.getLowerBounds())
+            return Arrays.equals(lowerBounds, other.getLowerBounds())
 					&& Arrays.equals(upperBounds, other.getUpperBounds());
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(lowerBounds, upperBounds);
+			return Objects.hash(Arrays.hashCode(lowerBounds), Arrays.hashCode(upperBounds));
 		}
 	}
 
@@ -436,21 +423,17 @@ public final class TypeConstraint {
 			if (arguments.length == 0) {
 				return rawType.toString();
 			}
-			return rawType + "<" +
-					String.join(", ", Arrays.stream(arguments).map(t -> t.toString())
-							.toArray(size -> new String[size]))
-					+ ">";
+			return rawType + "<" + String.join(", ", Arrays.stream(arguments).map(Object::toString).toArray(String[]::new)) + ">";
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof ParameterizedType))
+			if (!(obj instanceof ParameterizedType other))
 				return false;
 			if (obj == this)
 				return true;
 
-			ParameterizedType other = (ParameterizedType) obj;
-			return null == other.getOwnerType() &&
+            return null == other.getOwnerType() &&
 					Objects.equals(rawType, other.getRawType()) &&
 					Arrays.equals(arguments, other.getActualTypeArguments());
 		}

@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.AbstractCommentedConfig;
 import re.neotamia.nightconfig.core.AbstractConfig;
 import re.neotamia.nightconfig.core.CommentedConfig;
@@ -484,7 +485,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getRaw(List<String> path) {
+    public <T> T getRaw(@NotNull List<String> path) {
         switch (path.size()) {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
@@ -502,7 +503,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
     }
 
     @Override
-    public boolean contains(List<String> path) {
+    public boolean contains(@NotNull List<String> path) {
         switch (path.size()) {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
@@ -512,8 +513,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
                 StampedConfig parent = getExistingConfig(parentPath, false);
-                return parent != null
-                        && mapLockContains(parent.values, parent.lock, path.get(lastIndex));
+                return parent != null && mapLockContains(parent.values, parent.lock, path.get(lastIndex));
             }
         }
     }
@@ -530,8 +530,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
                 StampedConfig parent = getOrCreateConfig(parentPath);
-                Object prev = mapLockPutIfAbsent(parent.values, parent.lock,
-                        path.get(lastIndex), nnValue);
+                Object prev = mapLockPutIfAbsent(parent.values, parent.lock, path.get(lastIndex), nnValue);
                 return prev == null;
             }
         }
@@ -1463,7 +1462,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
-        public boolean contains(List<String> path) {
+        public boolean contains(@NotNull List<String> path) {
             checkValid();
             switch (path.size()) {
                 case 0:
@@ -1486,7 +1485,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <T> T getRaw(List<String> path) {
+        public <T> T getRaw(@NotNull List<String> path) {
             checkValid();
             switch (path.size()) {
                 case 0:

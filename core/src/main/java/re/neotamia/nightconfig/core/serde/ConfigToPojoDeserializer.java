@@ -19,16 +19,14 @@ final class ConfigToPojoDeserializer
 	implements ValueDeserializer<UnmodifiableConfig, Object> {
 
 	@Override
-	public Object deserialize(UnmodifiableConfig value, Optional<TypeConstraint> resultType,
-							  DeserializerContext ctx) {
+	public Object deserialize(UnmodifiableConfig value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
 		if (resultType.isEmpty()) {
 			// no constraint, we don't know the type of the POJO!
 			// Assume the easiest result: return the value as is
 			return value;
 		} else {
 			TypeConstraint t = resultType.get();
-			Class<?> cls = t.getSatisfyingRawType().orElseThrow(() -> new SerdeException(
-				"Could not find a concrete type that can satisfy the constraint " + t));
+			Class<?> cls = t.getSatisfyingRawType().orElseThrow(() -> new SerdeException("Could not find a concrete type that can satisfy the constraint " + t));
 
 			if (cls.isRecord()) return deserializeToRecord(value, cls);
 			return deserializeToNormalClass(value, cls, ctx);
@@ -60,13 +58,11 @@ final class ConfigToPojoDeserializer
 			if (configValue == null) {
 				// missing component!
 				// find all the missing components to emit a more helpful error message
-				List<String> missingComponents = Arrays.stream(components).map(c -> c.getName())
+				List<String> missingComponents = Arrays.stream(components).map(RecordComponent::getName)
 					.filter(c -> !value.contains(c)).collect(Collectors.toList());
 				var missingComponentsStr = String.join(", ", missingComponents);
-				throw new SerdeException(
-					"Could not deserialize this configuration to a record of type " + objectClass
-						+ " because the following components (entries) are missing: "
-						+ missingComponentsStr);
+				throw new SerdeException("Could not deserialize this configuration to a record of type " + objectClass
+						+ " because the following components (entries) are missing: " + missingComponentsStr);
 			}
 			if (configValue == NullObject.NULL_OBJECT) {
 				// component of value null
@@ -77,21 +73,18 @@ final class ConfigToPojoDeserializer
 		try {
 			return constructor.newInstance(componentValues);
 		} catch (Exception e) {
-			throw new SerdeException(
-				"Failed to create an instance of record " + objectClass, e);
+			throw new SerdeException("Failed to create an instance of record " + objectClass, e);
 		}
 	}
 
-	private static Constructor<?> getCanonicalRecordConstructor(Class<?> cls,
-																RecordComponent[] components) {
+	private static Constructor<?> getCanonicalRecordConstructor(Class<?> cls, RecordComponent[] components) {
 		Class<?>[] paramTypes = Arrays.stream(components)
 			.map(RecordComponent::getType)
 			.toArray(Class<?>[]::new);
 		try {
 			return cls.getDeclaredConstructor(paramTypes);
 		} catch (Exception e) {
-			throw new SerdeException(
-				"Failed to get the canonical constructor of record " + cls, e);
+			throw new SerdeException("Failed to get the canonical constructor of record " + cls, e);
 		}
 	}
 }

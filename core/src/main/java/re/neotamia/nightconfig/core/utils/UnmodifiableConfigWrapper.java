@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 
@@ -20,7 +21,7 @@ public abstract class UnmodifiableConfigWrapper<C extends UnmodifiableConfig>
 	}
 
 	@Override
-	public <T> T getRaw(List<String> path) {
+	public <T> T getRaw(@NotNull List<String> path) {
 		return config.getRaw(path);
 	}
 
@@ -35,7 +36,7 @@ public abstract class UnmodifiableConfigWrapper<C extends UnmodifiableConfig>
 	}
 
 	@Override
-	public boolean contains(List<String> path) {
+	public boolean contains(@NotNull List<String> path) {
 		return config.contains(path);
 	}
 

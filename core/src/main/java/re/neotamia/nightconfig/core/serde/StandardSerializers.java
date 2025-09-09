@@ -30,8 +30,7 @@ final class StandardSerializers {
                 Object key = entry.getKey();
                 if (!(key instanceof String)) {
                     String keyTypeString = key == null ? "null" : key.getClass().toString();
-                    throw new SerdeException("Map keys must be strings, invalid key type "
-                            + keyTypeString + " in value.");
+                    throw new SerdeException("Map keys must be strings, invalid key type " + keyTypeString + " in value.");
                 }
                 List<String> path = Collections.singletonList((String) key);
 

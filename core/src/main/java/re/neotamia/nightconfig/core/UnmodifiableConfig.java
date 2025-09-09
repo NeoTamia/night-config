@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.concurrent.ConcurrentConfig;
 
 import java.util.*;
@@ -24,7 +26,7 @@ public interface UnmodifiableConfig {
      * @param <T>  the value's type
      * @return the value at the given path, or {@code null} if there is no such value.
      */
-    default <T> T get(String path) {
+    default <T> @Nullable T get(@NotNull String path) {
         return get(split(path, '.'));
     }
 
@@ -36,7 +38,7 @@ public interface UnmodifiableConfig {
      * @return the value at the given path, or {@code null} if there is no such value.
      */
     @SuppressWarnings("unchecked")
-    default <T> T get(List<String> path) {
+    default <T> @Nullable T get(@NotNull List<String> path) {
         Object raw = getRaw(path);
         return (raw == NULL_OBJECT) ? null : (T) raw;
     }
@@ -48,7 +50,7 @@ public interface UnmodifiableConfig {
      * @param <T>  the value's type
      * @return the value at the given path, or {@code null} if there is no such value.
      */
-    default <T> T getRaw(String path) {
+    default <T> @Nullable T getRaw(@NotNull String path) {
         return getRaw(split(path, '.'));
     }
 
@@ -59,7 +61,7 @@ public interface UnmodifiableConfig {
      * @param <T>  the value's type
      * @return the value at the given path, or {@code null} if there is no such value.
      */
-    <T> T getRaw(List<String> path);
+    <T> @Nullable T getRaw(@NotNull List<String> path);
 
     /**
      * Gets an optional value from the config.
@@ -69,7 +71,7 @@ public interface UnmodifiableConfig {
      * @return an Optional containing the value at the given path, or {@code Optional.empty()} if
      * there is no such value.
      */
-    default <T> Optional<T> getOptional(String path) {
+    default <T> @NotNull Optional<T> getOptional(@NotNull String path) {
         return getOptional(split(path, '.'));
     }
 
@@ -81,7 +83,7 @@ public interface UnmodifiableConfig {
      * @return an Optional containing the value at the given path, or {@code Optional.empty()} if
      * there is no such value.
      */
-    default <T> Optional<T> getOptional(List<String> path) {
+    default <T> @NotNull Optional<T> getOptional(@NotNull List<String> path) {
         return Optional.ofNullable(get(path));
     }
 
@@ -93,7 +95,7 @@ public interface UnmodifiableConfig {
      * @param <T>          the value's type
      * @return the value at the given path, or the default value if not found.
      */
-    default <T> T getOrElse(String path, T defaultValue) {
+    default <T> T getOrElse(@NotNull String path, T defaultValue) {
         return getOrElse(split(path, '.'), defaultValue);
     }
 
@@ -105,7 +107,7 @@ public interface UnmodifiableConfig {
      * @param <T>          the value's type
      * @return the value at the given path, or the default value if not found.
      */
-    default <T> T getOrElse(List<String> path, T defaultValue) {
+    default <T> T getOrElse(@NotNull List<String> path, T defaultValue) {
         T value = getRaw(path);
         return (value == null || value == NULL_OBJECT) ? defaultValue : value;
     }
@@ -118,7 +120,7 @@ public interface UnmodifiableConfig {
      * @param <T>                  the value's type
      * @return the value at the given path, or the default value if not found.
      */
-    default <T> T getOrElse(List<String> path, Supplier<T> defaultValueSupplier) {
+    default <T> T getOrElse(@NotNull List<String> path, @NotNull Supplier<T> defaultValueSupplier) {
         T value = getRaw(path);
         return (value == null || value == NULL_OBJECT) ? defaultValueSupplier.get() : value;
     }
@@ -131,8 +133,231 @@ public interface UnmodifiableConfig {
      * @param <T>                  the value's type
      * @return the value at the given path, or the default value if not found.
      */
-    default <T> T getOrElse(String path, Supplier<T> defaultValueSupplier) {
+    default <T> T getOrElse(@NotNull String path, @NotNull Supplier<T> defaultValueSupplier) {
         return getOrElse(split(path, '.'), defaultValueSupplier);
+    }
+
+    // ---- String getters ----
+
+    /**
+     * Like {@link #get(String)} but returns a String. The config's value must be a String.
+     * Throws an exception if the value does not exist.
+     *
+     * @param path the path to check, each part separated by a dot. Example "a.b.c"
+     * @return the value at the given path, as a String.
+     */
+    default @Nullable String getString(@NotNull String path) {
+        return this.get(path);
+    }
+
+    /**
+     * Like {@link #get(List)} but returns a String. The config's value must be a String.
+     * Throws an exception if the value does not exist.
+     *
+     * @param path the value's path, each element of the list is a different part of the path.
+     * @return the value at the given path, as a String.
+     */
+    default @Nullable String getString(@NotNull List<String> path) {
+        return this.get(path);
+    }
+
+    /**
+     * Like {@link #get(String)} but returns a Float. The config's value must be a String
+     * that can be parsed as a Float. Throws an exception if the value does not exist.
+     *
+     * @param path the path to check, each part separated by a dot. Example "a.b.c"
+     * @return the value at the given path, parsed as a Float.
+     */
+    default @NotNull Float getStringAsFloat(@NotNull String path) {
+        return this.getStringAsFloat(split(path, '.'));
+    }
+
+    /**
+     * Like {@link #get(List)} but returns a Float. The config's value must be a String
+     * that can be parsed as a Float. Throws an exception if the value does not exist.
+     *
+     * @param path the value's path, each element of the list is a different part of the path.
+     * @return the value at the given path, parsed as a Float.
+     */
+    default @NotNull Float getStringAsFloat(@NotNull List<String> path) {
+        return Float.parseFloat(this.get(path));
+    }
+
+    /**
+     * Like {@link #get(String)} but returns a Double. The config's value must be a String
+     * that can be parsed as a Double. Throws an exception if the value does not exist.
+     *
+     * @param path the path to check, each part separated by a dot. Example "a.b.c"
+     * @return the value at the given path, parsed as a Double.
+     */
+    default @NotNull Double getStringAsDouble(@NotNull String path) {
+        return this.getStringAsDouble(split(path, '.'));
+    }
+
+    /**
+     * Like {@link #get(List)} but returns a Double. The config's value must be a String
+     * that can be parsed as a Double. Throws an exception if the value does not exist.
+     *
+     * @param path the value's path, each element of the list is a different part of the path.
+     * @return the value at the given path, parsed as a Double.
+     */
+    default @NotNull Double getStringAsDouble(@NotNull List<String> path) {
+        return Double.parseDouble(this.get(path));
+    }
+
+    /**
+     * Like {@link #get(String)} but returns an Int. The config's value must be a String
+     * that can be parsed as an Int. Throws an exception if the value does not exist.
+     *
+     * @param path the path to check, each part separated by a dot. Example "a.b.c"
+     * @return the value at the given path, parsed as an Int.
+     */
+    default @NotNull Short getStringAsShort(@NotNull String path) {
+        return this.getStringAsShort(split(path, '.'));
+    }
+
+    /**
+     * Like {@link #get(List)} but returns a Short. The config's value must be a String
+     * that can be parsed as a Short. Throws an exception if the value does not exist.
+     *
+     * @param path the value's path, each element of the list is a different part of the path.
+     * @return the value at the given path, parsed as a Short.
+     */
+    default @NotNull Short getStringAsShort(@NotNull List<String> path) {
+        return Short.parseShort(this.get(path));
+    }
+
+    /**
+     * Like {@link #get(String)} but returns a Byte. The config's value must be a String
+     * that can be parsed as a Byte. Throws an exception if the value does not exist.
+     *
+     * @param path the path to check, each part separated by a dot. Example "a.b.c"
+     * @return the value at the given path, parsed as a Byte.
+     */
+    default @NotNull Byte getStringAsByte(@NotNull String path) {
+        return this.getStringAsByte(split(path, '.'));
+    }
+
+    /**
+     * Like {@link #get(List)} but returns a Byte. The config's value must be a String
+     * that can be parsed as a Byte. Throws an exception if the value does not exist.
+     *
+     * @param path the value's path, each element of the list is a different part of the path.
+     * @return the value at the given path, parsed as a Byte.
+     */
+    default @NotNull Byte getStringAsByte(@NotNull List<String> path) {
+        return Byte.parseByte(this.get(path));
+    }
+
+    /**
+     * Like {@link #get(String)} but returns an Integer. The config's value must be a String
+     * that can be parsed as an Integer. Throws an exception if the value does not exist.
+     *
+     * @param path the path to check, each part separated by a dot. Example "a.b.c"
+     * @return the value at the given path, parsed as an Integer.
+     */
+    default @NotNull Integer getStringAsInteger(@NotNull String path) {
+        return this.getStringAsInteger(split(path, '.'));
+    }
+
+    /**
+     * Like {@link #get(List)} but returns an Integer. The config's value must be a String
+     * that can be parsed as an Integer. Throws an exception if the value does not exist.
+     *
+     * @param path the value's path, each element of the list is a different part of the path.
+     * @return the value at the given path, parsed as an Integer.
+     */
+    default @NotNull Integer getStringAsInteger(@NotNull List<String> path) {
+        return Integer.parseInt(this.get(path));
+    }
+
+    /**
+     * Like {@link #get(String)} but returns a Long. The config's value must be a String
+     * that can be parsed as a Long. Throws an exception if the value does not exist.
+     *
+     * @param path the path to check, each part separated by a dot. Example "a.b.c"
+     * @return the value at the given path, parsed as a Long.
+     */
+    default @NotNull Long getStringAsLong(@NotNull String path) {
+        return this.getStringAsLong(split(path, '.'));
+    }
+
+    /**
+     * Like {@link #get(List)} but returns a Long. The config's value must be a String
+     * that can be parsed as a Long. Throws an exception if the value does not exist.
+     *
+     * @param path the value's path, each element of the list is a different part of the path.
+     * @return the value at the given path, parsed as a Long.
+     */
+    default @NotNull Long getStringAsLong(@NotNull List<String> path) {
+        return Long.parseLong(this.get(path));
+    }
+
+    /**
+     * Like {@link #get(String)} but returns a Boolean. The config's value must be a String
+     * that can be parsed as a Boolean. Throws an exception if the value does not exist.
+     *
+     * @param path the path to check, each part separated by a dot. Example "a.b.c"
+     * @return the value at the given path, parsed as a Boolean.
+     */
+    default @NotNull Boolean getStringAsBoolean(@NotNull String path) {
+        return this.getStringAsBoolean(split(path, '.'));
+    }
+
+    /**
+     * Like {@link #get(List)} but returns a Boolean. The config's value must be a String
+     * that can be parsed as a Boolean. Throws an exception if the value does not exist.
+     *
+     * @param path the value's path, each element of the list is a different part of the path.
+     * @return the value at the given path, parsed as a Boolean.
+     */
+    default @NotNull Boolean getStringAsBoolean(@NotNull List<String> path) {
+        return Boolean.parseBoolean(this.get(path));
+    }
+
+    /**
+     * Gets an optional String from the config.
+     *
+     * @param path the value's path, each part separated by a dot. Example "a.b.c"
+     * @return an Optional containing the value at the given path as a String,
+     * or {@code Optional.empty()} if there is no such value.
+     */
+    default @NotNull Optional<String> getOptionalString(@NotNull String path) {
+        return getOptionalString(split(path, '.'));
+    }
+
+    /**
+     * Gets an optional String from the config.
+     *
+     * @param path the value's path, each element of the list is a different part of the path.
+     * @return an Optional containing the value at the given path as a String,
+     * or {@code Optional.empty()} if there is no such value.
+     */
+    default @NotNull Optional<String> getOptionalString(@NotNull List<String> path) {
+        return Optional.ofNullable(getString(path));
+    }
+
+    /**
+     * Gets a String from the config. If the value doesn't exist, returns the default value.
+     *
+     * @param path         the value's path, each part separated by a dot. Example "a.b.c"
+     * @param defaultValue the default value to return if not found
+     * @return the value at the given path as a String, or the default value if not found.
+     */
+    default String getStringOrElse(@NotNull String path, String defaultValue) {
+        return getStringOrElse(split(path, '.'), defaultValue);
+    }
+
+    /**
+     * Gets a String from the config. If the value doesn't exist, returns the default value.
+     *
+     * @param path         the value's path, each element of the list is a different part of the path.
+     * @param defaultValue the default value to return if not found
+     * @return the value at the given path as a String, or the default value if not found.
+     */
+    default String getStringOrElse(@NotNull List<String> path, String defaultValue) {
+        String value = getString(path);
+        return (value == null) ? defaultValue : value;
     }
 
     // ---- Enum getters ----
@@ -150,7 +375,7 @@ public interface UnmodifiableConfig {
      * @throws ClassCastException       if the config contains a value that cannot be converted to
      *                                  an enum constant, like a List
      */
-    default <T extends Enum<T>> T getEnum(String path, Class<T> enumType, EnumGetMethod method) {
+    default <T extends Enum<T>> @Nullable T getEnum(@NotNull String path, @NotNull Class<T> enumType, @NotNull EnumGetMethod method) {
         return getEnum(split(path, '.'), enumType, method);
     }
 
@@ -163,7 +388,7 @@ public interface UnmodifiableConfig {
      * @param <T>      the enum type
      * @return the value at the given path as an enum, or {@code null} if not found
      */
-    default <T extends Enum<T>> T getEnum(String path, Class<T> enumType) {
+    default <T extends Enum<T>> @Nullable T getEnum(@NotNull String path, @NotNull Class<T> enumType) {
         return getEnum(split(path, '.'), enumType, EnumGetMethod.NAME_IGNORECASE);
     }
 
@@ -180,7 +405,7 @@ public interface UnmodifiableConfig {
      * @throws ClassCastException       if the config contains a value that cannot be converted to
      *                                  an enum constant, like a List
      */
-    default <T extends Enum<T>> T getEnum(List<String> path, Class<T> enumType, EnumGetMethod method) {
+    default <T extends Enum<T>> @Nullable T getEnum(@NotNull List<String> path, @NotNull Class<T> enumType, @NotNull EnumGetMethod method) {
         final Object value = getRaw(path);
         return method.get(value, enumType);
     }
@@ -193,7 +418,7 @@ public interface UnmodifiableConfig {
      * @param enumType the class of the Enum
      * @return the value at the given path as an enum, or {@code null} if not found.
      */
-    default <T extends Enum<T>> T getEnum(List<String> path, Class<T> enumType) {
+    default <T extends Enum<T>> @Nullable T getEnum(@NotNull List<String> path, @NotNull Class<T> enumType) {
         return getEnum(path, enumType, EnumGetMethod.NAME_IGNORECASE);
     }
 
@@ -210,7 +435,7 @@ public interface UnmodifiableConfig {
      * @throws ClassCastException       if the config contains a value that cannot be converted to
      *                                  an enum constant, like a List
      */
-    default <T extends Enum<T>> Optional<T> getOptionalEnum(String path, Class<T> enumType, EnumGetMethod method) {
+    default <T extends Enum<T>> @NotNull Optional<T> getOptionalEnum(@NotNull String path, @NotNull Class<T> enumType, @NotNull EnumGetMethod method) {
         return getOptionalEnum(split(path, '.'), enumType, method);
     }
 
@@ -222,7 +447,7 @@ public interface UnmodifiableConfig {
      * @param enumType the class of the Enum
      * @return the value at the given path as an enum, or {@code null} if not found.
      */
-    default <T extends Enum<T>> Optional<T> getOptionalEnum(String path, Class<T> enumType) {
+    default <T extends Enum<T>> @NotNull Optional<T> getOptionalEnum(@NotNull String path, @NotNull Class<T> enumType) {
         return getOptionalEnum(path, enumType, EnumGetMethod.NAME_IGNORECASE);
     }
 
@@ -239,7 +464,7 @@ public interface UnmodifiableConfig {
      * @throws ClassCastException       if the config contains a value that cannot be converted to
      *                                  an enum constant, like a List
      */
-    default <T extends Enum<T>> Optional<T> getOptionalEnum(List<String> path, Class<T> enumType, EnumGetMethod method) {
+    default <T extends Enum<T>> @NotNull Optional<T> getOptionalEnum(@NotNull List<String> path, @NotNull Class<T> enumType, @NotNull EnumGetMethod method) {
         return Optional.ofNullable(getEnum(path, enumType, method));
     }
 
@@ -251,7 +476,7 @@ public interface UnmodifiableConfig {
      * @param enumType the class of the Enum
      * @return the value at the given path as an enum, or {@code null} if not found.
      */
-    default <T extends Enum<T>> Optional<T> getOptionalEnum(List<String> path, Class<T> enumType) {
+    default <T extends Enum<T>> @NotNull Optional<T> getOptionalEnum(@NotNull List<String> path, @NotNull Class<T> enumType) {
         return getOptionalEnum(path, enumType, EnumGetMethod.NAME_IGNORECASE);
     }
 
@@ -268,7 +493,7 @@ public interface UnmodifiableConfig {
      * @throws ClassCastException       if the config contains a value that cannot be converted to
      *                                  an enum constant, like a List
      */
-    default <T extends Enum<T>> T getEnumOrElse(String path, T defaultValue, EnumGetMethod method) {
+    default <T extends Enum<T>> @NotNull T getEnumOrElse(@NotNull String path, @NotNull T defaultValue, @NotNull EnumGetMethod method) {
         return getEnumOrElse(split(path, '.'), defaultValue, method);
     }
 
@@ -280,7 +505,7 @@ public interface UnmodifiableConfig {
      * @param defaultValue the default value
      * @return the value at the given path as an enum, or {@code null} if not found.
      */
-    default <T extends Enum<T>> T getEnumOrElse(String path, T defaultValue) {
+    default <T extends Enum<T>> @NotNull T getEnumOrElse(@NotNull String path, @NotNull T defaultValue) {
         return getEnumOrElse(path, defaultValue, EnumGetMethod.NAME_IGNORECASE);
     }
 
@@ -297,7 +522,7 @@ public interface UnmodifiableConfig {
      * @throws ClassCastException       if the config contains a value that cannot be converted to
      *                                  an enum constant, like a List
      */
-    default <T extends Enum<T>> T getEnumOrElse(List<String> path, T defaultValue, EnumGetMethod method) {
+    default <T extends Enum<T>> @NotNull T getEnumOrElse(@NotNull List<String> path, @NotNull T defaultValue, @NotNull EnumGetMethod method) {
         T value = getEnum(path, defaultValue.getDeclaringClass(), method);
         return (value == null) ? defaultValue : value;
     }
@@ -310,7 +535,7 @@ public interface UnmodifiableConfig {
      * @param defaultValue the default value
      * @return the value at the given path as an enum, or {@code null} if not found.
      */
-    default <T extends Enum<T>> T getEnumOrElse(List<String> path, T defaultValue) {
+    default <T extends Enum<T>> @NotNull T getEnumOrElse(@NotNull List<String> path, @NotNull T defaultValue) {
         return getEnumOrElse(path, defaultValue, EnumGetMethod.NAME_IGNORECASE);
     }
 
@@ -327,10 +552,7 @@ public interface UnmodifiableConfig {
      * @throws ClassCastException       if the config contains a value that cannot be converted to
      *                                  an enum constant, like a List
      */
-    default <T extends Enum<T>> T getEnumOrElse(String path,
-                                                Class<T> enumType,
-                                                EnumGetMethod method,
-                                                Supplier<T> defaultValueSupplier) {
+    default <T extends Enum<T>> T getEnumOrElse(@NotNull String path, @NotNull Class<T> enumType, @NotNull EnumGetMethod method, @NotNull Supplier<T> defaultValueSupplier) {
         return getEnumOrElse(split(path, '.'), enumType, method, defaultValueSupplier);
     }
 
@@ -342,9 +564,7 @@ public interface UnmodifiableConfig {
      * @param enumType the class of the Enum
      * @return the value at the given path as an enum, or {@code null} if not found.
      */
-    default <T extends Enum<T>> T getEnumOrElse(String path,
-                                                Class<T> enumType,
-                                                Supplier<T> defaultValueSupplier) {
+    default <T extends Enum<T>> T getEnumOrElse(@NotNull String path, @NotNull Class<T> enumType, @NotNull Supplier<T> defaultValueSupplier) {
         return getEnumOrElse(path, enumType, EnumGetMethod.NAME_IGNORECASE, defaultValueSupplier);
     }
 
@@ -361,10 +581,7 @@ public interface UnmodifiableConfig {
      * @throws ClassCastException       if the config contains a value that cannot be converted to
      *                                  an enum constant, like a List
      */
-    default <T extends Enum<T>> T getEnumOrElse(List<String> path,
-                                                Class<T> enumType,
-                                                EnumGetMethod method,
-                                                Supplier<T> defaultValueSupplier) {
+    default <T extends Enum<T>> T getEnumOrElse(@NotNull List<String> path, @NotNull Class<T> enumType, @NotNull EnumGetMethod method, @NotNull Supplier<T> defaultValueSupplier) {
         // The enumType is needed to avoid using the Supplier when the raw value is an enum constant
         T value = getEnum(path, enumType, method);
         return (value == null) ? defaultValueSupplier.get() : value;
@@ -379,9 +596,7 @@ public interface UnmodifiableConfig {
      * @param defaultValueSupplier Supplier of the default value, only used if needed
      * @return the value at the given path as an enum, or {@code null} if not found.
      */
-    default <T extends Enum<T>> T getEnumOrElse(List<String> path,
-                                                Class<T> enumType,
-                                                Supplier<T> defaultValueSupplier) {
+    default <T extends Enum<T>> T getEnumOrElse(@NotNull List<String> path, @NotNull Class<T> enumType, @NotNull Supplier<T> defaultValueSupplier) {
         return getEnumOrElse(path, enumType, EnumGetMethod.NAME_IGNORECASE, defaultValueSupplier);
     }
 
@@ -394,7 +609,7 @@ public interface UnmodifiableConfig {
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      * @return the value at the given path, as {@link Number#intValue()}.
      */
-    default int getInt(String path) {
+    default int getInt(@NotNull String path) {
         return this.<Number>get(path).intValue();
     }
 
@@ -405,7 +620,7 @@ public interface UnmodifiableConfig {
      * @param path the value's path, each element of the list is a different part of the path.
      * @return the value at the given path, as {@link Number#intValue()}.
      */
-    default int getInt(List<String> path) {
+    default int getInt(@NotNull List<String> path) {
         return this.<Number>getRaw(path).intValue();
     }
 
@@ -416,7 +631,7 @@ public interface UnmodifiableConfig {
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      * @return the value at the given path, as {@link Number#intValue()}, or {@link OptionalInt#empty()}.
      */
-    default OptionalInt getOptionalInt(String path) {
+    default @NotNull OptionalInt getOptionalInt(@NotNull String path) {
         return getOptionalInt(split(path, '.'));
     }
 
@@ -427,7 +642,7 @@ public interface UnmodifiableConfig {
      * @param path the value's path, each element of the list is a different part of the path.
      * @return the value at the given path, as {@link Number#intValue()}, or {@link OptionalInt#empty()}.
      */
-    default OptionalInt getOptionalInt(List<String> path) {
+    default @NotNull OptionalInt getOptionalInt(@NotNull List<String> path) {
         Number n = get(path);
         return (n == null) ? OptionalInt.empty() : OptionalInt.of(n.intValue());
     }
@@ -440,7 +655,7 @@ public interface UnmodifiableConfig {
      * @param defaultValue the value returned if the config doesn't contain the given path
      * @return the value at the given path, as {@link Number#intValue()}, or {@code defaultValue}.
      */
-    default int getIntOrElse(String path, int defaultValue) {
+    default int getIntOrElse(@NotNull String path, int defaultValue) {
         return getIntOrElse(split(path, '.'), defaultValue);
     }
 
@@ -451,7 +666,7 @@ public interface UnmodifiableConfig {
      * @param path the value's path, each element of the list is a different part of the path.
      * @return the value at the given path, as {@link Number#intValue()}, or {@code defaultValue}.
      */
-    default int getIntOrElse(List<String> path, int defaultValue) {
+    default int getIntOrElse(@NotNull List<String> path, int defaultValue) {
         Number n = get(path);
         return (n == null) ? defaultValue : n.intValue();
     }
@@ -463,7 +678,7 @@ public interface UnmodifiableConfig {
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      * @return the value at the given path, as {@link Number#intValue()}, or {@code defaultValueSupplier.get()}.
      */
-    default int getIntOrElse(String path, IntSupplier defaultValueSupplier) {
+    default int getIntOrElse(@NotNull String path, @NotNull IntSupplier defaultValueSupplier) {
         return getIntOrElse(split(path, '.'), defaultValueSupplier);
     }
 
@@ -474,7 +689,7 @@ public interface UnmodifiableConfig {
      * @param path the value's path, each element of the list is a different part of the path.
      * @return the value at the given path, as {@link Number#intValue()}, or {@code defaultValueSupplier.get()}.
      */
-    default int getIntOrElse(List<String> path, IntSupplier defaultValueSupplier) {
+    default int getIntOrElse(@NotNull List<String> path, @NotNull IntSupplier defaultValueSupplier) {
         Number n = get(path);
         return (n == null) ? defaultValueSupplier.getAsInt() : n.intValue();
     }
@@ -488,7 +703,7 @@ public interface UnmodifiableConfig {
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      * @return the value at the given path, as {@link Number#doubleValue()}.
      */
-    default double getDouble(String path) {
+    default double getDouble(@NotNull String path) {
         return this.<Number>getRaw(path).doubleValue();
     }
 
@@ -499,7 +714,7 @@ public interface UnmodifiableConfig {
      * @param path the value's path, each element of the list is a different part of the path.
      * @return the value at the given path, as {@link Number#doubleValue()}.
      */
-    default double getDouble(List<String> path) {
+    default double getDouble(@NotNull List<String> path) {
         return this.<Number>getRaw(path).doubleValue();
     }
 
@@ -510,7 +725,7 @@ public interface UnmodifiableConfig {
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      * @return the value at the given path, as {@link Number#doubleValue()}, or {@link OptionalDouble#empty()}.
      */
-    default OptionalDouble getOptionalDouble(String path) {
+    default @NotNull OptionalDouble getOptionalDouble(@NotNull String path) {
         return getOptionalDouble(split(path, '.'));
     }
 
@@ -521,7 +736,7 @@ public interface UnmodifiableConfig {
      * @param path the value's path, each element of the list is a different part of the path.
      * @return the value at the given path, as {@link Number#doubleValue()}, or {@link OptionalDouble#empty()}.
      */
-    default OptionalDouble getOptionalDouble(List<String> path) {
+    default @NotNull OptionalDouble getOptionalDouble(@NotNull List<String> path) {
         Number n = get(path);
         return (n == null) ? OptionalDouble.empty() : OptionalDouble.of(n.doubleValue());
     }
@@ -534,7 +749,7 @@ public interface UnmodifiableConfig {
      * @param defaultValue the value returned if the config doesn't contain the given path
      * @return the value at the given path, as {@link Number#doubleValue()}, or {@code defaultValue}.
      */
-    default double getDoubleOrElse(String path, double defaultValue) {
+    default double getDoubleOrElse(@NotNull String path, double defaultValue) {
         return getDoubleOrElse(split(path, '.'), defaultValue);
     }
 
@@ -545,7 +760,7 @@ public interface UnmodifiableConfig {
      * @param path the value's path, each element of the list is a different part of the path.
      * @return the value at the given path, as {@link Number#doubleValue()}, or {@code defaultValue}.
      */
-    default double getDoubleOrElse(List<String> path, double defaultValue) {
+    default double getDoubleOrElse(@NotNull List<String> path, double defaultValue) {
         Number n = get(path);
         return (n == null) ? defaultValue : n.doubleValue();
     }
@@ -557,7 +772,7 @@ public interface UnmodifiableConfig {
      * @param path                 the path to check, each part separated by a dot. Example "a.b.c"
      * @param defaultValueSupplier supplies the value to return if the config doesn't contain the path
      */
-    default double getDoubleOrElse(String path, DoubleSupplier defaultValueSupplier) {
+    default double getDoubleOrElse(@NotNull String path, @NotNull DoubleSupplier defaultValueSupplier) {
         return getDoubleOrElse(split(path, '.'), defaultValueSupplier);
     }
 
@@ -568,7 +783,7 @@ public interface UnmodifiableConfig {
      * @param path                 the value's path, each element of the list is a different part of the path.
      * @param defaultValueSupplier supplies the value to return if the config doesn't contain the path
      */
-    default double getDoubleOrElse(List<String> path, DoubleSupplier defaultValueSupplier) {
+    default double getDoubleOrElse(@NotNull List<String> path, @NotNull DoubleSupplier defaultValueSupplier) {
         Number n = get(path);
         return (n == null) ? defaultValueSupplier.getAsDouble() : n.doubleValue();
     }
@@ -582,7 +797,7 @@ public interface UnmodifiableConfig {
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      * @return the value at the given path, as {@link Number#floatValue()}.
      */
-    default float getFloat(String path) {
+    default float getFloat(@NotNull String path) {
         return this.<Number>getRaw(path).floatValue();
     }
 
@@ -593,7 +808,7 @@ public interface UnmodifiableConfig {
      * @param path the value's path, each element of the list is a different part of the path.
      * @return the value at the given path, as {@link Number#floatValue()}.
      */
-    default float getFloat(List<String> path) {
+    default float getFloat(@NotNull List<String> path) {
         return this.<Number>getRaw(path).floatValue();
     }
 
@@ -604,7 +819,7 @@ public interface UnmodifiableConfig {
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      * @return the value at the given path, as {@link Number#floatValue()}, or {@link OptionalDouble#empty()}.
      */
-    default float getFloatOrElse(String path, float defaultValue) {
+    default float getFloatOrElse(@NotNull String path, float defaultValue) {
         return getFloatOrElse(split(path, '.'), defaultValue);
     }
 
@@ -615,28 +830,30 @@ public interface UnmodifiableConfig {
      * @param path the value's path, each element of the list is a different part of the path.
      * @return the value at the given path, as {@link Number#floatValue()}, or {@link OptionalDouble#empty()}.
      */
-    default float getFloatOrElse(List<String> path, float defaultValue) {
+    default float getFloatOrElse(@NotNull List<String> path, float defaultValue) {
         Number n = get(path);
         return (n == null) ? defaultValue : n.floatValue();
     }
 
-    /** Like {@link #getOrElse(String, Supplier)} but returns a primitive float.
+    /**
+     * Like {@link #getOrElse(String, Supplier)} but returns a primitive float.
      * The config's value must be a {@link Number} or null or nonexistant.
      *
      * @param path                 the path to check, each part separated by a dot. Example "a.b.c"
      * @param defaultValueSupplier supplies the value to return if the config doesn't contain the path
      */
-    default float getFloatOrElse(String path, Supplier<Float> defaultValueSupplier) {
+    default float getFloatOrElse(@NotNull String path, @NotNull Supplier<Float> defaultValueSupplier) {
         return getFloatOrElse(split(path, '.'), defaultValueSupplier);
     }
 
-    /** Like {@link #getOrElse(List, Supplier)} but returns a primitive float.
+    /**
+     * Like {@link #getOrElse(List, Supplier)} but returns a primitive float.
      * The config's value must be a {@link Number} or null or nonexistant.
      *
      * @param path                 the value's path, each element of the list is a different part of the path.
      * @param defaultValueSupplier supplies the value to return if the config doesn't contain the path
      */
-    default float getFloatOrElse(List<String> path, Supplier<Float> defaultValueSupplier) {
+    default float getFloatOrElse(@NotNull List<String> path, @NotNull Supplier<Float> defaultValueSupplier) {
         Number n = get(path);
         return (n == null) ? defaultValueSupplier.get() : n.floatValue();
     }
@@ -649,7 +866,7 @@ public interface UnmodifiableConfig {
      *
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      */
-    default long getLong(String path) {
+    default long getLong(@NotNull String path) {
         return this.<Number>getRaw(path).longValue();
     }
 
@@ -659,7 +876,7 @@ public interface UnmodifiableConfig {
      *
      * @param path the value's path, each element of the list is a different part of the path.
      */
-    default long getLong(List<String> path) {
+    default long getLong(@NotNull List<String> path) {
         return this.<Number>getRaw(path).longValue();
     }
 
@@ -669,7 +886,7 @@ public interface UnmodifiableConfig {
      *
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      */
-    default OptionalLong getOptionalLong(String path) {
+    default @NotNull OptionalLong getOptionalLong(@NotNull String path) {
         return getOptionalLong(split(path, '.'));
     }
 
@@ -679,7 +896,7 @@ public interface UnmodifiableConfig {
      *
      * @param path the value's path, each element of the list is a different part of the path.
      */
-    default OptionalLong getOptionalLong(List<String> path) {
+    default @NotNull OptionalLong getOptionalLong(@NotNull List<String> path) {
         Number n = get(path);
         return (n == null) ? OptionalLong.empty() : OptionalLong.of(n.longValue());
     }
@@ -691,7 +908,7 @@ public interface UnmodifiableConfig {
      * @param path         the path to check, each part separated by a dot. Example "a.b.c"
      * @param defaultValue the value to return if the config doesn't contain the path
      */
-    default long getLongOrElse(String path, long defaultValue) {
+    default long getLongOrElse(@NotNull String path, long defaultValue) {
         return getLongOrElse(split(path, '.'), defaultValue);
     }
 
@@ -702,7 +919,7 @@ public interface UnmodifiableConfig {
      * @param path         the value's path, each element of the list is a different part of the path.
      * @param defaultValue the value to return if the config doesn't contain the path
      */
-    default long getLongOrElse(List<String> path, long defaultValue) {
+    default long getLongOrElse(@NotNull List<String> path, long defaultValue) {
         Number n = get(path);
         return (n == null) ? defaultValue : n.longValue();
     }
@@ -714,7 +931,7 @@ public interface UnmodifiableConfig {
      * @param path                 the path to check, each part separated by a dot. Example "a.b.c"
      * @param defaultValueSupplier supplies the value to return if the config doesn't contain the path
      */
-    default long getLongOrElse(String path, LongSupplier defaultValueSupplier) {
+    default long getLongOrElse(@NotNull String path, @NotNull LongSupplier defaultValueSupplier) {
         return getLongOrElse(split(path, '.'), defaultValueSupplier);
     }
 
@@ -725,43 +942,43 @@ public interface UnmodifiableConfig {
      * @param path                 the value's path, each element of the list is a different part of the path.
      * @param defaultValueSupplier supplies the value to return if the config doesn't contain the path
      */
-    default long getLongOrElse(List<String> path, LongSupplier defaultValueSupplier) {
+    default long getLongOrElse(@NotNull List<String> path, @NotNull LongSupplier defaultValueSupplier) {
         Number n = get(path);
         return (n == null) ? defaultValueSupplier.getAsLong() : n.longValue();
     }
 
     // ---- Primitive getters: byte ----
-    default byte getByte(String path) {
+    default byte getByte(@NotNull String path) {
         return this.<Number>getRaw(path).byteValue();
     }
 
-    default byte getByte(List<String> path) {
+    default byte getByte(@NotNull List<String> path) {
         return this.<Number>getRaw(path).byteValue();
     }
 
-    default byte getByteOrElse(String path, byte defaultValue) {
+    default byte getByteOrElse(@NotNull String path, byte defaultValue) {
         return getByteOrElse(split(path, '.'), defaultValue);
     }
 
-    default byte getByteOrElse(List<String> path, byte defaultValue) {
+    default byte getByteOrElse(@NotNull List<String> path, byte defaultValue) {
         Number n = get(path);
         return (n == null) ? defaultValue : n.byteValue();
     }
 
     // ---- Primitive getters: short ----
-    default short getShort(String path) {
+    default short getShort(@NotNull String path) {
         return this.<Number>getRaw(path).shortValue();
     }
 
-    default short getShort(List<String> path) {
+    default short getShort(@NotNull List<String> path) {
         return this.<Number>getRaw(path).shortValue();
     }
 
-    default short getShortOrElse(String path, short defaultValue) {
+    default short getShortOrElse(@NotNull String path, short defaultValue) {
         return getShortOrElse(split(path, '.'), defaultValue);
     }
 
-    default short getShortOrElse(List<String> path, short defaultValue) {
+    default short getShortOrElse(@NotNull List<String> path, short defaultValue) {
         Number n = get(path);
         return (n == null) ? defaultValue : n.shortValue();
     }
@@ -778,7 +995,7 @@ public interface UnmodifiableConfig {
      * @param path the value's path as a dot-separated String
      * @return the value, as a single char
      */
-    default char getChar(String path) {
+    default char getChar(@NotNull String path) {
         return (char) getInt(path);
     }
 
@@ -792,14 +1009,14 @@ public interface UnmodifiableConfig {
      * @param path the value's path as a list of String
      * @return the value, as a single char
      */
-    default char getChar(List<String> path) {
+    default char getChar(@NotNull List<String> path) {
         Object value = getRaw(path);
         if (value instanceof Number) {
             return (char) ((Number) value).intValue();
         } else if (value instanceof CharSequence) {
             return ((CharSequence) value).charAt(0);
         } else {
-            return (char) value;
+            return (char) Objects.requireNonNull(value);
         }
     }
 
@@ -815,7 +1032,7 @@ public interface UnmodifiableConfig {
      * @param defaultValue the char to return if the value doesn't exist in the config
      * @return the value, as a single char
      */
-    default char getCharOrElse(String path, char defaultValue) {
+    default char getCharOrElse(@NotNull String path, char defaultValue) {
         return getCharOrElse(split(path, '.'), defaultValue);
     }
 
@@ -831,7 +1048,7 @@ public interface UnmodifiableConfig {
      * @param defaultValue the char to return if the value doesn't exist in the config
      * @return the value, as a single char
      */
-    default char getCharOrElse(List<String> path, char defaultValue) {
+    default char getCharOrElse(@NotNull List<String> path, char defaultValue) {
         Object value = getRaw(path);
         if (value == null || value == NULL_OBJECT) {
             return defaultValue;
@@ -852,7 +1069,7 @@ public interface UnmodifiableConfig {
      * @param path the path to check, each part separated by a dot. Example "a.b.c"
      * @return {@code true} if the path is associated with a value, {@code false} if it's not.
      */
-    default boolean contains(String path) {
+    default boolean contains(@NotNull String path) {
         return contains(split(path, '.'));
     }
 
@@ -862,7 +1079,7 @@ public interface UnmodifiableConfig {
      * @param path the path to check, each element of the list is a different part of the path.
      * @return {@code true} if the path is associated with a value, {@code false} if it's not.
      */
-    boolean contains(List<String> path);
+    boolean contains(@NotNull List<String> path);
 
     /**
      * Checks if the config contains a null value at some path.
@@ -871,7 +1088,7 @@ public interface UnmodifiableConfig {
      * @return {@code true} if the path is associated with {@link NullObject#NULL_OBJECT},
      * {@code false} if it's associated with another value or with no value.
      */
-    default boolean isNull(String path) {
+    default boolean isNull(@NotNull String path) {
         return isNull(split(path, '.'));
     }
 
@@ -882,7 +1099,7 @@ public interface UnmodifiableConfig {
      * @return {@code true} if the path is associated with {@link NullObject#NULL_OBJECT},
      * {@code false} if it's associated with another value or with no value.
      */
-    default boolean isNull(List<String> path) {
+    default boolean isNull(@NotNull List<String> path) {
         return getRaw(path) == NULL_OBJECT;
     }
 
@@ -945,7 +1162,7 @@ public interface UnmodifiableConfig {
          * @return the entry's value
          */
         @SuppressWarnings("unchecked")
-        default <T> T getValue() {
+        default <T> @Nullable T getValue() {
             Object raw = getRawValue();
             return (raw == NULL_OBJECT) ? null : (T) raw;
         }
@@ -961,7 +1178,7 @@ public interface UnmodifiableConfig {
          * @param <T> the value's type
          * @return the entry's value, wrapped in {@link Optional}
          */
-        default <T> Optional<T> getOptional() {
+        default <T> @NotNull Optional<T> getOptional() {
             return Optional.ofNullable(getValue());
         }
 
@@ -979,7 +1196,7 @@ public interface UnmodifiableConfig {
             return this.<Number>getRawValue().intValue();
         }
 
-        default OptionalInt getOptionalInt() {
+        default @NotNull OptionalInt getOptionalInt() {
             Number value = getRawValue();
             return (value == null) ? OptionalInt.empty() : OptionalInt.of(value.intValue());
         }
@@ -998,7 +1215,7 @@ public interface UnmodifiableConfig {
             return this.<Number>getRawValue().longValue();
         }
 
-        default OptionalLong getOptionalLong() {
+        default @NotNull OptionalLong getOptionalLong() {
             Number value = getRawValue();
             return (value == null) ? OptionalLong.empty() : OptionalLong.of(value.longValue());
         }
@@ -1056,15 +1273,12 @@ public interface UnmodifiableConfig {
 
         default char getCharOrElse(char defaultValue) {
             Object value = getRawValue();
-            if (value == null) {
-                return defaultValue;
-            } else if (value instanceof Number) {
-                return (char) ((Number) value).intValue();
-            } else if (value instanceof CharSequence) {
-                return ((CharSequence) value).charAt(0);
-            } else {
-                return (char) value;
-            }
+            return switch (value) {
+                case null -> defaultValue;
+                case Number number -> (char) number.intValue();
+                case CharSequence charSequence -> charSequence.charAt(0);
+                default -> (char) value;
+            };
         }
     }
 
@@ -1084,7 +1298,7 @@ public interface UnmodifiableConfig {
      * @param <T>  the value's type
      * @see #get(String)
      */
-    default <T> T apply(String path) {
+    default <T> @Nullable T apply(@NotNull String path) {
         return get(path);
     }
 
@@ -1095,7 +1309,7 @@ public interface UnmodifiableConfig {
      * @param <T>  the value's type
      * @see #get(List)
      */
-    default <T> T apply(List<String> path) {
+    default <T> @Nullable T apply(@NotNull List<String> path) {
         return get(path);
     }
 }

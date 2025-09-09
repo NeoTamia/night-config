@@ -152,17 +152,14 @@ final class AnnotationUtils {
 	private static void checkFieldSpec(Field field, Object value, SpecValidator spec) {
 		final Predicate<Object> validatorInstance;
 		try {
-			Constructor<? extends Predicate<Object>> constructor = spec.value()
-																	   .getDeclaredConstructor();
+			Constructor<? extends Predicate<Object>> constructor = spec.value().getDeclaredConstructor();
 			constructor.setAccessible(true);
 			validatorInstance = constructor.newInstance();
 		} catch (ReflectiveOperationException ex) {
 			throw new ReflectionException("Cannot create a converter for field " + field, ex);
 		}
 		if (!validatorInstance.test(value)) {
-			throw new InvalidValueException(
-					"Invalid value \"%s\" for field %s: it doesn't conform to " + "%s", value,
-					field, spec);
+			throw new InvalidValueException("Invalid value \"%s\" for field %s: it doesn't conform to " + "%s", value, field, spec);
 		}
 	}
 
@@ -178,18 +175,14 @@ final class AnnotationUtils {
 				if (aClass.equals(valueClass)) { return; }
 			}
 		}
-		throw new InvalidValueException(
-				"Invalid value \"%s\" for field %s: it doesn't conform to " + "%s", value, field,
-				spec);
+		throw new InvalidValueException("Invalid value \"%s\" for field %s: it doesn't conform to " + "%s", value, field, spec);
 	}
 
 	private static void checkFieldSpec(Field field, Object value, SpecStringInRange spec) {
 		checkClass(field, value, String.class);
 		String s = (String)value;
 		if (s.compareTo(spec.min()) < 0 || s.compareTo(spec.max()) > 0) {
-			throw new InvalidValueException(
-					"Invalid value \"%s\" for field %s: it doesn't conform to %s", value, field,
-					spec);
+			throw new InvalidValueException("Invalid value \"%s\" for field %s: it doesn't conform to %s", value, field, spec);
 		}
 	}
 
@@ -198,13 +191,11 @@ final class AnnotationUtils {
 		EnumGetMethod m = spec.method();
         Class<?> fieldType = field.getType();
         if (!fieldType.isEnum()) {
-            throw new InvalidValueException("Field %s is annotated with @SpecEnum but isn't of type enum",
-                    field);
+            throw new InvalidValueException("Field %s is annotated with @SpecEnum but isn't of type enum", field);
         }
         Class<? extends Enum> t = (Class<? extends Enum>)fieldType;
 		if (!m.validate(value, t)) {
-			throw new InvalidValueException(
-				"Invalid value \"%s\" for field %s: it doesn't conform to %s", value, field, spec);
+			throw new InvalidValueException("Invalid value \"%s\" for field %s: it doesn't conform to %s", value, field, spec);
 		}
 	}
 
@@ -220,8 +211,7 @@ final class AnnotationUtils {
 				if (s.equals(acceptable)) { return; }
 			}
 		}
-		throw new InvalidValueException(
-				"Invalid value \"%s\" for field %s: it doesn't conform to %s", value, field, spec);
+		throw new InvalidValueException("Invalid value \"%s\" for field %s: it doesn't conform to %s", value, field, spec);
 	}
 
 	private static void checkFieldSpec(Field field, Object value, SpecDoubleInRange spec) {

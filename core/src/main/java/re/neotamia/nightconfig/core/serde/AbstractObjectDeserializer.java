@@ -19,9 +19,8 @@ class AbstractObjectDeserializer {
 
 	protected AbstractObjectDeserializer(ObjectDeserializerBuilder builder) {
 		this.generalProviders = builder.deserializerProviders;
-		this.defaultProvider = builder.defaultProvider;
+		this.defaultProvider = Objects.requireNonNull(builder.defaultProvider);
 		this.applyTransientModifier = builder.applyTransientModifier;
-		assert generalProviders != null && defaultProvider != null;
 	}
 
 	// NOTE: it would make no sense to provide a method deserialize(Object) ->
@@ -44,11 +43,9 @@ class AbstractObjectDeserializer {
 	 * @return the deserialized collection
 	 */
 	@SuppressWarnings("unchecked")
-	protected <C extends Collection<V>, V> C deserializeToCollection(Object configValue,
-			Class<C> collectionClass, Class<V> valueClass) {
+	protected <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass, Class<V> valueClass) {
 		DeserializerContext ctx = new DeserializerContext(this);
-		TypeConstraint t = new TypeConstraint(
-				new TypeConstraint.ManuallyParameterized(collectionClass, valueClass));
+		TypeConstraint t = new TypeConstraint(new TypeConstraint.ManuallyParameterized(collectionClass, valueClass));
 		return (C) ctx.deserializeValue(configValue, Optional.of(t));
 	}
 
@@ -64,11 +61,9 @@ class AbstractObjectDeserializer {
 	 * @return the deserialized map
 	 */
 	@SuppressWarnings("unchecked")
-	protected <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass,
-			Class<V> valueClass) {
+	protected <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass, Class<V> valueClass) {
 		DeserializerContext ctx = new DeserializerContext(this);
-		TypeConstraint t = new TypeConstraint(
-				new TypeConstraint.ManuallyParameterized(mapClass, String.class, valueClass));
+		TypeConstraint t = new TypeConstraint(new TypeConstraint.ManuallyParameterized(mapClass, String.class, valueClass));
 		return (M) ctx.deserializeValue(configValue, Optional.of(t));
 	}
 
@@ -117,8 +112,7 @@ class AbstractObjectDeserializer {
 			return (ValueDeserializer<T, R>) maybeDe;
 		}
 		String ofTypeStr = valueClass == null ? "" : " of type " + valueClass;
-		throw new SerdeException("No suitable deserializer found for value" + ofTypeStr + ": "
-				+ value + " and result constraint " + resultType);
+		throw new SerdeException("No suitable deserializer found for value" + ofTypeStr + ": "+ value + " and result constraint " + resultType);
 	}
 
 	protected Supplier<?> findDefaultValueSupplier(Object rawConfigValue, Field field, Object instance) {

@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.concurrent.ConcurrentConfig;
 
 import static re.neotamia.nightconfig.core.utils.StringUtils.split;
@@ -130,12 +131,12 @@ public interface Config extends UnmodifiableConfig {
 	default UnmodifiableConfig unmodifiable() {
 		return new UnmodifiableConfig() {
 			@Override
-			public <T> T getRaw(List<String> path) {
+			public <T> T getRaw(@NotNull List<String> path) {
 				return Config.this.getRaw(path);
 			}
 
 			@Override
-			public boolean contains(List<String> path) {
+			public boolean contains(@NotNull List<String> path) {
 				return Config.this.contains(path);
 			}
 

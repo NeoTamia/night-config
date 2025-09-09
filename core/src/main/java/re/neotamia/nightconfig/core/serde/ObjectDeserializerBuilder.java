@@ -128,8 +128,7 @@ public final class ObjectDeserializerBuilder {
 		withDeserializerProvider(((valueClass, resultType) -> {
 			Type fullType = resultType.getFullType();
 			return resultType.getSatisfyingRawType().map(resultClass -> {
-				if (Util.canAssign(resultClass, valueClass)
-						&& (valueClass == null || fullType instanceof Class)) {
+				if (Util.canAssign(resultClass, valueClass) && (valueClass == null || fullType instanceof Class)) {
 					return trivialDe; // value to value (same type or compatible type)
 
 					// Note that we rule out TypeConstraint where getFullType() is not a simple Class,
@@ -142,9 +141,8 @@ public final class ObjectDeserializerBuilder {
 						return arrDe; // collection<value> to array<T>
 					}
 				}
-				if ((UnmodifiableConfig.class.isAssignableFrom(valueClass)
-						|| Map.class.isAssignableFrom(valueClass))
-						&& Map.class.isAssignableFrom(resultClass)) {
+				if ((UnmodifiableConfig.class.isAssignableFrom(valueClass) || Map.class.isAssignableFrom(valueClass))
+                        && Map.class.isAssignableFrom(resultClass)) {
 					return mapDe; // config to map<K, V>
 				}
 				if (resultClass == UUID.class && valueClass == String.class) {

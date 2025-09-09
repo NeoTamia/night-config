@@ -101,8 +101,7 @@ final class StandardDeserializers {
 		@SuppressWarnings("unchecked")
 		private static Map<String, Object> createMapInstance(Class<?> cls, int sizeHint) {
 			if (cls == Map.class) {
-				return Config.isInsertionOrderPreserved() ? new java.util.LinkedHashMap<>(sizeHint)
-						: new java.util.HashMap<>(sizeHint);
+				return Config.isInsertionOrderPreserved() ? new java.util.LinkedHashMap<>(sizeHint) : new java.util.HashMap<>(sizeHint);
 			}
 			if (cls == java.util.LinkedHashMap.class) {
 				return new java.util.LinkedHashMap<>(sizeHint);
@@ -116,8 +115,7 @@ final class StandardDeserializers {
 			if (cls.isAssignableFrom(java.util.HashMap.class)) {
 				// We use isAssignableFrom to cover other superclasses or superinterfaces of HashMap,$
 				// such as NavigableMap.
-				if (Config.isInsertionOrderPreserved()
-						&& cls.isAssignableFrom(java.util.LinkedHashMap.class)) {
+				if (Config.isInsertionOrderPreserved() && cls.isAssignableFrom(java.util.LinkedHashMap.class)) {
 					return new java.util.LinkedHashMap<>(sizeHint);
 				} else {
 					return new java.util.HashMap<>(sizeHint);
@@ -195,9 +193,7 @@ final class StandardDeserializers {
 	static final class CollectionToArrayDeserializer implements ValueDeserializer<Collection<?>, Object> {
 
 		@Override
-		public Object deserialize(Collection<?> collectionValue,
-				Optional<TypeConstraint> resultType,
-				DeserializerContext ctx) {
+		public Object deserialize(Collection<?> collectionValue, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
 
 			int size = collectionValue.size();
 			Object res;
@@ -236,9 +232,7 @@ final class StandardDeserializers {
 			TypeConstraint enumType = resultType.orElseThrow(() -> new SerdeException(
 					"Cannot deserialize a value to an enum without knowing the enum type"));
 			Class<?> cls = enumType.getSatisfyingRawType()
-					.orElseThrow(() -> new SerdeException(
-							"Could not find a concrete enum type that can satisfy the constraint "
-									+ enumType));
+					.orElseThrow(() -> new SerdeException("Could not find a concrete enum type that can satisfy the constraint " + enumType));
 			// TODO use the field's annotations, if any, to get the right variant of EnumGetMethod
 			return EnumGetMethod.NAME.get(value, (Class) cls);
 		}

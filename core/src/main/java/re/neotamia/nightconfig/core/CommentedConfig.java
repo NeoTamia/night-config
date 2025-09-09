@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.concurrent.ConcurrentConfig;
 import re.neotamia.nightconfig.core.utils.FakeCommentedConfig;
 
@@ -114,7 +115,7 @@ public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
 	default UnmodifiableCommentedConfig unmodifiable() {
 		return new UnmodifiableCommentedConfig() {
 			@Override
-			public <T> T getRaw(List<String> path) {
+			public <T> T getRaw(@NotNull List<String> path) {
 				return CommentedConfig.this.getRaw(path);
 			}
 
@@ -124,7 +125,7 @@ public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
 			}
 
 			@Override
-			public boolean contains(List<String> path) {
+			public boolean contains(@NotNull List<String> path) {
 				return CommentedConfig.this.contains(path);
 			}
 

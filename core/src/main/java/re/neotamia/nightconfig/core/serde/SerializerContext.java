@@ -119,10 +119,7 @@ public final class SerializerContext {
 							((CommentedConfig) destination).setComment(path, comment);
 						}
 					} catch (Exception ex) {
-						throw new SerdeException(
-								"Error during serialization of field `" + field
-										+ "` with serializer " + serializer,
-								ex);
+						throw new SerdeException("Error during serialization of field `" + field + "` with serializer " + serializer, ex);
 					}
 				}
 			}
@@ -140,12 +137,12 @@ public final class SerializerContext {
 		if (commentAnnots.length == 0) {
 			return null;
 		}
-		String comment = commentAnnots[0].value();
+		StringBuilder comment = new StringBuilder(commentAnnots[0].value());
 		for (int i = 1; i < commentAnnots.length; i++) {
-			comment += "\n";
-			comment += commentAnnots[i].value();
+			comment.append("\n");
+			comment.append(commentAnnots[i].value());
 		}
-		return comment;
+		return comment.toString();
 	}
 
 	/**
@@ -173,12 +170,11 @@ public final class SerializerContext {
 	@SuppressWarnings("unchecked")
 	private boolean assertField(Field field, Object fieldContainer, Object fieldValue) {
 		SerdeAssert[] annot = field.getAnnotationsByType(SerdeAssert.class);
-		if (annot == null || annot.length == 0) {
+		if (annot.length == 0) {
 			return true;
 		}
 		try {
-			Predicate<?> assertPredicate = AnnotationProcessor.resolveAssertPredicate(annot, fieldContainer,
-					SerdePhase.SERIALIZING, field);
+			Predicate<?> assertPredicate = AnnotationProcessor.resolveAssertPredicate(annot, fieldContainer, SerdePhase.SERIALIZING, field);
 			if (assertPredicate == null) {
 				return true;
 			}

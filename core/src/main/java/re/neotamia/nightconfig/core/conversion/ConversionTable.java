@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.conversion;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.*;
 import re.neotamia.nightconfig.core.CommentedConfig;
 import re.neotamia.nightconfig.core.Config;
@@ -176,7 +177,7 @@ public final class ConversionTable implements Cloneable {
 		return new UnmodifiableConfigWrapper<UnmodifiableConfig>(config) {
 			@Override
 			@SuppressWarnings("unchecked")
-			public <T> T getRaw(List<String> path) {
+			public <T> T getRaw(@NotNull List<String> path) {
 				return (T)convert(config.getRaw(path));
 			}
 

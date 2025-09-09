@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.utils.TransformingSet;
 
 import java.util.*;
@@ -94,7 +95,7 @@ public abstract class AbstractConfig implements Config, Cloneable {
 	}
 
 	@Override
-	public <T> T getRaw(List<String> path) {
+	public <T> T getRaw(@NotNull List<String> path) {
 		final int lastIndex = path.size() - 1;
 		Map<String, Object> parentMap = getMap(path.subList(0, lastIndex));
 		if (parentMap == null) {
@@ -134,7 +135,7 @@ public abstract class AbstractConfig implements Config, Cloneable {
 	}
 
 	@Override
-	public boolean contains(List<String> path) {
+	public boolean contains(@NotNull List<String> path) {
 		final int lastIndex = path.size() - 1;
 		Map<String, Object> parentMap = getMap(path.subList(0, lastIndex));
 		if (parentMap == null) {
@@ -145,7 +146,7 @@ public abstract class AbstractConfig implements Config, Cloneable {
 	}
 
 	@Override
-	public boolean isNull(List<String> path) {
+	public boolean isNull(@NotNull List<String> path) {
 		final int lastIndex = path.size() - 1;
 		Map<String, Object> parentMap = getMap(path.subList(0, lastIndex));
 		if (parentMap == null) {

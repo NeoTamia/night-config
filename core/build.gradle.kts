@@ -6,6 +6,8 @@ plugins {
 // Use the build script defined in buildSrc
 
 dependencies {
+    compileOnly(libs.jetbrainsAnnotations)
+
     testImplementation(project(":test-shared"))
 }
 

@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.AbstractCommentedConfig;
 import re.neotamia.nightconfig.core.AbstractConfig;
 import re.neotamia.nightconfig.core.CommentedConfig;
@@ -290,7 +291,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
     }
 
     @Override
-    public boolean contains(List<String> path) {
+    public boolean contains(@NotNull List<String> path) {
         synchronized (rootMonitor) {
             return dataHolder.contains(path);
         }
@@ -304,7 +305,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
     }
 
     @Override
-    public <T> T getRaw(List<String> path) {
+    public <T> T getRaw(@NotNull List<String> path) {
         synchronized (rootMonitor) {
             return dataHolder.getRaw(path);
         }
@@ -404,21 +405,21 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
     }
 
     @Override
-    public <T> T apply(List<String> path) {
+    public <T> T apply(@NotNull List<String> path) {
         synchronized (rootMonitor) {
             return dataHolder.apply(path);
         }
     }
 
     @Override
-    public <T> T get(List<String> path) {
+    public <T> T get(@NotNull List<String> path) {
         synchronized (rootMonitor) {
             return dataHolder.get(path);
         }
     }
 
     @Override
-    public boolean isNull(List<String> path) {
+    public boolean isNull(@NotNull List<String> path) {
         synchronized (rootMonitor) {
             return dataHolder.isNull(path);
         }

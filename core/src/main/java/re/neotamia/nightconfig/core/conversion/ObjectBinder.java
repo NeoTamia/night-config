@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.conversion;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.EnumGetMethod;
@@ -233,7 +234,7 @@ public final class ObjectBinder {
 		}
 
 		@Override
-		public <T> T getRaw(List<String> path) {
+		public <T> T getRaw(@NotNull List<String> path) {
 			final BoundSearchResult searchResult = searchInfosOrConfig(path);
 			if (searchResult == null) {
 				return null;
@@ -245,7 +246,7 @@ public final class ObjectBinder {
 		}
 
 		@Override
-		public boolean contains(List<String> path) {
+		public boolean contains(@NotNull List<String> path) {
 			return searchInfosOrConfig(path) != null;
 		}
 

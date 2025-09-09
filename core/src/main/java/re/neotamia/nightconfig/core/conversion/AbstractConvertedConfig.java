@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.conversion;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.utils.ConfigWrapper;
@@ -41,7 +42,7 @@ abstract class AbstractConvertedConfig<C extends Config> extends ConfigWrapper<C
 	}
 
 	@Override
-	public <T> T getRaw(List<String> path) {
+	public <T> T getRaw(@NotNull List<String> path) {
 		return (T)readConversion.apply(config.getRaw(path));
 	}
 

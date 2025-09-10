@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.conversion;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.CommentedConfig;
 import re.neotamia.nightconfig.core.UnmodifiableCommentedConfig;
 import re.neotamia.nightconfig.core.utils.TransformingSet;
@@ -15,13 +17,27 @@ import java.util.function.Predicate;
  */
 abstract class AbstractConvertedCommentedConfig<C extends CommentedConfig>
 		extends AbstractConvertedConfig<C> implements CommentedConfig {
-	public AbstractConvertedCommentedConfig(C config, Function<Object, Object> readConversion,
-											Function<Object, Object> writeConversion,
+	public AbstractConvertedCommentedConfig(C config, Function<Object, Object> readConversion, Function<Object, Object> writeConversion,
 											Predicate<Class<?>> supportPredicate) {
 		super(config, readConversion, writeConversion, supportPredicate);
 	}
 
-	@Override
+    @Override
+    public @Nullable String getHeaderComment() {
+        return config.getHeaderComment();
+    }
+
+    @Override
+    public @Nullable String setHeaderComment(@NotNull String comment) {
+        return config.setHeaderComment(comment);
+    }
+
+    @Override
+    public @Nullable String removeHeaderComment() {
+        return config.removeHeaderComment();
+    }
+
+    @Override
 	public String getComment(List<String> path) {
 		return config.getComment(path);
 	}

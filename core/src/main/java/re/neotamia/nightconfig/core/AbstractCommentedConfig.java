@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.utils.TransformingSet;
 
 import java.util.*;
@@ -14,6 +16,7 @@ import java.util.function.Supplier;
  */
 public abstract class AbstractCommentedConfig extends AbstractConfig implements CommentedConfig {
 	protected final Map<String, String> commentMap;
+    protected @Nullable String headerComment = null;
 
 	@Deprecated
 	public AbstractCommentedConfig(boolean concurrent) {
@@ -92,7 +95,26 @@ public abstract class AbstractCommentedConfig extends AbstractConfig implements 
 		return AbstractConfig.<String>getDefaultMapCreator(concurrent).get();
 	}
 
-	@Override
+    @Override
+    public @Nullable String getHeaderComment() {
+        return headerComment;
+    }
+
+    @Override
+    public @Nullable String setHeaderComment(@NotNull String comment) {
+        var old = headerComment;
+        headerComment = comment;
+        return old;
+    }
+
+    @Override
+    public @Nullable String removeHeaderComment() {
+        var old = headerComment;
+        headerComment = null;
+        return old;
+    }
+
+    @Override
 	public String getComment(List<String> path) {
 		final int lastIndex = path.size() - 1;
 		final String lastKey = path.get(lastIndex);

@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.UnmodifiableCommentedConfig;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 
@@ -13,9 +14,7 @@ import java.util.Set;
  *
  * @author TheElectronWill
  */
-public final class FakeUnmodifiableCommentedConfig
-		extends UnmodifiableConfigWrapper<UnmodifiableConfig>
-		implements UnmodifiableCommentedConfig {
+public final class FakeUnmodifiableCommentedConfig extends UnmodifiableConfigWrapper<UnmodifiableConfig> implements UnmodifiableCommentedConfig {
 
 	/**
 	 * Creates a FakeUnmodifiableCommentedConfig that gets all its values from the given config.
@@ -28,7 +27,12 @@ public final class FakeUnmodifiableCommentedConfig
 		super(config);
 	}
 
-	@Override
+    @Override
+    public @Nullable String getHeaderComment() {
+        return null;
+    }
+
+    @Override
 	public String getComment(List<String> path) {
 		return null;
 	}

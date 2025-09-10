@@ -45,4 +45,20 @@ class AbstractCommentedConfigTest {
 		}
 	}
 
+    @Test
+    public void testHeaderComment() {
+        CommentedConfig config = CommentedConfig.inMemory();
+        assertNull(config.getHeaderComment());
+        assertNull(config.removeHeaderComment());
+
+        config.setHeaderComment("header");
+        assertEquals("header", config.getHeaderComment());
+
+        config.setHeaderComment("newHeader");
+        assertEquals("newHeader", config.getHeaderComment());
+
+        assertEquals("newHeader", config.removeHeaderComment());
+        assertNull(config.getHeaderComment());
+    }
+
 }

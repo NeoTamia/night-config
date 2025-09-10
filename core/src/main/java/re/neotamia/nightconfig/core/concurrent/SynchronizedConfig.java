@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.AbstractCommentedConfig;
 import re.neotamia.nightconfig.core.AbstractConfig;
 import re.neotamia.nightconfig.core.CommentedConfig;
@@ -223,6 +224,20 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
     }
 
     @Override
+    public @Nullable String removeHeaderComment() {
+        synchronized (rootMonitor) {
+            return dataHolder.removeHeaderComment();
+        }
+    }
+
+    @Override
+    public @Nullable String setHeaderComment(@NotNull String comment) {
+        synchronized (rootMonitor) {
+            return dataHolder.setHeaderComment(comment);
+        }
+    }
+
+    @Override
     public String setComment(List<String> path, String comment) {
         synchronized (rootMonitor) {
             return dataHolder.setComment(path, comment);
@@ -233,6 +248,13 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
     public boolean containsComment(List<String> path) {
         synchronized (rootMonitor) {
             return dataHolder.containsComment(path);
+        }
+    }
+
+    @Override
+    public @Nullable String getHeaderComment() {
+        synchronized (rootMonitor) {
+            return dataHolder.getHeaderComment();
         }
     }
 

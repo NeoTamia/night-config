@@ -20,9 +20,7 @@ public final class ConvertedCommentedConfig extends AbstractConvertedCommentedCo
 	 * @param supportPredicate a Predicate that checks if a given class is supported by the
 	 *                         ConvertedConfig
 	 */
-	public ConvertedCommentedConfig(CommentedConfig config, ConversionTable readTable,
-									ConversionTable writeTable,
-									Predicate<Class<?>> supportPredicate) {
+	public ConvertedCommentedConfig(CommentedConfig config, ConversionTable readTable, ConversionTable writeTable, Predicate<Class<?>> supportPredicate) {
 		this(config, readTable::convert, writeTable::convert, supportPredicate);
 	}
 
@@ -35,8 +33,7 @@ public final class ConvertedCommentedConfig extends AbstractConvertedCommentedCo
 	 * @param supportPredicate a Predicate that checks if a given class is supported by the
 	 *                         ConvertedConfig
 	 */
-	public ConvertedCommentedConfig(CommentedConfig config, Function<Object, Object> readConversion,
-									Function<Object, Object> writeConversion,
+	public ConvertedCommentedConfig(CommentedConfig config, Function<Object, Object> readConversion, Function<Object, Object> writeConversion,
 									Predicate<Class<?>> supportPredicate) {
 		super(config, readConversion, writeConversion, supportPredicate);
 	}

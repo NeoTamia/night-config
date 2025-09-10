@@ -1,154 +1,195 @@
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
 import re.neotamia.nightconfig.core.CommentedConfig;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.file.CommentedFileConfig;
 import re.neotamia.nightconfig.core.file.FileConfig;
-
-import static org.junit.jupiter.api.Assertions.*;
+import re.neotamia.nightconfig.core.file.FormatDetector;
+import re.neotamia.nightconfig.json.JsonFormat;
+import re.neotamia.nightconfig.toml.TomlFormat;
+import re.neotamia.nightconfig.yaml.YamlFormat;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class FileConfigTests {
-	@Test
-	public void asyncJson() throws URISyntaxException {
-		Path jsonResource = Path.of(getClass().getResource("/simple_config.json").toURI());
-		FileConfig fileConfig = FileConfig.builder(jsonResource).async().build();
-		fileConfig.load();
-		fileConfig.close();
 
-		assertEquals(2024, fileConfig.getInt(List.of("year")));
-		assertInstanceOf(List.class, fileConfig.get(List.of("dependencies", "testproject")));
-		assertEquals("dep-a", (fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).get("a"));
-		assertNull((fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).get("null"));
-		assertTrue((fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).contains("null"));
-	}
+    @BeforeAll
+    public static void registerFormats() {
+        FormatDetector.registerExtension("json", JsonFormat.fancyInstance());
+        FormatDetector.registerExtension("toml", TomlFormat.instance());
+        FormatDetector.registerExtension("yaml", YamlFormat.defaultInstance());
+        FormatDetector.registerExtension("yml", YamlFormat.defaultInstance());
+    }
 
-	@Test
-	public void asyncToml() throws URISyntaxException {
-		Path tomlResource = Path.of(getClass().getResource("/simple_config.toml").toURI());
-		FileConfig fileConfig = FileConfig.builder(tomlResource).async().build();
-		fileConfig.load();
-		fileConfig.close();
+    @Test
+    public void asyncJson() throws URISyntaxException {
+        Path jsonResource = Path.of(getClass().getResource("/simple_config.json").toURI());
+        FileConfig fileConfig = FileConfig.builder(jsonResource).async().build();
+        fileConfig.load();
+        fileConfig.close();
 
-		assertEquals(2024, fileConfig.getInt(List.of("year")));
-		assertInstanceOf(List.class, fileConfig.get(List.of("dependencies", "testproject")));
-		assertEquals("dep-a", (fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).get("a"));
-	}
+        assertEquals(2024, fileConfig.getInt(List.of("year")));
+        assertInstanceOf(List.class, fileConfig.get(List.of("dependencies", "testproject")));
+        assertEquals("dep-a", (fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).get("a"));
+        assertNull((fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).get("null"));
+        assertTrue((fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).contains("null"));
+    }
 
-	@Test
-	public void asyncForgeTest() throws URISyntaxException {
-		Path forgeTestResource = Path.of(getClass().getResource("/forge_test.toml").toURI());
-		FileConfig fileConfig = FileConfig.builder(forgeTestResource).async().build();
-		fileConfig.load(); // initial load
-		System.out.println("loaded: " + fileConfig);
+    @Test
+    public void asyncToml() throws URISyntaxException {
+        Path tomlResource = Path.of(getClass().getResource("/simple_config.toml").toURI());
+        FileConfig fileConfig = FileConfig.builder(tomlResource).async().build();
+        fileConfig.load();
+        fileConfig.close();
 
-		checkForgeTestContent(fileConfig);
-		fileConfig.load(); // reload (should have the same content)
-		checkForgeTestContent(fileConfig);
-		fileConfig.close(); // close (should not modify the config)
-		checkForgeTestContent(fileConfig);
-	}
+        assertEquals(2024, fileConfig.getInt(List.of("year")));
+        assertInstanceOf(List.class, fileConfig.get(List.of("dependencies", "testproject")));
+        assertEquals("dep-a", (fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).get("a"));
+    }
 
-	@Test
-	public void syncForgeTest() throws URISyntaxException {
-		Path forgeTestResource = Path.of(getClass().getResource("/forge_test.toml").toURI());
-		FileConfig fileConfig = FileConfig.builder(forgeTestResource).sync().build();
-		fileConfig.load(); // initial load
-		System.out.println("loaded: " + fileConfig);
+    @Test
+    public void asyncForgeTest() throws URISyntaxException {
+        Path forgeTestResource = Path.of(getClass().getResource("/forge_test.toml").toURI());
+        FileConfig fileConfig = FileConfig.builder(forgeTestResource).async().build();
+        fileConfig.load(); // initial load
+        System.out.println("loaded: " + fileConfig);
 
-		checkForgeTestContent(fileConfig);
-		fileConfig.load(); // reload (should have the same content)
-		checkForgeTestContent(fileConfig);
-		fileConfig.close(); // close (should not modify the config)
-		checkForgeTestContent(fileConfig);
-	}
+        checkForgeTestContent(fileConfig);
+        fileConfig.load(); // reload (should have the same content)
+        checkForgeTestContent(fileConfig);
+        fileConfig.close(); // close (should not modify the config)
+        checkForgeTestContent(fileConfig);
+    }
 
-	@Test
-	public void asyncMiniTest() throws Exception {
-		Path forgeTestResource = Path.of(getClass().getResource("/mini_test.toml").toURI());
-		FileConfig fileConfig = FileConfig.builder(forgeTestResource).async().build();
-		fileConfig.load();
-		assertEquals(1, fileConfig.getInt("v"));
+    @Test
+    public void syncForgeTest() throws URISyntaxException {
+        Path forgeTestResource = Path.of(getClass().getResource("/forge_test.toml").toURI());
+        FileConfig fileConfig = FileConfig.builder(forgeTestResource).sync().build();
+        fileConfig.load(); // initial load
+        System.out.println("loaded: " + fileConfig);
 
-		List<Config> arrayOfTables = fileConfig.get(List.of("a.b", "b.c"));
-		assertEquals("value", arrayOfTables.get(0).get("key"));
-	}
+        checkForgeTestContent(fileConfig);
+        fileConfig.load(); // reload (should have the same content)
+        checkForgeTestContent(fileConfig);
+        fileConfig.close(); // close (should not modify the config)
+        checkForgeTestContent(fileConfig);
+    }
 
-	@Test
-	public void syncMiniTest() throws Exception {
-		Path forgeTestResource = Path.of(getClass().getResource("/mini_test.toml").toURI());
-		FileConfig fileConfig = FileConfig.builder(forgeTestResource).sync().build();
-		fileConfig.load();
-		assertEquals(1, fileConfig.getInt("v"));
+    @Test
+    public void asyncMiniTest() throws Exception {
+        Path forgeTestResource = Path.of(getClass().getResource("/mini_test.toml").toURI());
+        FileConfig fileConfig = FileConfig.builder(forgeTestResource).async().build();
+        fileConfig.load();
+        assertEquals(1, fileConfig.getInt("v"));
 
-		List<Config> arrayOfTables = fileConfig.get(List.of("a.b", "b.c"));
-		assertEquals("value", arrayOfTables.get(0).get("key"));
-	}
+        List<Config> arrayOfTables = fileConfig.get(List.of("a.b", "b.c"));
+        assertEquals("value", arrayOfTables.get(0).get("key"));
+    }
 
-	void checkForgeTestContent(FileConfig fileConfig) {
-		assertEquals("javafml", fileConfig.get("modLoader"));
-		assertEquals("[3,)", fileConfig.get("loaderVersion"));
-		assertEquals("CC0", fileConfig.get("license"));
+    @Test
+    public void syncMiniTest() throws Exception {
+        Path forgeTestResource = Path.of(getClass().getResource("/mini_test.toml").toURI());
+        FileConfig fileConfig = FileConfig.builder(forgeTestResource).sync().build();
+        fileConfig.load();
+        assertEquals(1, fileConfig.getInt("v"));
 
-		List<Config> mods = fileConfig.get("mods");
-		Config mod0 = mods.get(0);
-		assertEquals("testproject", mod0.get("modId"));
-		assertEquals("A test project.", mod0.get("description"));
+        List<Config> arrayOfTables = fileConfig.get(List.of("a.b", "b.c"));
+        assertEquals("value", arrayOfTables.get(0).get("key"));
+    }
 
-		List<Config> dependencies = fileConfig.get("dependencies.testproject");
-		Config dep0 = dependencies.get(0);
-		assertEquals("neoforge", dep0.get("modId"));
-		assertEquals("required", dep0.get("type"));
-		assertEquals("NONE", dep0.get("ordering"));
-		assertEquals("BOTH", dep0.get("side"));
-	}
+    void checkForgeTestContent(FileConfig fileConfig) {
+        assertEquals("javafml", fileConfig.get("modLoader"));
+        assertEquals("[3,)", fileConfig.get("loaderVersion"));
+        assertEquals("CC0", fileConfig.get("license"));
 
-	@Test
-	public void asyncTomlCommentsTest() throws Exception {
-		Path forgeTestResource = Path.of(getClass().getResource("/comments_test.toml").toURI());
-		CommentedFileConfig fileConfig = CommentedFileConfig.builder(forgeTestResource).async().build();
-		fileConfig.load(); // initial load
-		System.out.println("loaded: " + fileConfig);
+        List<Config> mods = fileConfig.get("mods");
+        Config mod0 = mods.get(0);
+        assertEquals("testproject", mod0.get("modId"));
+        assertEquals("A test project.", mod0.get("description"));
 
-		checkCommentsTestContent(fileConfig);
-		fileConfig.load(); // reload (should have the same content)
-		checkCommentsTestContent(fileConfig);
-		fileConfig.close(); // close (should not modify the config)
-		checkCommentsTestContent(fileConfig);
-	}
+        List<Config> dependencies = fileConfig.get("dependencies.testproject");
+        Config dep0 = dependencies.get(0);
+        assertEquals("neoforge", dep0.get("modId"));
+        assertEquals("required", dep0.get("type"));
+        assertEquals("NONE", dep0.get("ordering"));
+        assertEquals("BOTH", dep0.get("side"));
+    }
 
-	@Test
-	public void syncTomlCommentsTest() throws Exception {
-		Path forgeTestResource = Path.of(getClass().getResource("/comments_test.toml").toURI());
-		CommentedFileConfig fileConfig = CommentedFileConfig.builder(forgeTestResource).sync().build();
-		fileConfig.load(); // initial load
-		System.out.println("loaded: " + fileConfig);
+    @Test
+    public void asyncTomlCommentsTest() throws Exception {
+        Path forgeTestResource = Path.of(getClass().getResource("/comments_test.toml").toURI());
+        CommentedFileConfig fileConfig = CommentedFileConfig.builder(forgeTestResource).async().build();
+        fileConfig.load(); // initial load
+        System.out.println("loaded: " + fileConfig);
 
-		checkCommentsTestContent(fileConfig);
-		fileConfig.load(); // reload (should have the same content)
-		checkCommentsTestContent(fileConfig);
-		fileConfig.close(); // close (should not modify the config)
-		checkCommentsTestContent(fileConfig);
-	}
+        checkCommentsTestContent(fileConfig);
+        fileConfig.load(); // reload (should have the same content)
+        checkCommentsTestContent(fileConfig);
+        fileConfig.close(); // close (should not modify the config)
+        checkCommentsTestContent(fileConfig);
+    }
 
-	void checkCommentsTestContent(CommentedFileConfig config) {
-		assertEquals(1, config.getInt("v"));
-		assertEquals(" comment on v", config.getComment("v"));
+    @Test
+    public void syncTomlCommentsTest() throws Exception {
+        Path forgeTestResource = Path.of(getClass().getResource("/comments_test.toml").toURI());
+        CommentedFileConfig fileConfig = CommentedFileConfig.builder(forgeTestResource).sync().build();
+        fileConfig.load(); // initial load
+        System.out.println("loaded: " + fileConfig);
 
-		List<CommentedConfig> abbc = config.get(List.of("a.b", "b.c"));
-		assertNotNull(abbc);
-		assertEquals("value", abbc.get(0).get("key"));
-		assertEquals(" sub1", abbc.get(0).getComment("key"));
+        checkCommentsTestContent(fileConfig);
+        fileConfig.load(); // reload (should have the same content)
+        checkCommentsTestContent(fileConfig);
+        fileConfig.close(); // close (should not modify the config)
+        checkCommentsTestContent(fileConfig);
+    }
 
-		assertEquals(" comment on table", config.getComment("table"));
-		assertEquals("v", config.get(List.of("table", "k")));
-		assertEquals(" sub2", config.getComment(List.of("table", "k")));
+    void checkCommentsTestContent(CommentedFileConfig config) {
+        assertEquals(1, config.getInt("v"));
+        assertEquals(" comment on v", config.getComment("v"));
 
-		assertEquals(" comment on subtable", config.getComment(List.of("table", "subtable")));
-		assertEquals("b", config.get(List.of("table", "subtable", "a")));
-		assertEquals(" sub3", config.getComment(List.of("table", "subtable", "a")));
-	}
+        List<CommentedConfig> abbc = config.get(List.of("a.b", "b.c"));
+        assertNotNull(abbc);
+        assertEquals("value", abbc.get(0).get("key"));
+        assertEquals(" sub1", abbc.get(0).getComment("key"));
+
+        assertEquals(" comment on table", config.getComment("table"));
+        assertEquals("v", config.get(List.of("table", "k")));
+        assertEquals(" sub2", config.getComment(List.of("table", "k")));
+
+        assertEquals(" comment on subtable", config.getComment(List.of("table", "subtable")));
+        assertEquals("b", config.get(List.of("table", "subtable", "a")));
+        assertEquals(" sub3", config.getComment(List.of("table", "subtable", "a")));
+    }
+
+    @Test
+    public void testHeaderCommentWithYaml() throws Exception {
+        CommentedFileConfig fileConfig = CommentedFileConfig.builder(Path.of(getClass().getResource("header.yaml").toURI())).async().build();
+        fileConfig.setHeaderComment("This is a header comment");
+        assertEquals("This is a header comment", fileConfig.getHeaderComment());
+
+        fileConfig.save();
+        var loadedConfig = CommentedFileConfig.builder(Path.of(getClass().getResource("header.yaml").toURI())).async().build();
+        loadedConfig.load();
+        assertEquals("This is a header comment", loadedConfig.getHeaderComment());
+        fileConfig.close();
+        loadedConfig.close();
+    }
+
+    @Test
+    public void testHeaderCommentWithToml() throws Exception {
+        CommentedFileConfig fileConfig = CommentedFileConfig.builder(Path.of(getClass().getResource("header.toml").toURI())).async().build();
+        fileConfig.setHeaderComment("This is a header comment");
+        assertEquals("This is a header comment", fileConfig.getHeaderComment());
+
+        fileConfig.save();
+        var loadedConfig = CommentedFileConfig.builder(Path.of(getClass().getResource("header.toml").toURI())).async().build();
+        loadedConfig.load();
+        assertEquals("This is a header comment", loadedConfig.getHeaderComment());
+        fileConfig.close();
+        loadedConfig.close();
+    }
 }

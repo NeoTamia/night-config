@@ -1,13 +1,11 @@
 package re.neotamia.nightconfig.core;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.concurrent.ConcurrentConfig;
 import re.neotamia.nightconfig.core.utils.FakeCommentedConfig;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static re.neotamia.nightconfig.core.utils.StringUtils.split;
@@ -18,6 +16,22 @@ import static re.neotamia.nightconfig.core.utils.StringUtils.split;
  * @author TheElectronWill
  */
 public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
+    /**
+     * Sets the header comment.
+     *
+     * @param comment The new header comment to be set.
+     *
+     * @return The previously set header comment, if any or {@code null}.
+     */
+    @Nullable String setHeaderComment(@NotNull String comment);
+
+    /**
+     * Removes the header comment.
+     *
+     * @return The previously set header comment, if any or {@code null}.
+     */
+    @Nullable String removeHeaderComment();
+
 	/**
 	 * Sets a config comment.
 	 *
@@ -119,7 +133,17 @@ public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
 				return CommentedConfig.this.getRaw(path);
 			}
 
-			@Override
+            @Override
+            public String getHeaderComment() {
+                return CommentedConfig.this.getHeaderComment();
+            }
+
+            @Override
+            public Optional<String> getOptionalHeaderComment() {
+                return CommentedConfig.this.getOptionalHeaderComment();
+            }
+
+            @Override
 			public String getComment(List<String> path) {
 				return CommentedConfig.this.getComment(path);
 			}
@@ -230,8 +254,7 @@ public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
 	 * @param format     the config's format
 	 * @return a new empty config
 	 */
-	static CommentedConfig of(Supplier<Map<String, Object>> mapCreator,
-			ConfigFormat<? extends CommentedConfig> format) {
+	static CommentedConfig of(Supplier<Map<String, Object>> mapCreator,ConfigFormat<? extends CommentedConfig> format) {
 		return new SimpleCommentedConfig(mapCreator, format);
 	}
 
@@ -386,9 +409,7 @@ public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
 	 * @param format     the config's format
 	 * @return a copy of the config
 	 */
-	static CommentedConfig copy(UnmodifiableCommentedConfig config,
-			Supplier<Map<String, Object>> mapCreator,
-			ConfigFormat<? extends CommentedConfig> format) {
+	static CommentedConfig copy(UnmodifiableCommentedConfig config, Supplier<Map<String, Object>> mapCreator, ConfigFormat<? extends CommentedConfig> format) {
 		return new SimpleCommentedConfig(config, mapCreator, format);
 	}
 
@@ -448,8 +469,7 @@ public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
 	 *             instead.
 	 */
 	@Deprecated
-	static CommentedConfig concurrentCopy(UnmodifiableCommentedConfig config,
-			ConfigFormat<?> format) {
+	static CommentedConfig concurrentCopy(UnmodifiableCommentedConfig config, ConfigFormat<?> format) {
 		return new SimpleCommentedConfig(config, format, true);
 	}
 
@@ -463,9 +483,8 @@ public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
 	 * @return a CommentedConfig instance backed by the specified config
 	 */
 	static CommentedConfig fake(Config config) {
-		if (config instanceof CommentedConfig) {
-			return (CommentedConfig) config;
-		}
+		if (config instanceof CommentedConfig commentedConfig)
+			return commentedConfig;
 		return new FakeCommentedConfig(config);
 	}
 }

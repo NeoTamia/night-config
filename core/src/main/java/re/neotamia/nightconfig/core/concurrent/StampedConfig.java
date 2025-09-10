@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.AbstractCommentedConfig;
 import re.neotamia.nightconfig.core.AbstractConfig;
 import re.neotamia.nightconfig.core.CommentedConfig;
@@ -34,12 +35,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
     private final Supplier<Map<String, Object>> mapSupplier;
     private Map<String, Object> values;
     private Map<String, String> comments;
+    private String headerComment = null;
 
     private final StampedLock lock = new StampedLock();
 
     /** current state for reasonable deadlock prevention */
-    private final ThreadLocal<ThreadConfigState> state = ThreadLocal
-            .withInitial(() -> ThreadConfigState.NORMAL);
+    private final ThreadLocal<ThreadConfigState> state = ThreadLocal.withInitial(() -> ThreadConfigState.NORMAL);
 
     // BEWARE: StampedLock does not support reentrant locking
 
@@ -56,8 +57,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         this.comments = (Map) mapSupplier.get();
     }
 
-    StampedConfig(ConfigFormat<?> configFormat, Supplier<Map<String, Object>> mapSupplier,
-            Map<String, Object> values, Map<String, String> comments) {
+    StampedConfig(ConfigFormat<?> configFormat, Supplier<Map<String, Object>> mapSupplier, Map<String, Object> values, Map<String, String> comments) {
         this.configFormat = configFormat;
         this.mapSupplier = mapSupplier;
         this.values = values;
@@ -122,14 +122,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
      * @return a deep copy
      */
     public Accumulator newAccumulatorCopy() {
-        Accumulator acc = (Accumulator) copyValueInAccumulator(this);
-        return acc;
+        return (Accumulator) copyValueInAccumulator(this);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Object copyValueInAccumulator(Object v) {
-        if (v instanceof StampedConfig) {
-            StampedConfig stamped = (StampedConfig) v;
+        if (v instanceof StampedConfig stamped) {
             stamped.checkStateForNormalOp();
 
             // lock the config and copy the values and comments
@@ -149,7 +147,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         } else if (v instanceof List) {
             List<Object> l = (List<Object>) v;
             List<Object> copy = new ArrayList<>(l);
-            copy.replaceAll(elem -> copyValueInAccumulator(elem));
+            copy.replaceAll(this::copyValueInAccumulator);
             return copy;
         } else {
             return v;
@@ -183,8 +181,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         private final StampedConfig mirror;
         private boolean valid = true;
 
-        Accumulator(Map<String, Object> values, Map<String, String> comments,
-                Supplier<Map<String, Object>> mapSupplier, ConfigFormat<?> configFormat) {
+        Accumulator(Map<String, Object> values, Map<String, String> comments, Supplier<Map<String, Object>> mapSupplier, ConfigFormat<?> configFormat) {
             super(values, comments);
             this.mirror = new StampedConfig(configFormat, mapSupplier, values, comments);
         }
@@ -200,8 +197,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 
         private void checkValid() {
             if (!valid) {
-                throw new IllegalStateException(
-                        "This StampedConfig.Accumulator is no longer valid after a call to replaceContentBy().");
+                throw new IllegalStateException("This StampedConfig.Accumulator is no longer valid after a call to replaceContentBy().");
             }
         }
 
@@ -228,8 +224,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
 
         private Object replaceValue(Object v) {
-            if (v instanceof Accumulator) {
-                Accumulator acc = (Accumulator) v;
+            if (v instanceof Accumulator acc) {
                 acc.prepareReplacement();
                 return acc.mirror;
             } else if (v instanceof UnmodifiableConfig) {
@@ -355,8 +350,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
     }
 
     /** Finds an existing subconfig with the given path (for example "a.subconfig"). */
-    private StampedConfig getExistingConfig(List<String> configPath,
-            boolean failIfIncompatibleLevel) {
+    private StampedConfig getExistingConfig(List<String> configPath, boolean failIfIncompatibleLevel) {
         // optimization: no recursion here
         StampedConfig current = this;
         for (String key : configPath) {
@@ -714,6 +708,22 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
     }
 
     @Override
+    public @Nullable String removeHeaderComment() {
+        long stamp = lock.tryWriteLock();
+        if (stamp == 0) {
+            checkStateForNormalOp();
+            stamp = lock.writeLock();
+        }
+        try {
+            String prev = headerComment;
+            headerComment = null;
+            return prev;
+        } finally {
+            lock.unlockWrite(stamp);
+        }
+    }
+
+    @Override
     public String removeComment(List<String> path) {
         switch (path.size()) {
             case 0:
@@ -729,6 +739,22 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 }
                 return mapLockRemove(parent.comments, parent.lock, path.get(lastIndex));
             }
+        }
+    }
+
+    @Override
+    public @Nullable String setHeaderComment(@NotNull String comment) {
+        long stamp = lock.tryWriteLock();
+        if (stamp == 0) {
+            checkStateForNormalOp();
+            stamp = lock.writeLock();
+        }
+        try {
+            String old = headerComment;
+            headerComment = comment;
+            return old;
+        } finally {
+            lock.unlockWrite(stamp);
         }
     }
 
@@ -764,6 +790,22 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                                 path.get(lastIndex));
             }
         }
+    }
+
+    @Override
+    public @Nullable String getHeaderComment() {
+        long stamp = lock.tryOptimisticRead();
+        String comment = headerComment;
+        if (!lock.validate(stamp)) {
+            checkStateForNormalOp();
+            stamp = lock.readLock();
+            try {
+                comment = headerComment;
+            } finally {
+                lock.unlockRead(stamp);
+            }
+        }
+        return comment;
     }
 
     @Override
@@ -1434,6 +1476,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
+        public @Nullable String getHeaderComment() {
+            checkValid();
+            return StampedConfig.this.headerComment;
+        }
+
+        @Override
         public String getComment(List<String> path) {
             checkValid();
             switch (path.size()) {
@@ -1705,6 +1753,14 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
+        public @Nullable String removeHeaderComment() {
+            checkValid();
+            var old = StampedConfig.this.headerComment;
+            StampedConfig.this.headerComment = null;
+            return old;
+        }
+
+        @Override
         public String removeComment(List<String> path) {
             checkValid();
             switch (path.size()) {
@@ -1760,6 +1816,14 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                     }
                 }
             }
+        }
+
+        @Override
+        public @Nullable String setHeaderComment(@NotNull String comment) {
+            checkValid();
+            var old = StampedConfig.this.headerComment;
+            StampedConfig.this.headerComment = comment;
+            return old;
         }
 
         @Override

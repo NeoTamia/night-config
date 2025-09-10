@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core;
 
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.concurrent.ConcurrentConfig;
 import re.neotamia.nightconfig.core.utils.FakeUnmodifiableCommentedConfig;
 
@@ -13,6 +14,17 @@ import static re.neotamia.nightconfig.core.utils.StringUtils.split;
  * @author TheElectronWill
  */
 public interface UnmodifiableCommentedConfig extends UnmodifiableConfig {
+    @Nullable String getHeaderComment();
+
+    /**
+     * Gets the header comment
+     *
+     * @return the header comment, or {@link Optional#empty()} if there is no such comment.
+     */
+    default Optional<String> getOptionalHeaderComment() {
+        return Optional.ofNullable(getHeaderComment());
+    }
+
 	/**
 	 * Gets a comment from the config.
 	 *

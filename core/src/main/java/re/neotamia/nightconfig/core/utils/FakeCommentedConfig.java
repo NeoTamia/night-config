@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.CommentedConfig;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.UnmodifiableCommentedConfig;
@@ -31,7 +33,22 @@ public final class FakeCommentedConfig extends ConfigWrapper<Config> implements 
 		return config;
 	}
 
-	@Override
+    @Override
+    public @Nullable String getHeaderComment() {
+        return null;
+    }
+
+    @Override
+    public @Nullable String setHeaderComment(@NotNull String comment) {
+        return null;
+    }
+
+    @Override
+    public @Nullable String removeHeaderComment() {
+        return null;
+    }
+
+    @Override
 	public String getComment(List<String> path) {
 		return null;
 	}

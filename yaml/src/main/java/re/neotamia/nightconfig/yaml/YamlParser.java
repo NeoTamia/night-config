@@ -13,7 +13,7 @@ import org.snakeyaml.engine.v2.api.lowlevel.Compose;
 import org.snakeyaml.engine.v2.comments.CommentLine;
 import org.snakeyaml.engine.v2.nodes.*;
 
-import java.io.Reader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -73,8 +73,10 @@ public final class YamlParser implements ConfigParser<CommentedConfig> {
                 var optionalNode = compose.composeReader(reader);
                 if (optionalNode.isEmpty()) return;
 
+
                 Node rootNode = optionalNode.get();
                 parsingMode.prepareParsing(destination);
+                parseHeaderComment(reader, commentedConfig);
                 parseNodeWithComments(rootNode, commentedConfig, Collections.emptyList(), parsingMode);
             } catch (Exception e) {
                 throw new ParsingException("YAML parsing with comments failed", e);
@@ -95,6 +97,40 @@ public final class YamlParser implements ConfigParser<CommentedConfig> {
             }
         } catch (Exception e) {
             throw new ParsingException("YAML parsing failed", e);
+        }
+    }
+
+    private void parseHeaderComment(Reader reader, CommentedConfig commentedConfig) {
+        if (reader instanceof StringReader stringReader) {
+            StringWriter stringWriter = new StringWriter();
+            try {
+                stringReader.reset();
+                stringReader.transferTo(stringWriter);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String content = stringWriter.toString();
+            String[] lines = content.split("\r?\n");
+            StringBuilder headerComment = new StringBuilder();
+            for (String line : lines) {
+                String trimmedLine = line.trim();
+                if (trimmedLine.startsWith("#")) {
+                    // Remove leading # and whitespace but preserve the content
+                    String commentLine = trimmedLine.substring(1);
+                    if (commentLine.startsWith(" "))
+                        commentLine = commentLine.substring(1);
+                    // Trim leading and trailing whitespace to clean up the comment
+                    commentLine = commentLine.trim();
+                    if (!headerComment.isEmpty())
+                        headerComment.append("\n");
+                    headerComment.append(commentLine);
+                } else if (!trimmedLine.isEmpty()) {
+                    // Stop at the first non-comment, non-empty line
+                    break;
+                }
+            }
+            if (!headerComment.isEmpty())
+                commentedConfig.setHeaderComment(headerComment.toString());
         }
     }
 

@@ -82,6 +82,8 @@ public final class YamlWriter implements ConfigWriter {
         if (config instanceof UnmodifiableCommentedConfig commentedConfig) {
             // create yaml nodes with comments
             try {
+                if (commentedConfig.getHeaderComment() != null && !commentedConfig.getHeaderComment().trim().isEmpty())
+                    writer.write(processHeaderComment(commentedConfig.getHeaderComment()));
                 Node rootNode = createNodeWithComments(commentedConfig);
                 yaml.dumpNode(rootNode, streamWriter);
                 return; // Don't fall through to regular dump
@@ -190,5 +192,18 @@ public final class YamlWriter implements ConfigWriter {
         if (value instanceof Enum)
             return ((Enum<?>) value).name();
         return value;
+    }
+
+    private static String processHeaderComment(String headerComment) {
+        StringBuilder processed = new StringBuilder();
+        String[] lines = headerComment.split("\n");
+        for (String line : lines) {
+            String trimmedLine = line.trim();
+            if (!trimmedLine.startsWith("#"))
+                processed.append("# ");
+            processed.append(trimmedLine).append("\n");
+        }
+        processed.append("\n");
+        return processed.toString();
     }
 }

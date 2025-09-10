@@ -179,21 +179,4 @@ class AbstractObjectDeserializer {
 	protected <V, R> void registerDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
 		generalProviders.add(provider);
 	}
-
-	/**
-	 * Adds a {@link ValueDeserializer} directly to the deserializer providers.
-	 * This is a convenience method that wraps the deserializer in a provider.
-	 *
-	 * @param <V>          type of the config values to deserialize
-	 * @param <R>          resulting type of the deserialization
-	 * @param deserializer deserializer to register
-	 */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-	protected <V, R> void registerDeserializer(ValueDeserializer<V, R> deserializer) {
-		registerDeserializerProvider((valueClass, resultType) -> {
-			// Return the deserializer - it's up to the deserializer to handle
-			// whether it can process the given types or throw an appropriate exception
-			return (ValueDeserializer) deserializer;
-		});
-	}
 }

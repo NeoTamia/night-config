@@ -178,16 +178,4 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	public <V, R> void registerDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
 		super.registerDeserializerProvider(provider);
 	}
-
-	/**
-	 * Adds a {@link ValueDeserializer} directly to the deserializer providers.
-	 * This is a convenience method that wraps the deserializer in a provider.
-	 *
-	 * @param <V>          type of the config values to deserialize
-	 * @param <R>          resulting type of the deserialization
-	 * @param deserializer deserializer to register
-	 */
-	public <V, R> void registerDeserializer(ValueDeserializer<V, R> deserializer) {
-		super.registerDeserializer(deserializer);
-	}
 }

@@ -73,12 +73,11 @@ public final class ObjectDeserializerBuilder {
 	 * @param deserializer deserializer to register
 	 */
 	public <V, R> ObjectDeserializerBuilder withDeserializerForClass(Class<V> valueClass, Class<R> resultClass, ValueDeserializer<? super V, ? extends R> deserializer) {
-		withDeserializerProvider(((valueCls, resultType) -> resultType.getSatisfyingRawType().map(resultCls -> {
+		return withDeserializerProvider(((valueCls, resultType) -> resultType.getSatisfyingRawType().map(resultCls -> {
             if (valueCls.isAssignableFrom(valueClass) && resultCls.isAssignableFrom(resultClass))
                 return deserializer;
             return null;
         }).orElse(null)));
-        return this;
 	}
 
 	/**

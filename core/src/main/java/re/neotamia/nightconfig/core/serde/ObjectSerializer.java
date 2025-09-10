@@ -263,22 +263,4 @@ public final class ObjectSerializer {
     public <V, R> void registerSerializerProvider(ValueSerializerProvider<V, R> provider) {
         generalProviders.add(provider);
     }
-
-    /**
-     * Registers a {@link ValueSerializer} that can be used for serializing
-     * specific types of values to their desired representation.
-     *
-     * @param <V>          the type of the values to serialize
-     * @param <R>          the type of the serialized representation
-     * @param serializer the serializer to register, used for converting values of
-     *                     type {@code V} to representation of type {@code R}
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <V, R> void registerSerializer(ValueSerializer<V, R> serializer) {
-        registerSerializerProvider((valueClass, resultType) -> {
-            // Return the serializer - it's up to the serializer to handle
-            // whether it can process the given types or throw an appropriate exception
-            return (ValueSerializer) serializer;
-        });
-    }
 }

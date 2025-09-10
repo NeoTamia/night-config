@@ -149,4 +149,51 @@ class AbstractObjectDeserializer {
 
 		return AnnotationProcessor.resolveConfigDefaultProvider(applicableDefault, instance);
 	}
+
+	/**
+	 * Adds a {@link ValueDeserializer} that will be used to deserialize config values
+	 * of type {@code valueClass} to objects of type {@code resultClass}.
+	 *
+	 * @param <V>          type of the config values to deserialize
+	 * @param <R>          resulting type of the deserialization
+	 * @param valueClass   class of the config values to deserialize
+	 * @param resultClass  class of the deserialization result
+	 * @param deserializer deserializer to register
+	 */
+	protected <V, R> void registerDeserializerForClass(Class<V> valueClass, Class<R> resultClass, ValueDeserializer<? super V, ? extends R> deserializer) {
+		registerDeserializerProvider((valueCls, resultType) -> resultType.getSatisfyingRawType().map(resultCls -> {
+			if (valueCls != null && valueCls.isAssignableFrom(valueClass) && resultCls.isAssignableFrom(resultClass))
+				return deserializer;
+			return null;
+		}).orElse(null));
+	}
+
+	/**
+	 * Adds a {@link ValueDeserializerProvider} that provides {@link ValueDeserializer} to
+	 * deserialize config values.
+	 *
+	 * @param <V>      type of the config values to deserialize
+	 * @param <R>      resulting type of the deserialization
+	 * @param provider provider to register
+	 */
+	protected <V, R> void registerDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
+		generalProviders.add(provider);
+	}
+
+	/**
+	 * Adds a {@link ValueDeserializer} directly to the deserializer providers.
+	 * This is a convenience method that wraps the deserializer in a provider.
+	 *
+	 * @param <V>          type of the config values to deserialize
+	 * @param <R>          resulting type of the deserialization
+	 * @param deserializer deserializer to register
+	 */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+	protected <V, R> void registerDeserializer(ValueDeserializer<V, R> deserializer) {
+		registerDeserializerProvider((valueClass, resultType) -> {
+			// Return the deserializer - it's up to the deserializer to handle
+			// whether it can process the given types or throw an appropriate exception
+			return (ValueDeserializer) deserializer;
+		});
+	}
 }

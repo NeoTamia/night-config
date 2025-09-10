@@ -152,4 +152,42 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 		TypeConstraint t = new TypeConstraint(recordClass);
 		return (R) ctx.deserializeValue(source, Optional.of(t));
 	}
+
+	/**
+	 * Adds a {@link ValueDeserializer} that will be used to deserialize config values
+	 * of type {@code valueClass} to objects of type {@code resultClass}.
+	 *
+	 * @param <V>          type of the config values to deserialize
+	 * @param <R>          resulting type of the deserialization
+	 * @param valueClass   class of the config values to deserialize
+	 * @param resultClass  class of the deserialization result
+	 * @param deserializer deserializer to register
+	 */
+	public <V, R> void registerDeserializerForClass(Class<V> valueClass, Class<R> resultClass, ValueDeserializer<? super V, ? extends R> deserializer) {
+		super.registerDeserializerForClass(valueClass, resultClass, deserializer);
+	}
+
+	/**
+	 * Adds a {@link ValueDeserializerProvider} that provides {@link ValueDeserializer} to
+	 * deserialize config values.
+	 *
+	 * @param <V>      type of the config values to deserialize
+	 * @param <R>      resulting type of the deserialization
+	 * @param provider provider to register
+	 */
+	public <V, R> void registerDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
+		super.registerDeserializerProvider(provider);
+	}
+
+	/**
+	 * Adds a {@link ValueDeserializer} directly to the deserializer providers.
+	 * This is a convenience method that wraps the deserializer in a provider.
+	 *
+	 * @param <V>          type of the config values to deserialize
+	 * @param <R>          resulting type of the deserialization
+	 * @param deserializer deserializer to register
+	 */
+	public <V, R> void registerDeserializer(ValueDeserializer<V, R> deserializer) {
+		super.registerDeserializer(deserializer);
+	}
 }

@@ -28,7 +28,7 @@ public final class SerdeTestConfig {
     }
 
     static class ConfigWithKey {
-        @SerdeConfig(key = @SerdeKey("custom_name"))
+        @SerdeConfig(key = "custom_name")
         String name = "test";
 
         int value = 42;
@@ -196,7 +196,7 @@ public final class SerdeTestConfig {
 
     static class ConfigComplete {
         @SerdeConfig(
-                key = @SerdeKey("user_name"),
+                key = "user_name",
                 comments = {
                         @SerdeComment("The username for authentication"),
                         @SerdeComment("Must be between 3 and 20 characters")
@@ -208,7 +208,7 @@ public final class SerdeTestConfig {
         String username;
 
         @SerdeConfig(
-                key = @SerdeKey("user_age"),
+                key = "user_age",
                 defaults = @SerdeDefault(provider = "getDefaultAge", whenValue = WhenValue.IS_MISSING),
                 asserts = @SerdeAssert(value = AssertThat.CUSTOM, customCheck = "isPositive")
         )
@@ -294,7 +294,7 @@ public final class SerdeTestConfig {
 
     static class ConfigMultipleAnnotations {
         @SerdeConfig(
-                key = @SerdeKey("servers"),
+                key = "servers",
                 comments = @SerdeComment("List of available servers"),
                 defaults = @SerdeDefault(provider = "getDefaultServers", whenValue = WhenValue.IS_MISSING)
         )

@@ -121,10 +121,7 @@ public final class ObjectSerializer {
      * @return the object, converted to a config value
      */
     public Object serialize(Object value, Supplier<? extends Config> configSupplier) {
-        SerializerContext ctx = new SerializerContext(
-                this,
-                () -> configSupplier.get().configFormat(),
-                configSupplier);
+        SerializerContext ctx = new SerializerContext(this, () -> configSupplier.get().configFormat(), configSupplier);
         return ctx.serializeValue(value);
     }
 
@@ -165,10 +162,7 @@ public final class ObjectSerializer {
      */
     public void serializeFields(Object source, Config destination) {
         // the destination exists, convert the fields recursively
-        SerializerContext ctx = new SerializerContext(
-                this,
-                () -> destination.configFormat(),
-                () -> destination.createSubConfig());
+        SerializerContext ctx = new SerializerContext(this, destination::configFormat, destination::createSubConfig);
         ctx.serializeFields(source, destination);
     }
 
@@ -238,5 +232,53 @@ public final class ObjectSerializer {
         }
         String ofTypeStr = valueClass == null ? "" : " of type " + valueClass;
         return new SerdeException("No suitable serializer found for value" + ofTypeStr + ": " + value + ". " + supportedStr);
+    }
+
+
+    /**
+     * Adds a {@link ValueSerializer} that will be used to serialize config values
+     * of type {@code valueClass} to objects of type {@code resultClass}.
+     *
+     * @param <V>          type of the config values to serialize
+     * @param <R>          resulting type of the serialization
+     * @param cls          class of the config values to serialize
+     * @param serializer   serializer to register
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public <V, R> void registerSerializerForClass(Class<V> cls, ValueSerializer<? super V, ? extends R> serializer) {
+        generalProviders.add((valueClass, ctx) -> valueClass != null && Util.canAssign(cls, valueClass)
+                        ? (ValueSerializer) serializer
+                        : null);
+    }
+
+    /**
+     * Registers a {@link ValueSerializerProvider} to provide serializers for various value types.
+     * The added provider can be used to dynamically supply an appropriate {@link ValueSerializer}
+     * by analyzing the value's class type and serialization context.
+     *
+     * @param <V>       type of the configuration values to serialize
+     * @param <R>       resulting type of the serialization
+     * @param provider  the provider that supplies serializers for specific value classes
+     */
+    public <V, R> void registerSerializerProvider(ValueSerializerProvider<V, R> provider) {
+        generalProviders.add(provider);
+    }
+
+    /**
+     * Registers a {@link ValueSerializer} that can be used for serializing
+     * specific types of values to their desired representation.
+     *
+     * @param <V>          the type of the values to serialize
+     * @param <R>          the type of the serialized representation
+     * @param serializer the serializer to register, used for converting values of
+     *                     type {@code V} to representation of type {@code R}
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <V, R> void registerSerializer(ValueSerializer<V, R> serializer) {
+        registerSerializerProvider((valueClass, resultType) -> {
+            // Return the serializer - it's up to the serializer to handle
+            // whether it can process the given types or throw an appropriate exception
+            return (ValueSerializer) serializer;
+        });
     }
 }

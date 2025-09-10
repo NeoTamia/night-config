@@ -68,7 +68,7 @@ public @interface SerdeSkipSerializingIf {
 	 * If set to {@code CUSTOM}, you must provide the {@link #customCheck()}
 	 * parameter, and you may provide the {@link #customClass()} parameter.
 	 */
-	SkipSerIf[] value();
+	SkipSerIf[] value() default { SkipSerIf.ALWAYS };
 
 	/**
 	 * The class where to find the custom skip predicate.

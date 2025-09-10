@@ -20,7 +20,7 @@ public @interface SerdeSkip {
      * If set to {@code CUSTOM}, you must provide the {@link #customCheck()}
      * parameter, and you may provide the {@link #customClass()} parameter.
      */
-    SkipIf[] value();
+    SkipIf[] value() default { SkipIf.ALWAYS };
 
     /**
      * The class where to find the custom skip predicate.

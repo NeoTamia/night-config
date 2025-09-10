@@ -570,10 +570,8 @@ final class AnnotationProcessor {
      * Extracts SerdeKey annotation from SerdeConfig and returns the key value.
      */
     static String resolveSerdeConfigKey(SerdeConfig config, String fieldName) {
-        SerdeKey[] keyAnnotations = config.key();
-        if (keyAnnotations.length == 0) return fieldName;
-        if (keyAnnotations.length > 1) throw new SerdeException("SerdeConfig can only contain one SerdeKey annotation");
-        return keyAnnotations[0].value();
+        var key = config.key();
+        return key.isBlank() ? fieldName : key;
     }
 
     /**

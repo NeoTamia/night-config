@@ -40,7 +40,7 @@ public @interface SerdeConfig {
      *
      * @return the key to use
      */
-    SerdeKey[] key() default {};
+    String key() default "";
 
     /**
      * Skip rules to apply during (de)serialization. <br />

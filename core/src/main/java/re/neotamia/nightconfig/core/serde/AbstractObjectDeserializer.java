@@ -18,7 +18,7 @@ class AbstractObjectDeserializer {
 	protected final List<ValueDeserializerProvider<?, ?>> generalProviders;
 	protected ValueDeserializerProvider<?, ?> defaultProvider;
 	protected final boolean applyTransientModifier;
-	protected final NamingStrategy namingStrategy;
+	protected NamingStrategy namingStrategy;
 
 	protected AbstractObjectDeserializer(ObjectDeserializerBuilder builder) {
 		this.generalProviders = builder.deserializerProviders;
@@ -179,4 +179,13 @@ class AbstractObjectDeserializer {
 	protected <V, R> void registerDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
 		generalProviders.add(provider);
 	}
+
+    /**
+     * Sets the naming strategy to use for field names.
+     *
+     * @param namingStrategy the naming strategy to use
+     */
+    protected void setNamingStrategy(@NotNull NamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
+    }
 }

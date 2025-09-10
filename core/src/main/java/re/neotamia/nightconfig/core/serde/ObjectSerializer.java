@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.serde;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
@@ -97,7 +98,7 @@ public final class ObjectSerializer {
     /**
      * setting: naming strategy for field names
      */
-    final NamingStrategy namingStrategy;
+    public NamingStrategy namingStrategy;
 
     ObjectSerializer(ObjectSerializerBuilder builder) {
         this.classBasedSerializers = builder.classBasedSerializers;
@@ -262,5 +263,14 @@ public final class ObjectSerializer {
      */
     public <V, R> void registerSerializerProvider(ValueSerializerProvider<V, R> provider) {
         generalProviders.add(provider);
+    }
+
+    /**
+     * Sets the naming strategy to be used by the {@code ObjectSerializer}.
+     *
+     * @param namingStrategy the naming strategy to use, must not be null
+     */
+    public void setNamingStrategy(@NotNull NamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
     }
 }

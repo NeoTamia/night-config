@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 
@@ -178,4 +179,9 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	public <V, R> void registerDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
 		super.registerDeserializerProvider(provider);
 	}
+
+    @Override
+    public void setNamingStrategy(@NotNull NamingStrategy namingStrategy) {
+        super.setNamingStrategy(namingStrategy);
+    }
 }

@@ -193,17 +193,4 @@ public final class YamlWriter implements ConfigWriter {
             return ((Enum<?>) value).name();
         return value;
     }
-
-    private static String processHeaderComment(String headerComment) {
-        StringBuilder processed = new StringBuilder();
-        String[] lines = headerComment.split("\n");
-        for (String line : lines) {
-            String trimmedLine = line.trim();
-            if (!trimmedLine.startsWith("#"))
-                processed.append("# ");
-            processed.append(trimmedLine).append("\n");
-        }
-        processed.append("\n");
-        return processed.toString();
-    }
 }

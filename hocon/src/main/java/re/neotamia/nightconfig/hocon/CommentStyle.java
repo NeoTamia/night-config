@@ -10,6 +10,10 @@ public enum CommentStyle {
 	 * # prefix
 	 */
 	HASH('#'),
+    /**
+     * # and space prefix
+     */
+	HASH_WITH_SPACE('#', ' '),
 	/**
 	 * // prefix
 	 */

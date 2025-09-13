@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 
 /**
@@ -93,8 +94,7 @@ public interface ConfigWriter {
 				write(config, output, charset);
 			} catch (IOException e) {
 				// regular IO exception
-				String msg = String.format("Failed to write (%s) the config to: %s",
-						writingMode.toString(), file.toString());
+				String msg = String.format("Failed to write (%s) the config to: %s", writingMode, file);
 				throw new WritingException(msg, e);
 			}
 			// Flush and close the output before atomically moving the file.
@@ -122,8 +122,7 @@ public interface ConfigWriter {
 			try (OutputStream output = Files.newOutputStream(file, WRITE, CREATE, lastOption)) {
 				write(config, output, charset);
 			} catch (IOException e) {
-				String msg = String.format("Failed to write (%s) the config to: %s",
-						writingMode.toString(), file.toString());
+				String msg = String.format("Failed to write (%s) the config to: %s", writingMode.toString(), file);
 				throw new WritingException(msg, e);
 			}
 		}
@@ -193,4 +192,21 @@ public interface ConfigWriter {
 		write(config, builder);
 		return builder.toString();
 	}
+
+    default @NotNull String processHeaderComment(@NotNull String headerComment) {
+        return processHeaderComment(headerComment, "#");
+    }
+
+    default @NotNull String processHeaderComment(@NotNull String headerComment, @NotNull String commentPrefix) {
+        StringBuilder processed = new StringBuilder();
+        String[] lines = headerComment.split("\n");
+        for (String line : lines) {
+            String trimmedLine = line.trim();
+            if (!trimmedLine.startsWith(commentPrefix))
+                processed.append(commentPrefix).append(" ");
+            processed.append(trimmedLine).append("\n");
+        }
+        processed.append("\n");
+        return processed.toString();
+    }
 }

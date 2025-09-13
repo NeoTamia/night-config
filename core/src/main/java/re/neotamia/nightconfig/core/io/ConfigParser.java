@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.io;
 
+import re.neotamia.nightconfig.core.CommentedConfig;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.file.FileNotFoundAction;
@@ -14,6 +15,8 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Interface for reading configurations.
@@ -305,4 +308,44 @@ public interface ConfigParser<C extends Config> {
 			throw new WritingException("An I/O error occured", e);
 		}
 	}
+
+    default void parseHeaderComment(Reader reader, CommentedConfig commentedConfig) {
+        if (!(reader instanceof StringReader stringReader)) return;
+
+        StringWriter stringWriter = new StringWriter();
+        try {
+            stringReader.reset();
+            stringReader.transferTo(stringWriter);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        String[] lines = stringWriter.toString().split("\\r?\\n", -1);
+
+        List<String> collected = new ArrayList<>();
+        int i = 0;
+        while (i < lines.length) {
+            String trimmed = lines[i].trim();
+            if (trimmed.startsWith("#")) {
+                String commentLine = trimmed.substring(1);
+                if (commentLine.startsWith(" ")) commentLine = commentLine.substring(1);
+                commentLine = commentLine.trim();
+                collected.add(commentLine);
+                i++;
+            } else
+                break;
+        }
+
+        boolean hasSeparatorBlankLine = false;
+        while (i < lines.length && lines[i].trim().isEmpty()) {
+            hasSeparatorBlankLine = true;
+            i++;
+        }
+
+        if (!collected.isEmpty() && hasSeparatorBlankLine) {
+            String header = String.join("\n", collected);
+            if (!header.isBlank())
+                commentedConfig.setHeaderComment(header);
+        }
+    }
 }

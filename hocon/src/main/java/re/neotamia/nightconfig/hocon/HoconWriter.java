@@ -41,7 +41,7 @@ public final class HoconWriter implements ConfigWriter {
 	private char[] newline = NewlineStyle.system().chars;
 	private char[] indent = IndentStyle.TABS.chars;
 	private char[] kvSeparator = KeyValueSeparatorStyle.COLON.chars;
-	private char[] commentPrefix = CommentStyle.HASH.chars;
+	private char[] commentPrefix = CommentStyle.HASH_WITH_SPACE.chars;
 	private int currentIndentLevel;
 
 	// --- Writer's methods ---
@@ -58,6 +58,8 @@ public final class HoconWriter implements ConfigWriter {
 	}
 
 	private void writeObject(UnmodifiableCommentedConfig config, CharacterOutput output, boolean root) {
+        if (config.getHeaderComment() != null && !config.getHeaderComment().trim().isEmpty())
+            output.write(processHeaderComment(config.getHeaderComment()));
 		if (config.isEmpty()) {
 			output.write(EMPTY_OBJECT);
 			return;

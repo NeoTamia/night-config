@@ -42,7 +42,9 @@ public final class TomlParser implements ConfigParser<CommentedConfig> {
 	@Override
 	public CommentedConfig parse(Reader reader) {
 		configWasEmpty = true;
-		return parse(new ReaderInput(reader), TomlFormat.instance().createConfig(), ParsingMode.MERGE);
+		var config = parse(new ReaderInput(reader), TomlFormat.instance().createConfig(), ParsingMode.MERGE);
+        parseHeaderComment(reader, config);
+        return config;
 	}
 
 	@Override
@@ -50,7 +52,9 @@ public final class TomlParser implements ConfigParser<CommentedConfig> {
 		if(parsingMode == ParsingMode.REPLACE) {
 			configWasEmpty = true;
 		}
-		parse(new ReaderInput(reader), destination, parsingMode);
+        parse(new ReaderInput(reader), destination, parsingMode);
+        if (destination instanceof CommentedConfig commentedConfig)
+            parseHeaderComment(reader, commentedConfig);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -74,14 +78,11 @@ public final class TomlParser implements ConfigParser<CommentedConfig> {
 			if (hasPendingComment()) {// Handles comments that are before the table declaration
 				String comment = consumeComment();
 				if (parentConfig instanceof CommentedConfig cc)
-                    cc.setComment(lastPath, comment);
+                    cc.setComment(lastPath, comment.stripLeading());
 			}
 			if (isArray) {// It's an element of an array of tables
 				if (parentConfig == null) {
-					throw new ParsingException("Cannot create entry "
-											   + path
-											   + " because of an invalid "
-											   + "parent that isn't a table.");
+					throw new ParsingException("Cannot create entry " + path + " because of an invalid " + "parent that isn't a table.");
 				}
 				CommentedConfig table = TableParser.parseNormal(commentedConfig, input, this);
 				Object shouldBeArrayOfTables = parentConfig.get(lastPath);
@@ -137,9 +138,8 @@ public final class TomlParser implements ConfigParser<CommentedConfig> {
 				currentConfig = sub;
 			} else if (value instanceof Config) {
 				currentConfig = (Config)value;
-			} else if (value instanceof List) {
-				List<?> list = (List<?>)value;
-				if (!list.isEmpty() && list.stream().allMatch(Config.class::isInstance)) {// Arrays of tables
+			} else if (value instanceof List<?> list) {
+                if (!list.isEmpty() && list.stream().allMatch(Config.class::isInstance)) {// Arrays of tables
 					int lastIndex = list.size() - 1;
 					currentConfig = (Config)list.get(lastIndex);
 				} else {

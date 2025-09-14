@@ -9,6 +9,7 @@ import re.neotamia.nightconfig.core.io.ParsingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author TheElectronWill
@@ -44,8 +45,7 @@ final class TableParser {
 				return config;
 			}
 			if (after != ',') {
-				throw new ParsingException(
-						"Invalid entry separator '" + after + "' in inline table.");
+				throw new ParsingException("Invalid entry separator '" + after + "' in inline table.");
 			}
 			expectNextElement = true;
 		}
@@ -75,15 +75,10 @@ final class TableParser {
 				CharsWrapper comment = Toml.readLine(input);
 				commentsList.add(comment);
 			} else if (after != '\n' && after != '\r') {
-				throw new ParsingException("Invalid character '"
-										   + (char)after
-										   + "' after table entry \""
-										   + key
-										   + "\" = "
-										   + value);
+				throw new ParsingException("Invalid character '" + after + "' after table entry \"" + key + "\" = " + value);
 			}
 			parser.setComment(commentsList);
-			config.setComment(key, parser.consumeComment());
+			config.setComment(key, Optional.ofNullable(parser.consumeComment()).map(String::stripLeading).orElse(null));
 		}
 	}
 
@@ -114,8 +109,7 @@ final class TableParser {
 		from the beginning.
 		 */
 		if (previousValue != null && emptyConfig) {
-			throw new ParsingException(
-					"Invalid TOML data: entry \"" + key + "\" defined twice in its table.");
+			throw new ParsingException("Invalid TOML data: entry \"" + key + "\" defined twice in its table.");
 		}
 	}
 
@@ -150,8 +144,7 @@ final class TableParser {
 					CharsWrapper comment = Toml.readLine(input);
 					parser.setComment(comment);
 				} else if (after != '\n' && after != '\r') {
-					throw new ParsingException(
-							"Invalid character '" + after + "' after a table " + "declaration.");
+					throw new ParsingException("Invalid character '" + after + "' after a table " + "declaration.");
 				}
 				return list;
 			} else if (separator != '.') {

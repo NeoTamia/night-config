@@ -43,15 +43,14 @@ final class TableWriter {
 	static void writeTopLevel(UnmodifiableConfig config, List<String> configPath, CharacterOutput output, TomlWriter writer) {
 		UnmodifiableCommentedConfig commentedConfig = UnmodifiableCommentedConfig.fake(config);
 
-		writeWithHeader(commentedConfig, null, false, false, configPath, output, writer);
+		writeWithHeader(commentedConfig, commentedConfig.getHeaderComment(), true, false, false, configPath, output, writer);
 	}
 
 	static class OrganizedTable {
 		List<UnmodifiableCommentedConfig.Entry> simples, subTables, arraysOfTables;
 		String comment; // comment on the table itself
 
-		OrganizedTable(String comment, List<Entry> simpleEntries, List<Entry> tablesEntries,
-				List<Entry> tableArraysEntries) {
+		OrganizedTable(String comment, List<Entry> simpleEntries, List<Entry> tablesEntries, List<Entry> tableArraysEntries) {
 			this.comment = (comment == null) ? "" : comment;
 			this.simples = simpleEntries;
 			this.subTables = tablesEntries;
@@ -80,16 +79,14 @@ final class TableWriter {
 
 		for (Entry entry : config.entrySet()) {
 			Object value = entry.getValue();
-			if (value instanceof UnmodifiableCommentedConfig) {
-				UnmodifiableConfig sub = (UnmodifiableConfig) value;
-				if (writer.writesInline(sub)) {
+			if (value instanceof UnmodifiableCommentedConfig sub) {
+                if (writer.writesInline(sub)) {
 					simpleEntries.add(entry);
 				} else {
 					tablesEntries.add(entry);
 				}
-			} else if (value instanceof List) {
-				List<?> list = (List<?>) value;
-				if (!list.isEmpty() && list.stream().allMatch(UnmodifiableConfig.class::isInstance)) {
+			} else if (value instanceof List<?> list) {
+                if (!list.isEmpty() && list.stream().allMatch(UnmodifiableConfig.class::isInstance)) {
 					tableArraysEntries.add(entry);
 				} else {
 					simpleEntries.add(entry);
@@ -102,9 +99,20 @@ final class TableWriter {
 		return new OrganizedTable(comment, simpleEntries, tablesEntries, tableArraysEntries);
 	}
 
+    private static void writeWithHeader(
+            UnmodifiableCommentedConfig config,
+            String tableComment,
+            boolean inArrayOfTables,
+            boolean tableHeader,
+            List<String> configPath,
+            CharacterOutput output, TomlWriter writer) {
+        writeWithHeader(config, tableComment, false, inArrayOfTables, tableHeader, configPath, output, writer);
+    }
+
 	private static void writeWithHeader(
 			UnmodifiableCommentedConfig config,
 			String tableComment,
+            boolean hasHeaderComment,
 			boolean inArrayOfTables,
 			boolean tableHeader,
 			List<String> configPath,
@@ -140,6 +148,8 @@ final class TableWriter {
 			// header comment
 			if (!table.comment.isEmpty()) {
 				writer.writeIndentedComment(tableComment, output);
+                if (hasHeaderComment)
+                    writer.writeNewline(output);
 			}
 			// header
 			if (inArrayOfTables) {
@@ -179,7 +189,7 @@ final class TableWriter {
 					.fake((UnmodifiableConfig) entry.getRawValue());
 			configPath.add(entry.getKey());
 			writeWithHeader(sub, entry.getComment(), false, true, configPath, output, writer);
-			configPath.remove(configPath.size() - 1);
+			configPath.removeLast();
 
 			// separate the tables
 			if (hasArraysOfTables || it.hasNext()) {
@@ -199,7 +209,7 @@ final class TableWriter {
 				writeWithHeader(UnmodifiableCommentedConfig.fake(sub), entry.getComment(), true,
 						true, configPath, output, writer);
 			}
-			configPath.remove(configPath.size() - 1);
+			configPath.removeLast();
 
 			// separate the arrays of tables
 			if (it.hasNext()) {
@@ -208,18 +218,15 @@ final class TableWriter {
 		}
 	}
 
-	private static void writeTableArrayName(List<String> name, CharacterOutput output,
-			TomlWriter writer) {
+	private static void writeTableArrayName(List<String> name, CharacterOutput output, TomlWriter writer) {
 		writeTableName(name, output, writer, ARRAY_OF_TABLES_NAME_BEGIN, ARRAY_OF_TABLES_NAME_END);
 	}
 
-	private static void writeTableName(List<String> name, CharacterOutput output,
-			TomlWriter writer) {
+	private static void writeTableName(List<String> name, CharacterOutput output, TomlWriter writer) {
 		writeTableName(name, output, writer, TABLE_NAME_BEGIN, TABLE_NAME_END);
 	}
 
-	private static void writeTableName(List<String> name, CharacterOutput output, TomlWriter writer,
-			char[] begin, char[] end) {
+	private static void writeTableName(List<String> name, CharacterOutput output, TomlWriter writer, char[] begin, char[] end) {
 		if (name.isEmpty()) {
 			throw new WritingException("Invalid empty table name.");
 		}

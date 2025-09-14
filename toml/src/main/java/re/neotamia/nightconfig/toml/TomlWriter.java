@@ -167,6 +167,7 @@ public final class TomlWriter implements ConfigWriter {
 		for (String comment : comments) {
 			writeIndent(output);
 			output.write('#');
+			output.write(' ');
 			output.write(comment);
 			output.write(newline);
 		}

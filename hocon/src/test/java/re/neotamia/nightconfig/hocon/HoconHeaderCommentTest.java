@@ -44,6 +44,7 @@ public class HoconHeaderCommentTest {
         assertTrue(parsedHeaderComment.contains("This is a header comment"), "Should contain first header comment line");
         assertTrue(parsedHeaderComment.contains("Second line of header"), "Should contain second header comment line");
         assertTrue(parsedHeaderComment.contains("Third line of header"), "Should contain third header comment line");
+        assertNull(parsedConfig.getComment("database"), "No comment should be associated with the 'database' table itself");
 
         // Verify other comments and values are preserved
         assertEquals("localhost", parsedConfig.get("database.host"));
@@ -72,6 +73,7 @@ public class HoconHeaderCommentTest {
         CommentedConfig parsedConfig = parser.parse(new StringReader(hoconString));
 
         assertEquals("Single line header comment", parsedConfig.getHeaderComment());
+        assertNull(parsedConfig.getComment("key"), "No comment should be associated with 'key'");
         assertEquals("value", parsedConfig.get("key"));
     }
 

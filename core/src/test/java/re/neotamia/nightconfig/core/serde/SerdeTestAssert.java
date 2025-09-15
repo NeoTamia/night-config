@@ -71,7 +71,7 @@ public final class SerdeTestAssert {
 		// Null value => ok
 		var conf = Config.inMemory();
 		conf.set("name", null);
-		assertEquals(null, deserialize(conf, AssertNotEmpty::new).name);
+        assertNull(deserialize(conf, AssertNotEmpty::new).name);
 
 		// Empty value => error because of @SerdeAssert
 		var emptyValConf = Config.inMemory();

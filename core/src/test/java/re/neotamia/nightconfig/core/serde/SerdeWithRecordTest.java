@@ -16,10 +16,10 @@ import re.neotamia.nightconfig.core.Config;
  * Serialization/deserialization of records, a new feature of Java 16.
  */
 public class SerdeWithRecordTest {
-    static record Point3d(int x, int y, int z) {
+    record Point3d(int x, int y, int z) {
     }
 
-    static record Name(String username, String nickname) {
+    record Name(String username, String nickname) {
     }
 
     static class Player {
@@ -34,9 +34,8 @@ public class SerdeWithRecordTest {
 
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof Player))
+            if (!(obj instanceof Player other))
                 return false;
-            Player other = (Player) obj;
             return id == other.id && Objects.equals(blockPosition, other.blockPosition)
                     && Objects.equals(name, other.name);
         }
@@ -65,9 +64,8 @@ public class SerdeWithRecordTest {
 
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof Engine))
+            if (!(obj instanceof Engine other))
                 return false;
-            Engine other = (Engine) obj;
             return Objects.equals(playersById, other.playersById)
                     && Objects.equals(playersByUsername, other.playersByUsername);
         }

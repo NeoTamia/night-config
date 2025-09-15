@@ -59,8 +59,8 @@ public class TypeConstraintMapTest {
 		for (Field f : Params1.class.getDeclaredFields()) {
 			TypeConstraint t = new TypeConstraint(f.getGenericType());
 			List<TypeConstraint> vt = extractMapValueType(t);
-			assertTrue(fullType(vt).get(0) instanceof TypeVariable);
-			assertTrue(fullType(vt).get(1) instanceof TypeVariable);
+            assertInstanceOf(TypeVariable.class, fullType(vt).get(0));
+            assertInstanceOf(TypeVariable.class, fullType(vt).get(1));
 			assertEquals(List.of(Optional.of(CharSequence.class), Optional.of(Number.class)), rawType(vt));
 		}
 		for (Field f : Params2.class.getDeclaredFields()) {

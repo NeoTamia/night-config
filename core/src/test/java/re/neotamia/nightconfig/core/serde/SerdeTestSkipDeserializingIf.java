@@ -65,7 +65,7 @@ public final class SerdeTestSkipDeserializingIf {
 
 		var nullConf = Config.inMemory();
 		nullConf.set("name", null);
-		assertEquals(null, deserialize(nullConf, p).name);
+        assertNull(deserialize(nullConf, p).name);
 
 		var eConf = Config.inMemory();
 		eConf.set("name", ""); // empty string
@@ -146,7 +146,7 @@ public final class SerdeTestSkipDeserializingIf {
 
 		var nullConf = Config.inMemory();
 		nullConf.set("name", null);
-		assertEquals(null, nameField.get(deserialize(nullConf, p)));
+        assertNull(nameField.get(deserialize(nullConf, p)));
 
 		var dontSkipConf = Config.inMemory();
 		dontSkipConf.set("name", "don't skip me"); // empty string

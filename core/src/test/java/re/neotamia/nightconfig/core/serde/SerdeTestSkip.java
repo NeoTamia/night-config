@@ -286,7 +286,7 @@ public final class SerdeTestSkip {
         var deserialized = deserialize(configWithEmpty, SkipIfEmptyDeserialization::new);
         assertEquals("default_name", deserialized.name); // Ignoré car vide, garde la valeur par défaut
         assertEquals(1, deserialized.items.size()); // Ignoré car vide, garde la valeur par défaut
-        assertEquals("default", deserialized.items.get(0));
+        assertEquals("default", deserialized.items.getFirst());
 
         // Test avec valeurs non-vides
         var configWithValues = Config.inMemory();

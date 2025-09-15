@@ -20,7 +20,7 @@ public final class SerdeTestDefaultValue {
 		List<String> servers = null;
 
 		List<String> defaultServers() {
-			return Arrays.asList("example.org");
+			return List.of("example.org");
 		}
 	}
 
@@ -29,7 +29,7 @@ public final class SerdeTestDefaultValue {
 		List<String> servers = null;
 
 		static List<String> defaultServers() {
-			return Arrays.asList("example.org");
+			return List.of("example.org");
 		}
 	}
 
@@ -38,11 +38,11 @@ public final class SerdeTestDefaultValue {
 		List<String> servers = null;
 
 		@SuppressWarnings("unused")
-		private final transient Supplier<List<String>> defaultServers = () -> Arrays.asList("example.org");
+		private final transient Supplier<List<String>> defaultServers = () -> List.of("example.org");
 	}
 
 	private void testDefaultServers(Supplier<?> sup) throws Exception {
-		testDefaultServers(sup, Arrays.asList("example.org"));
+		testDefaultServers(sup, List.of("example.org"));
 	}
 
 	private void testDefaultServers(Supplier<?> sup, List<String> defaultValue) throws Exception {
@@ -56,9 +56,9 @@ public final class SerdeTestDefaultValue {
 		assertNull(serialized.get("servers"));
 
 		o = sup.get();
-		serversField.set(o, Arrays.asList("wow"));
+		serversField.set(o, List.of("wow"));
         serialized = ser.serializeFields(o, Config::inMemory);
-		assertEquals(Arrays.asList("wow"), serialized.get("servers"));
+		assertEquals(List.of("wow"), serialized.get("servers"));
 
 		// check deserialization now
 		var conf = Config.inMemory(); // empty
@@ -83,10 +83,10 @@ public final class SerdeTestDefaultValue {
 	}
 
 	static class DefaultProvidersA {
-		static final Supplier<List<String>> defaultServersSupplier = () -> Arrays.asList("example.org");
+		static final Supplier<List<String>> defaultServersSupplier = () -> List.of("example.org");
 
 		static List<String> defaultServersFunction() {
-			return Arrays.asList("example.org");
+			return List.of("example.org");
 		}
 	}
 
@@ -107,10 +107,10 @@ public final class SerdeTestDefaultValue {
 	}
 
 	static class DefaultProvidersB {
-		static final Supplier<List<String>> defaultServers = () -> Arrays.asList("default-from-field");
+		static final Supplier<List<String>> defaultServers = () -> List.of("default-from-field");
 
 		static List<String> defaultServers() {
-			return Arrays.asList("default-from-method");
+			return List.of("default-from-method");
 		}
 	}
 
@@ -126,8 +126,8 @@ public final class SerdeTestDefaultValue {
 
 	@Test
 	public void providerInAnotherClassWithExplicitDisambiguation() throws Exception {
-		testDefaultServers(DefaultValueAnnotations6::new, Arrays.asList("default-from-field"));
-		testDefaultServers(DefaultValueAnnotations7::new, Arrays.asList("default-from-method"));
+		testDefaultServers(DefaultValueAnnotations6::new, List.of("default-from-field"));
+		testDefaultServers(DefaultValueAnnotations7::new, List.of("default-from-method"));
 	}
 
 	// static class DefaultValueAnnotations2 {
@@ -143,11 +143,11 @@ public final class SerdeTestDefaultValue {
 
 	// static class DefaultValueProviders {
 	// 	static List<String> defaultServers() {
-	// 		return Arrays.asList("example.org");
+	// 		return List.of("example.org");
 	// 	}
 
 	// 	static List<String> defaultUsers() {
-	// 		return Arrays.asList("default-user");
+	// 		return List.of("default-user");
 	// 	}
 
 	// 	private static final Supplier<String> defaultHostSupplier = () -> "default-host";

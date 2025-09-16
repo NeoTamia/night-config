@@ -16,7 +16,7 @@ import re.neotamia.nightconfig.core.concurrent.ConcurrentConfig;
  * <h2>IO operations</h2>
  * When created, a {@code FileConfig} is empty. It is linked to a file, but that file has not been parsed yet.
  * To parse the file and fill the {@code FileConfig}, call the {@link #load()} method.
- * <b>You probably want to call {@link load()} before using the configuration.</b>
+ * <b>You probably want to call {@link #load()} before using the configuration.</b>
  * <p>
  * Depending on the options that you have chosen when building the {@code FileConfig} (see {@link FileConfigBuilder}),
  * it may be saved automatically after each writing operation. To manually save the content of the configuration to

@@ -19,12 +19,7 @@ public final class NullObject {
 		return "NULL_OBJECT";
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		return o == this;
-	}
-
-	@Override
+    @Override
 	public int hashCode() {
 		return 0;
 	}

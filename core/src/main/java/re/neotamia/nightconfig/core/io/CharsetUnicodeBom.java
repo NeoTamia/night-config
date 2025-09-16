@@ -20,11 +20,6 @@ class CharsetUnicodeBom extends Charset {
     }
 
     @Override
-    public boolean canEncode() {
-        return true;
-    }
-
-    @Override
     public boolean contains(Charset cs) {
         return StandardCharsets.UTF_8.contains(cs);
     }
@@ -40,7 +35,7 @@ class CharsetUnicodeBom extends Charset {
     }
 
     private static final class Decoder extends CharsetDecoder {
-        private boolean utf8Only;
+        private final boolean utf8Only;
         private CharsetDecoder decoder = null;
 
         Decoder(CharsetUnicodeBom cs) {

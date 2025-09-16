@@ -24,5 +24,5 @@ public enum WritingMode {
 	 * Appends the config to the end of the file, if it exists.
 	 * If the file does not exist, create it.
 	 */
-	APPEND;
+	APPEND
 }

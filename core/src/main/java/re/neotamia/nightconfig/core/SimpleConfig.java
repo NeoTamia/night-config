@@ -49,7 +49,7 @@ final class SimpleConfig extends AbstractConfig {
 	 *
 	 * @param toCopy       the config to copy
 	 * @param configFormat the config's format
-	 * @param concurrent
+	 * @param concurrent   whether the new config should be concurrent
 	 */
 	@Deprecated
 	SimpleConfig(UnmodifiableConfig toCopy, ConfigFormat<?> configFormat, boolean concurrent) {

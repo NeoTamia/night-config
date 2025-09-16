@@ -17,13 +17,8 @@ import java.util.List;
 import java.util.concurrent.*;
 
 import re.neotamia.nightconfig.core.*;
-import re.neotamia.nightconfig.core.CommentedConfig;
-import re.neotamia.nightconfig.core.Config;
-import re.neotamia.nightconfig.core.UnmodifiableCommentedConfig;
-import re.neotamia.nightconfig.core.UnmodifiableConfig;
 import re.neotamia.nightconfig.core.concurrent.ConcurrentCommentedConfig;
 import re.neotamia.nightconfig.core.concurrent.StampedConfig;
-import re.neotamia.nightconfig.core.io.*;
 import re.neotamia.nightconfig.core.io.*;
 import re.neotamia.nightconfig.core.utils.ConcurrentCommentedConfigWrapper;
 
@@ -130,26 +125,24 @@ final class AsyncFileConfig extends ConcurrentCommentedConfigWrapper<StampedConf
 					configWriter.write(copy, writer);
 				} catch (IOException e) {
 					String msg = String.format("Failed to write (%s) the config to: %s",
-							writingMode.toString(), tmp.toString());
+                            writingMode, tmp);
 					throw new WritingException(msg, e);
 				}
 				// Flush and close the output before atomically moving the file.
 				try {
-					IoUtils.retryIfAccessDenied("move", () -> {
-						Files.move(tmp, nioPath, StandardCopyOption.ATOMIC_MOVE);
-					});
+					IoUtils.retryIfAccessDenied("move", () -> Files.move(tmp, nioPath, StandardCopyOption.ATOMIC_MOVE));
 				} catch (AtomicMoveNotSupportedException e) {
 					// can fail in some conditions (OS and filesystem-dependent)
 					String msg = String.format(
 							"Failed to atomically move the config from '%s' to '%s': WritingMode.REPLACE_ATOMIC is not supported for this path, use WritingMode.REPLACE instead.\n%s",
-							tmp.toString(), nioPath.toString(),
+                            tmp, nioPath,
 							"Note: you may see *.new.tmp files after this error, they contain the \"new version\" of your configurations and can be safely removed."
 									+ "If you want, you can manually copy their content into your regular configuration files (replacing the old config).");
 					throw new WritingException(msg, e);
 				} catch (IOException e) {
 					// regular IO exception
 					String msg = String.format("Failed to atomically write (%s) the config to: %s",
-							writingMode.toString(), tmp.toString());
+                            writingMode, tmp);
 					throw new WritingException(msg, e);
 				}
 			} else {
@@ -259,9 +252,7 @@ final class AsyncFileConfig extends ConcurrentCommentedConfigWrapper<StampedConf
 
 	/** Loads the config from a background thread. Returns quickly, without waiting the loading to complete. */
 	public void asyncLoad() {
-		LazyExecutorHolder.sharedExecutor.execute(() -> {
-			loadNow();
-		});
+		LazyExecutorHolder.sharedExecutor.execute(this::loadNow);
 	}
 
 	@Override

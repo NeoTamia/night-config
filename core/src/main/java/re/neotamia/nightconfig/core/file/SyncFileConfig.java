@@ -5,8 +5,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 
 import re.neotamia.nightconfig.core.*;
-import re.neotamia.nightconfig.core.CommentedConfig;
-import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.concurrent.SynchronizedConfig;
 import re.neotamia.nightconfig.core.io.ConfigParser;
 import re.neotamia.nightconfig.core.io.ConfigWriter;

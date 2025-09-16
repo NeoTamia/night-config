@@ -360,7 +360,7 @@ public final class FileWatcher {
 		running = false;
 
 		Collection<FsWatcher> allWatchers = watchers.values();
-		if (allWatchers.size() == 0) {
+		if (allWatchers.isEmpty()) {
 			// There is no background watcher thread to stop, we're done.
 			return CompletableFuture.completedFuture(null);
 		}
@@ -668,7 +668,7 @@ public final class FileWatcher {
 
 	}
 
-	private static enum ControlMessageKind {
+	private enum ControlMessageKind {
 		PUT, ADD, REMOVE, POISON
 	}
 

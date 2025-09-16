@@ -13,7 +13,7 @@ public final class IoUtils {
 	 * Like {@code Runnable}, but with a throwable {@code IOException}.
 	 */
 	@FunctionalInterface
-	public static interface IoRunnable {
+	public interface IoRunnable {
 		void run() throws IOException;
 	}
 
@@ -60,7 +60,7 @@ public final class IoUtils {
 		if (i < 0) {
 			return new String[] { s };
 		} else {
-			return new String[] { s.substring(0, i), s.substring(i + 1, s.length()) };
+			return new String[] { s.substring(0, i), s.substring(i + 1) };
 		}
 	}
 
@@ -83,14 +83,14 @@ public final class IoUtils {
 	}
 
 	/**
-	 * Run an IO operation and retry it (at most {@code maxRetries} retries) if it
-	 * fails with {@code AccessDeniedException}.
-	 * See https://github.com/TheElectronWill/night-config/issues/183.
-	 *
-	 * @param name a name to print in error messages
-	 * @param r the operation to run
-	 * @throws IOException if it fails after retrying too many times, or for an error other than {@code AccessDeniedException}
-	 */
+     * Run an IO operation and retry it (at most {@code maxRetries} retries) if it
+     * fails with {@code AccessDeniedException}.
+     * See <a href="https://github.com/TheElectronWill/night-config/issues/183">github</a>.
+     *
+     * @param name a name to print in error messages
+     * @param r the operation to run
+     * @throws IOException if it fails after retrying too many times, or for an error other than {@code AccessDeniedException}
+     */
 	public static void retryIfAccessDenied(String name, IoRunnable r) throws IOException {
 		// load the default values from java properties, keep them in memory once loaded
 		retryIfAccessDenied(
@@ -102,9 +102,7 @@ public final class IoUtils {
 		);
 	}
 
-	public static void retryIfAccessDenied(String name, IoRunnable r, int maxRetries, long retryDelay,
-			TimeUnit delayUnit)
-			throws IOException {
+	public static void retryIfAccessDenied(String name, IoRunnable r, int maxRetries, long retryDelay, TimeUnit delayUnit) throws IOException {
 		AccessDeniedException lastException = null;
 		for (int i = 0; i <= maxRetries; i++) {
 			try {

@@ -406,9 +406,8 @@ public class ConfigSpec {
 	public void defineList(List<String> path, Supplier<List<?>> defaultValueSupplier,
 						   Predicate<Object> elementValidator) {
 		define(path, defaultValueSupplier, o -> {
-			if (!(o instanceof List)) { return false; }
-			List<?> list = (List<?>)o;
-			for (Object element : list) {
+			if (!(o instanceof List<?> list)) { return false; }
+            for (Object element : list) {
 				if (!elementValidator.test(element)) { return false; }
 			}
 			return true;
@@ -683,7 +682,7 @@ public class ConfigSpec {
 				Map<String, Object> configValueMap = ((Config)configValue).valueMap();
 				Map<String, Object> specValueMap = ((Config)specValue).valueMap();
 				count += correct(configValueMap, specValueMap, parentPath, listener, subConfigSupplier);
-				parentPath.remove(parentPath.size() - 1);
+				parentPath.removeLast();
 
 			} else {
 				ValueSpec valueSpec = (ValueSpec)specValue;
@@ -725,7 +724,7 @@ public class ConfigSpec {
 		List<String> valuePath = Collections.unmodifiableList(
 				parentPath);// Creates an unmodifiable version of the list
 		listener.onCorrect(action, valuePath, value, newValue);// Notifies the listener
-		parentPath.remove(parentPath.size() - 1);// Removes the last element, ie the path
+		parentPath.removeLast();// Removes the last element, ie the path
 	}
 
 	/**

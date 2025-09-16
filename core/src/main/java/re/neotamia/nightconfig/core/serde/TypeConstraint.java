@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.serde;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -191,10 +193,9 @@ public final class TypeConstraint {
 						parent -> resolveTypeArgumentsFor(parent, classToFind, resolvedVariables));
 			}
 		}
-		if (t instanceof ParameterizedType) {
+		if (t instanceof ParameterizedType pt) {
 			// type with generic parameters such as Cls<A, B>
-			ParameterizedType pt = (ParameterizedType) t;
-			Type rawType = pt.getRawType();
+            Type rawType = pt.getRawType();
 			Type[] actualTypeArgs = pt.getActualTypeArguments();
 
 			// resolve the args that are variables, and
@@ -321,9 +322,8 @@ public final class TypeConstraint {
 		// declared: `? extends B1 & B2 & ...`
 		Type[] declaredUpperBounds = declaredTypeParam.getBounds();
 
-		if (declaredUpperBounds.length == 0 || declaredUpperBounds.length == 1
-				&& (declaredUpperBounds[0] == Object.class
-						|| declaredUpperBounds[0] == upperBound)) {
+		if (declaredUpperBounds.length == 0 || declaredUpperBounds.length == 1 && (declaredUpperBounds[0] == Object.class
+                || declaredUpperBounds[0] == upperBound)) {
 			// nothing to refine
 			return wildcard;
 		}
@@ -335,17 +335,15 @@ public final class TypeConstraint {
 		} else {
 			List<Type> upper = new ArrayList<>(declaredUpperBounds.length + 1);
 			upper.add(upperBound);
-			for (int i = 0; i < declaredUpperBounds.length; i++) {
-				Type declaredUpper = declaredUpperBounds[i];
-				if (upperBound != declaredUpper) {
-					upper.add(declaredUpper);
-				}
-			}
-			refinedUpper = upper.toArray(new Type[upper.size()]);
+            for (Type declaredUpper : declaredUpperBounds) {
+                if (upperBound != declaredUpper) {
+                    upper.add(declaredUpper);
+                }
+            }
+			refinedUpper = upper.toArray(new Type[0]);
 		}
 		// collapse if upper == lower
-		if (refinedLower.length == 1 && refinedUpper.length == 1
-				&& refinedLower[0].equals(refinedUpper[0])) {
+		if (refinedLower.length == 1 && refinedUpper.length == 1 && refinedLower[0].equals(refinedUpper[0])) {
 			return refinedLower[0];
 		}
 		return new RefinedWildcard(refinedLower, refinedUpper);
@@ -361,12 +359,12 @@ public final class TypeConstraint {
 		}
 
 		@Override
-		public Type[] getLowerBounds() {
+		public Type @NotNull [] getLowerBounds() {
 			return lowerBounds;
 		}
 
 		@Override
-		public Type[] getUpperBounds() {
+		public Type @NotNull [] getUpperBounds() {
 			return upperBounds;
 		}
 
@@ -404,7 +402,7 @@ public final class TypeConstraint {
 		}
 
 		@Override
-		public Type[] getActualTypeArguments() {
+		public Type @NotNull [] getActualTypeArguments() {
 			return arguments;
 		}
 
@@ -414,7 +412,7 @@ public final class TypeConstraint {
 		}
 
 		@Override
-		public Type getRawType() {
+		public @NotNull Type getRawType() {
 			return rawType;
 		}
 

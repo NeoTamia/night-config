@@ -192,10 +192,9 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) { return true; }
-		if (!(obj instanceof CharsWrapper)) { return false; }
+		if (!(obj instanceof CharsWrapper other)) { return false; }
 
-		final CharsWrapper other = (CharsWrapper)obj;
-		final int l = other.length();
+        final int l = other.length();
 		if (length() != l) {
 			return false;
 		}
@@ -392,22 +391,22 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 
 	@Override
 	public Iterator<Character> iterator() {
-		return new Iterator<Character>() {
-			private int index = offset;
+		return new Iterator<>() {
+            private int index = offset;
 
-			@Override
-			public boolean hasNext() {
-				return index < limit;
-			}
+            @Override
+            public boolean hasNext() {
+                return index < limit;
+            }
 
-			@Override
-			public Character next() {
-				if (index >= limit) {
-					throw new NoSuchElementException("Index beyond limit: " + index);
-				}
-				return chars[index++];
-			}
-		};
+            @Override
+            public Character next() {
+                if (index >= limit) {
+                    throw new NoSuchElementException("Index beyond limit: " + index);
+                }
+                return chars[index++];
+            }
+        };
 	}
 
 	/**

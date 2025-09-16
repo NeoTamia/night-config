@@ -6,7 +6,6 @@ import re.neotamia.nightconfig.core.concurrent.ConcurrentConfig;
 import re.neotamia.nightconfig.core.concurrent.StampedConfig;
 import re.neotamia.nightconfig.core.concurrent.SynchronizedConfig;
 import re.neotamia.nightconfig.core.io.*;
-import re.neotamia.nightconfig.core.io.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -377,7 +376,6 @@ public abstract class GenericBuilder<Base extends Config, Result extends FileCon
 	 *
 	 * @return the config
 	 */
-	@SuppressWarnings("resource")
 	public Result build() {
 		CommentedFileConfig fileConfig;
 
@@ -395,8 +393,7 @@ public abstract class GenericBuilder<Base extends Config, Result extends FileCon
 			try {
 				nefAction.run(file, format);
 			} catch (IOException e) {
-				String msg = "An exception occured while executing the FileNotFoundAction for file: "
-						+ file;
+				String msg = "An exception occurred while executing the FileNotFoundAction for file: " + file;
 				throw new WritingException(msg, e);
 			}
 		}

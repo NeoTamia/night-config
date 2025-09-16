@@ -234,7 +234,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             } else if (v instanceof List) {
                 List<?> l = (List<?>) v;
                 List<Object> newList = new ArrayList<>(l);
-                newList.replaceAll(elem -> replaceValue(elem));
+                newList.replaceAll(this::replaceValue);
                 return newList;
             } else {
                 return v;
@@ -484,7 +484,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
             case 1:
-                return (T) mapLockGet(values, lock, path.get(0));
+                return (T) mapLockGet(values, lock, path.getFirst());
             default:
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
@@ -502,7 +502,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
             case 1:
-                return mapLockContains(values, lock, path.get(0));
+                return mapLockContains(values, lock, path.getFirst());
             default: {
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
@@ -519,7 +519,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
             case 1:
-                return mapLockPutIfAbsent(values, lock, path.get(0), nnValue) == null;
+                return mapLockPutIfAbsent(values, lock, path.getFirst(), nnValue) == null;
             default: {
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
@@ -537,7 +537,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
             case 1:
-                return (T) mapLockRemove(values, lock, path.get(0));
+                return (T) mapLockRemove(values, lock, path.getFirst());
             default: {
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
@@ -558,7 +558,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
             case 1:
-                return (T) mapLockPut(values, lock, path.get(0), nnValue);
+                return (T) mapLockPut(values, lock, path.getFirst(), nnValue);
             default: {
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
@@ -571,15 +571,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 
     /** Convert all sub-configurations to StampedConfigs. */
     private void convertSubConfigs(Config c) {
-        if (c instanceof AbstractConfig) {
-            AbstractConfig conf = (AbstractConfig) c;
-			try {
+        if (c instanceof AbstractConfig conf) {
+            try {
             	conf.valueMap().replaceAll((k, v) -> convertValue(v));
 			} catch (UnsupportedOperationException ex) {
 				// valueMap() is not supported, use entrySet() instead
-				conf.entrySet().forEach(entry -> {
-					entry.setValue(convertValue(entry.getRawValue()));
-                });
+				conf.entrySet().forEach(entry -> entry.setValue(convertValue(entry.getRawValue())));
 			}
         } else {
             for (Config.Entry entry : c.entrySet()) {
@@ -596,8 +593,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
     private Object convertValue(Object v) {
         if (v instanceof StampedConfig) {
             return v;
-        } else if (v instanceof Config) {
-            Config c = (Config) v;
+        } else if (v instanceof Config c) {
             StampedConfig converted = createSubConfig();
             convertSubConfigs(c);
             converted.putAll(c);
@@ -607,7 +603,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             return converted;
         } else if (v instanceof List) {
             List<Object> l = (List<Object>) v;
-            l.replaceAll(elem -> convertValue(elem));
+            l.replaceAll(this::convertValue);
             return l;
         } else {
             return v;
@@ -633,8 +629,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         if (other == this) {
             throw new IllegalArgumentException("I cannot putAll() into myself.");
         }
-        if (other instanceof StampedConfig) {
-            StampedConfig stamped = (StampedConfig) other;
+        if (other instanceof StampedConfig stamped) {
             long stamp = stamped.lock.tryReadLock();
             if (stamp == 0) {
                 stamped.checkStateForNormalOp(); // catch misuse, especially for other == this
@@ -648,9 +643,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         } else {
             // Danger: we may insert subconfigs that are not StampedConfig! convert them
             convertSubConfigs((Config) other);
-			other.entrySet().forEach(entry -> {
-				values.put(entry.getKey(), entry.getRawValue());
-			});
+			other.entrySet().forEach(entry -> values.put(entry.getKey(), entry.getRawValue()));
         }
     }
 
@@ -659,8 +652,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         if (other == this) {
             throw new IllegalArgumentException("I cannot removeAll() from myself.");
         }
-        if (other instanceof StampedConfig) {
-            StampedConfig stamped = (StampedConfig) other;
+        if (other instanceof StampedConfig stamped) {
             long stamp = stamped.lock.tryReadLock();
             if (stamp == 0) {
                 stamped.checkStateForNormalOp(); // catch misuse, especially for other == this
@@ -676,9 +668,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 Set<String> values = other.valueMap().keySet();
                 this.values.keySet().removeAll(values);
             } catch (UnsupportedOperationException ex) {
-                other.entrySet().forEach(entry -> {
-                    values.remove(entry.getKey());
-                });
+                other.entrySet().forEach(entry -> values.remove(entry.getKey()));
             }
         }
     }
@@ -702,9 +692,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
     @Override
     public void clearComments() {
         checkStateForNormalOp();
-        bulkCommentedUpdate(view -> {
-            view.clearComments();
-        });
+        bulkCommentedUpdate(CommentedConfig::clearComments);
     }
 
     @Override
@@ -729,7 +717,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
             case 1:
-                return mapLockRemove(comments, lock, path.get(0));
+                return mapLockRemove(comments, lock, path.getFirst());
             default: {
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
@@ -764,7 +752,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
             case 1:
-                return mapLockPut(comments, lock, path.get(0), value);
+                return mapLockPut(comments, lock, path.getFirst(), value);
             default: {
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
@@ -780,7 +768,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
             case 1:
-                return mapLockContains(comments, lock, path.get(0));
+                return mapLockContains(comments, lock, path.getFirst());
             default: {
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
@@ -814,7 +802,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             case 0:
                 throw new IllegalArgumentException("empty entry path");
             case 1:
-                return mapLockGet(comments, lock, path.get(0));
+                return mapLockGet(comments, lock, path.getFirst());
             default:
                 int lastIndex = path.size() - 1;
                 List<String> parentPath = path.subList(0, lastIndex);
@@ -839,8 +827,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
 
         bulkUpdate(view -> {
-            if (other instanceof StampedConfig) {
-                StampedConfig otherStamped = (StampedConfig) other;
+            if (other instanceof StampedConfig otherStamped) {
                 long otherStamp = otherStamped.lock.tryReadLock();
                 if (otherStamp == 0) {
                     otherStamped.checkStateForNormalOp();
@@ -929,9 +916,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
         if (obj instanceof StampedConfig) {
             return bulkCommentedRead(view -> {
-                return ((StampedConfig) obj).bulkCommentedRead(objView -> {
-                    return view.equals(objView);
-                });
+                return ((StampedConfig) obj).bulkCommentedRead(view::equals);
             });
         } else if (obj instanceof UnmodifiableConfig) {
             return bulkRead(view -> {
@@ -950,7 +935,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             for (UnmodifiableConfig.Entry entry : view.entrySet()) {
                 builder.append(entry.getKey());
                 builder.append('=');
-                builder.append(String.valueOf((Object) entry.getRawValue()));
+                builder.append((Object) entry.getRawValue());
                 builder.append(", ");
             }
             builder.append('}');
@@ -1049,12 +1034,11 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 
         @Override
         public boolean contains(Object o) {
-            if (o instanceof UnmodifiableConfig.Entry) {
-                UnmodifiableConfig.Entry entry = (UnmodifiableConfig.Entry) o;
+            if (o instanceof UnmodifiableConfig.Entry entry) {
                 Object entryValue = entry.getRawValue();
                 Object value = StampedConfig.this
                         .getRaw(Collections.singletonList(entry.getKey()));
-                return entryValue == null ? (value == null) : (entryValue.equals(value));
+                return Objects.equals(entryValue, value);
             }
             return false;
         }
@@ -1136,11 +1120,11 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 StampedConfig.this.state.set(ThreadConfigState.NORMAL);
                 StampedConfig.this.lock.unlockWrite(stamp);
             }
-        };
+        }
     }
 
     /** A "lazy" entry: its value is always determined on demand by querying the StampedConfig. */
-    private abstract class LazyEntry implements CommentedConfig.Entry {
+    private abstract static class LazyEntry implements CommentedConfig.Entry {
         protected final String key;
 
         protected LazyEntry(String key) {
@@ -1436,7 +1420,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         public Set<? extends UnmodifiableCommentedConfig.Entry> entrySet() {
             checkValid();
             @SuppressWarnings({ "unchecked", "rawtypes" })
-            Set<Entry> set = new TransformingSet<Map.Entry<String,Object>,Entry>(
+            Set<Entry> set = new TransformingSet<>(
                     StampedConfig.this.values.entrySet(),
                     r -> {
                         checkValid();
@@ -1446,9 +1430,9 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                         checkValid();
                         return null;
                     }, s -> {
-                        checkValid();
-                        return s instanceof Map.Entry ? new Entry((Map.Entry)s) : s;
-                    });
+                checkValid();
+                return s instanceof Map.Entry ? new Entry((Map.Entry) s) : s;
+            });
 			return Collections.unmodifiableSet(set);
         }
 
@@ -1459,13 +1443,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 case 0:
                     throw new IllegalArgumentException("empty entry path");
                 case 1: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     return comments.containsKey(key);
                 }
                 default: {
-                    Object maybeParent = values.get(path.get(0));
-                    if (maybeParent instanceof StampedConfig) {
-                        StampedConfig parent = (StampedConfig) maybeParent;
+                    Object maybeParent = values.get(path.getFirst());
+                    if (maybeParent instanceof StampedConfig parent) {
                         return parent.containsComment(path.subList(1, path.size()));
                         // it is OK to acquire a read lock on sub-configurations
                     } else {
@@ -1488,13 +1471,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 case 0:
                     throw new IllegalArgumentException("empty entry path");
                 case 1: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     return comments.get(key);
                 }
                 default: {
-                    Object maybeParent = values.get(path.get(0));
-                    if (maybeParent instanceof StampedConfig) {
-                        StampedConfig parent = (StampedConfig) maybeParent;
+                    Object maybeParent = values.get(path.getFirst());
+                    if (maybeParent instanceof StampedConfig parent) {
                         return parent.getComment(path.subList(1, path.size()));
                     } else {
                         return null;
@@ -1516,13 +1498,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 case 0:
                     throw new IllegalArgumentException("empty entry path");
                 case 1: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     return values.containsKey(key);
                 }
                 default: {
-                    Object maybeParent = values.get(path.get(0));
-                    if (maybeParent instanceof StampedConfig) {
-                        StampedConfig parent = (StampedConfig) maybeParent;
+                    Object maybeParent = values.get(path.getFirst());
+                    if (maybeParent instanceof StampedConfig parent) {
                         return parent.contains(path.subList(1, path.size()));
                     } else {
                         return false;
@@ -1539,13 +1520,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 case 0:
                     throw new IllegalArgumentException("empty entry path");
                 case 1: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     return (T) values.get(key);
                 }
                 default: {
-                    Object maybeParent = values.get(path.get(0));
-                    if (maybeParent instanceof StampedConfig) {
-                        StampedConfig parent = (StampedConfig) maybeParent;
+                    Object maybeParent = values.get(path.getFirst());
+                    if (maybeParent instanceof StampedConfig parent) {
                         return parent.getRaw(path.subList(1, path.size()));
                     } else {
                         return null;
@@ -1574,7 +1554,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
             for (UnmodifiableCommentedConfig.Entry entry : entrySet()) {
                 builder.append(entry.getKey());
                 builder.append('=');
-                builder.append(String.valueOf((Object) entry.getRawValue()));
+                builder.append((Object) entry.getRawValue());
                 builder.append(", ");
             }
             builder.append("}");
@@ -1585,10 +1565,9 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         public boolean equals(Object obj) {
             if (obj == this) {
                 return true;
-            } else if (!(obj instanceof UnmodifiableConfig)) {
+            } else if (!(obj instanceof UnmodifiableConfig conf)) {
                 return false;
             } else {
-                UnmodifiableConfig conf = (UnmodifiableConfig) obj;
                 if (conf.size() != size()) {
                     return false;
                 }
@@ -1693,38 +1672,38 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 		@Override
         public Set<? extends CommentedConfig.Entry> entrySet() {
 			checkValid();
-			return new TransformingSet<Map.Entry<String,Object>,Entry>(
-					StampedConfig.this.values.entrySet(),
-					r -> {
-						checkValid();
-						return new Entry(r);
-					},
-					w -> {
-						checkValid();
-						return new Map.Entry<String,Object>() {
-							@Override
-							public String getKey() {
-								checkValid();
-								return w.getKey();
-							}
+			return new TransformingSet<>(
+                    StampedConfig.this.values.entrySet(),
+                    r -> {
+                        checkValid();
+                        return new Entry(r);
+                    },
+                    w -> {
+                        checkValid();
+                        return new Map.Entry<>() {
+                            @Override
+                            public String getKey() {
+                                checkValid();
+                                return w.getKey();
+                            }
 
-							@Override
-							public Object getValue() {
-								checkValid();
-								return w.getRawValue();
-							}
+                            @Override
+                            public Object getValue() {
+                                checkValid();
+                                return w.getRawValue();
+                            }
 
-							@Override
-							public Object setValue(Object value) {
-								checkValid();
-								return w.setValue(value);
-							}
-						};
-					},
-					s -> {
-						checkValid();
-						return s instanceof Map.Entry ? new Entry((Map.Entry) s) : s;
-					});
+                            @Override
+                            public Object setValue(Object value) {
+                                checkValid();
+                                return w.setValue(value);
+                            }
+                        };
+                    },
+                    s -> {
+                        checkValid();
+                        return s instanceof Map.Entry ? new Entry((Map.Entry) s) : s;
+                    });
         }
 
         @SuppressWarnings("unchecked")
@@ -1735,14 +1714,13 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 case 0:
                     throw new IllegalArgumentException("empty entry path");
                 case 1: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     return (T) values.remove(key);
                 }
                 default: {
                     int lastIndex = path.size() - 1;
                     Object maybeParent = getRaw(path.subList(0, lastIndex));
-                    if (maybeParent instanceof StampedConfig) {
-                        StampedConfig parent = (StampedConfig) maybeParent;
+                    if (maybeParent instanceof StampedConfig parent) {
                         String key = path.get(lastIndex);
                         return (T) parent.values.remove(key);
                     } else {
@@ -1767,14 +1745,13 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 case 0:
                     throw new IllegalArgumentException("empty entry path");
                 case 1: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     return comments.remove(key);
                 }
                 default: {
                     int lastIndex = path.size() - 1;
                     Object maybeParent = getRaw(path.subList(0, lastIndex));
-                    if (maybeParent instanceof StampedConfig) {
-                        StampedConfig parent = (StampedConfig) maybeParent;
+                    if (maybeParent instanceof StampedConfig parent) {
                         String key = path.get(lastIndex);
                         return parent.comments.remove(key);
                     } else {
@@ -1792,12 +1769,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 case 0:
                     throw new IllegalArgumentException("empty entry path");
                 case 1: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     Object nnValue = (value == null) ? NULL_OBJECT : value;
                     return (T) values.put(key, nnValue);
                 }
                 default: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     List<String> subPath = path.subList(1, path.size());
                     Object currentParent = values.get(key);
                     if (currentParent == null) {
@@ -1833,11 +1810,11 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 case 0:
                     throw new IllegalArgumentException("empty entry path");
                 case 1: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     return comments.put(key, value);
                 }
                 default: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     List<String> subPath = path.subList(1, path.size());
                     Object currentParent = values.get(key);
                     if (currentParent == null) {
@@ -1865,12 +1842,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 case 0:
                     throw new IllegalArgumentException("empty entry path");
                 case 1: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     Object nnValue = (value == null) ? NULL_OBJECT : value;
                     return values.putIfAbsent(key, nnValue) == null;
                 }
                 default: {
-                    String key = path.get(0);
+                    String key = path.getFirst();
                     List<String> subPath = path.subList(1, path.size());
                     Object currentParent = values.get(key);
                     if (currentParent == null) {
@@ -1892,7 +1869,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
     }
 
-    private static enum ThreadConfigState {
+    private enum ThreadConfigState {
         /** normal state */
         NORMAL,
         /** currently in bulkRead/bulkWrite, the StampedConfig must not be used, only the view */
@@ -1900,7 +1877,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         /** currently in iterator, the StampedConfig must not be used, only the iterator */
         IN_ITER_OP,
         /** passed to otherConfig.replaceContentBy(this), cannot be used anymore */
-        CONSUMED;
+        CONSUMED
     }
 
 	/**
@@ -1934,158 +1911,156 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 
 		@Override
 		public Set<Entry<String, Object>> entrySet() {
-			return new Set<Map.Entry<String,Object>>() {
-				@Override
-				public int size() {
-					return config.size();
-				}
+			return new Set<>() {
+                @Override
+                public int size() {
+                    return config.size();
+                }
 
-				@Override
-				public boolean isEmpty() {
-					return config.isEmpty();
-				}
+                @Override
+                public boolean isEmpty() {
+                    return config.isEmpty();
+                }
 
-				@Override
-				@SuppressWarnings("unlikely-arg-type")
-				public boolean contains(Object o) {
-					if (!(o instanceof Map.Entry)) {
-						return false;
-					}
-					Map.Entry<?,?> search = (Map.Entry<?,?>)o;
-					if (!(search.getKey() instanceof String)) {
-						return false;
-					}
-					return config.entrySet().contains(new UnmodifiableConfig.Entry() {
-						@Override
-						public String getKey() {
-							return (String)search.getKey();
-						}
+                @Override
+                @SuppressWarnings("unlikely-arg-type")
+                public boolean contains(Object o) {
+                    if (!(o instanceof Entry<?, ?> search)) {
+                        return false;
+                    }
+                    if (!(search.getKey() instanceof String)) {
+                        return false;
+                    }
+                    return config.entrySet().contains(new UnmodifiableConfig.Entry() {
+                        @Override
+                        public String getKey() {
+                            return (String) search.getKey();
+                        }
 
-						@Override
-						@SuppressWarnings("unchecked")
-						public <T> T getRawValue() {
-							return (T)search.getValue();
-						}
+                        @Override
+                        @SuppressWarnings("unchecked")
+                        public <T> T getRawValue() {
+                            return (T) search.getValue();
+                        }
 
-					});
-				}
+                    });
+                }
 
-				@Override
-				public Iterator<Entry<String, Object>> iterator() {
-					Iterator<? extends Config.Entry> it = config.entrySet().iterator();
-					return new Iterator<Map.Entry<String,Object>>() {
+                @Override
+                public Iterator<Entry<String, Object>> iterator() {
+                    Iterator<? extends Config.Entry> it = config.entrySet().iterator();
+                    return new Iterator<>() {
 
-						@Override
-						public boolean hasNext() {
-							return it.hasNext();
-						}
+                        @Override
+                        public boolean hasNext() {
+                            return it.hasNext();
+                        }
 
-						@Override
-						public Entry<String, Object> next() {
-							Config.Entry entry = it.next();
-							return new Entry<String,Object>() {
+                        @Override
+                        public Entry<String, Object> next() {
+                            Config.Entry entry = it.next();
+                            return new Entry<>() {
 
-								@Override
-								public String getKey() {
-									return entry.getKey();
-								}
+                                @Override
+                                public String getKey() {
+                                    return entry.getKey();
+                                }
 
-								@Override
-								public Object getValue() {
-									return entry.getRawValue();
-								}
+                                @Override
+                                public Object getValue() {
+                                    return entry.getRawValue();
+                                }
 
-								@Override
-								public Object setValue(Object value) {
-									return entry.setValue(value);
-								}
+                                @Override
+                                public Object setValue(Object value) {
+                                    return entry.setValue(value);
+                                }
 
-							};
-						}
+                            };
+                        }
 
-						@Override
-						public void remove() {
-							it.remove();
-						}
+                        @Override
+                        public void remove() {
+                            it.remove();
+                        }
 
-					};
-				}
+                    };
+                }
 
-				@Override
-				public Object[] toArray() {
-					throw new UnsupportedOperationException("Unimplemented method 'toArray'");
-				}
+                @Override
+                public Object[] toArray() {
+                    throw new UnsupportedOperationException("Unimplemented method 'toArray'");
+                }
 
-				@Override
-				public <T> T[] toArray(T[] a) {
-					throw new UnsupportedOperationException("Unimplemented method 'toArray'");
-				}
+                @Override
+                public <T> T[] toArray(T[] a) {
+                    throw new UnsupportedOperationException("Unimplemented method 'toArray'");
+                }
 
-				@Override
-				public boolean add(Entry<String, Object> e) {
-					return config.add(Collections.singletonList(e.getKey()), e.getValue());
-				}
+                @Override
+                public boolean add(Entry<String, Object> e) {
+                    return config.add(Collections.singletonList(e.getKey()), e.getValue());
+                }
 
-				@Override
-				public boolean remove(Object o) {
-					if (!(o instanceof Map.Entry)) {
-						return false;
-					}
-					Map.Entry<?,?> entry = (Map.Entry<?,?>)o;
-					Object key = entry.getKey();
-					if (!(key instanceof String)) {
-						return false;
-					}
-					return config.remove(Collections.singletonList((String)key)) != null;
-				}
+                @Override
+                public boolean remove(Object o) {
+                    if (!(o instanceof Entry<?, ?> entry)) {
+                        return false;
+                    }
+                    Object key = entry.getKey();
+                    if (!(key instanceof String)) {
+                        return false;
+                    }
+                    return config.remove(Collections.singletonList((String) key)) != null;
+                }
 
-				@Override
-				public boolean containsAll(Collection<?> c) {
-					for (Object o : c) {
-						if (!contains(o)) {
-							return false;
-						}
-					}
-					return true;
-				}
+                @Override
+                public boolean containsAll(Collection<?> c) {
+                    for (Object o : c) {
+                        if (!contains(o)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
 
-				@Override
-				public boolean addAll(Collection<? extends Entry<String, Object>> c) {
-					boolean changed = false;
-					for (Map.Entry<String, Object> o : c) {
-						changed |= add(o);
-					}
-					return changed;
-				}
+                @Override
+                public boolean addAll(Collection<? extends Entry<String, Object>> c) {
+                    boolean changed = false;
+                    for (Map.Entry<String, Object> o : c) {
+                        changed |= add(o);
+                    }
+                    return changed;
+                }
 
-				@Override
-				public boolean retainAll(Collection<?> c) {
-					boolean changed = false;
-					Iterator<Map.Entry<String, Object>> it = iterator();
-					while (it.hasNext()) {
-						if (!c.contains(it.next())) {
-							it.remove();
-							changed = true;
-						}
-					}
-					return changed;
-				}
+                @Override
+                public boolean retainAll(Collection<?> c) {
+                    boolean changed = false;
+                    Iterator<Map.Entry<String, Object>> it = iterator();
+                    while (it.hasNext()) {
+                        if (!c.contains(it.next())) {
+                            it.remove();
+                            changed = true;
+                        }
+                    }
+                    return changed;
+                }
 
-				@Override
-				public boolean removeAll(Collection<?> c) {
-					boolean changed = false;
-					for (Object o : c) {
-						changed |= remove(o);
-					}
-					return changed;
-				}
+                @Override
+                public boolean removeAll(Collection<?> c) {
+                    boolean changed = false;
+                    for (Object o : c) {
+                        changed |= remove(o);
+                    }
+                    return changed;
+                }
 
-				@Override
-				public void clear() {
-					config.clear();
-				}
+                @Override
+                public void clear() {
+                    config.clear();
+                }
 
-			};
+            };
 		}
 
 		@Override
@@ -2103,12 +2078,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 
 		@Override
 		public Set<String> keySet() {
-			return config.entrySet().stream().map(e -> e.getKey()).collect(Collectors.toSet());
+			return config.entrySet().stream().map(UnmodifiableConfig.Entry::getKey).collect(Collectors.toSet());
 		}
 
 		@Override
 		public Collection<Object> values() {
-			return config.entrySet().stream().map(e -> e.getRawValue()).collect(Collectors.toList());
+			return config.entrySet().stream().map(UnmodifiableConfig.Entry::getRawValue).collect(Collectors.toList());
 		}
 
 		@Override
@@ -2117,8 +2092,8 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 		}
 
 		@Override
-		public void putAll(Map<? extends String, ? extends Object> m) {
-			for (Map.Entry<? extends String,? extends Object> entry : m.entrySet()) {
+		public void putAll(Map<? extends String, ?> m) {
+			for (Map.Entry<? extends String, ?> entry : m.entrySet()) {
 				config.set(Collections.singletonList(entry.getKey()), entry.getValue());
 			}
 		}

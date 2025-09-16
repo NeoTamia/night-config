@@ -56,8 +56,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
 
     /** Convert all sub-configurations to SynchronizedConfigs. */
     private static void convertSubConfigs(Config c, SynchronizedConfig parent) {
-        if (c instanceof AbstractConfig) {
-            AbstractConfig conf = (AbstractConfig) c;
+        if (c instanceof AbstractConfig conf) {
             conf.valueMap().replaceAll((k, v) -> convertValue(v, parent));
         } else {
             for (Config.Entry entry : c.entrySet()) {
@@ -75,8 +74,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
             SynchronizedConfig subConfig = convert((Config) v, parent);
             convertSubConfigs(subConfig, subConfig);
             return subConfig;
-        } else if (v instanceof List) {
-            List<?> l = (List<?>) v;
+        } else if (v instanceof List<?> l) {
             List<Object> newList = new ArrayList<>(l);
             newList.replaceAll(elem -> convertValue(elem, parent));
             return newList;
@@ -477,7 +475,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
 
     private static final class DataHolder extends AbstractCommentedConfig {
 
-        private SynchronizedConfig syncConfig;
+        private final SynchronizedConfig syncConfig;
         private final ConfigFormat<?> format;
 
         DataHolder(SynchronizedConfig parent) {
@@ -566,7 +564,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
         @Override
         public Set<Entry<K, V>> entrySet() {
             synchronized (rootMonitor) {
-                return new SynchronizedSet<Entry<K, V>>(map.entrySet(), rootMonitor);
+                return new SynchronizedSet<>(map.entrySet(), rootMonitor);
             }
         }
 

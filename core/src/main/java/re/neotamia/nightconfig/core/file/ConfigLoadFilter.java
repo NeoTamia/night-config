@@ -14,5 +14,5 @@ public interface ConfigLoadFilter {
      * @param newConfig the new configuration
      * @return {@code true} to accept the new version, {@code false} to reject it
      */
-    public boolean acceptNewVersion(CommentedConfig newConfig);
+    boolean acceptNewVersion(CommentedConfig newConfig);
 }

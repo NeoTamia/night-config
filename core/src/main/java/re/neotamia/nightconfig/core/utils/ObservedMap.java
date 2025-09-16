@@ -147,9 +147,8 @@ public final class ObservedMap<K, V> extends AbstractObserved implements Map<K, 
 		Function<Entry<K, V>, ObservedEntry<K, V>> readT = e -> new ObservedEntry<>(e, callback);
 		Function<ObservedEntry<K, V>, Entry<K, V>> writeT = oe -> oe.entry;
 		Function<Object, Object> searchT = o -> {
-			if (o instanceof ObservedEntry) {
-				ObservedEntry<?, ?> observedEntry = (ObservedEntry<?, ?>) o;
-				return observedEntry.entry;
+			if (o instanceof ObservedEntry<?, ?> observedEntry) {
+                return observedEntry.entry;
 			}
 			return o;
 		};

@@ -235,9 +235,8 @@ public abstract class AbstractCommentedConfig extends AbstractConfig implements 
 			if (obj == this) {
 				return true;
 			}
-			if (obj instanceof CommentedEntryWrapper) {
-				CommentedEntryWrapper other = (CommentedEntryWrapper)obj;
-				return Objects.equals(getKey(), other.getKey())
+			if (obj instanceof CommentedEntryWrapper other) {
+                return Objects.equals(getKey(), other.getKey())
 					   && Objects.equals(getValue(), other.getValue())
 					   && Objects.equals(getComment(), other.getComment());
 			}

@@ -3,6 +3,7 @@ package re.neotamia.nightconfig.core.serde;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.Buffer;
 import java.util.*;
 
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
@@ -27,13 +28,13 @@ final class Util {
 			return ((UnmodifiableConfig) configValue).isEmpty();
 		}
 		if (configValue instanceof CharSequence) {
-			return ((CharSequence) configValue).length() == 0;
+			return ((CharSequence) configValue).isEmpty();
 		}
 		if (configValue instanceof Optional) {
-			return !((Optional<?>) configValue).isPresent();
+			return ((Optional<?>) configValue).isEmpty();
 		}
-		if (configValue instanceof java.nio.Buffer) {
-			((java.nio.Buffer) configValue).hasRemaining();
+		if (configValue instanceof Buffer buffer) {
+			return !buffer.hasRemaining();
 		}
 		Class<?> cls = configValue.getClass();
 		if (cls.isArray()) {

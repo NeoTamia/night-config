@@ -270,7 +270,7 @@ final class StandardDeserializers {
 			Class<?> valueCls = value.getClass();
 
 			if (valueCls == Long.class) {
-				long l = ((Number) value).longValue();
+				long l = value.longValue();
 				if (resultCls == Integer.class || resultCls == int.class) {
 					// long to int
 					int i = (int) l;

@@ -89,7 +89,7 @@ public final class FormatDetector {
         if (!isAutoRegisterEnabled()) return;
 		try {
 			Class.forName(className);
-		} catch (ClassNotFoundException e) {}
+		} catch (ClassNotFoundException ignored) {}
 	}
 
 	private FormatDetector() {}

@@ -7,7 +7,6 @@ import java.lang.reflect.Field;
 import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.NullObject;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
-import re.neotamia.nightconfig.core.serde.annotations.SerdeConfig;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeDefault;
 import re.neotamia.nightconfig.core.serde.annotations.SerdePhase;
 

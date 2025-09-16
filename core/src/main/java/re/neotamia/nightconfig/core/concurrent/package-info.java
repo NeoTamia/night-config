@@ -50,11 +50,11 @@
  * every {@code get} and {@code set} methods.</li>
  * <li>They provide thread-safe atomic bulk operations that allow to apply a function to the config as a
  * whole, coherent, indivisible operation:
- * {@link ConcurrentConfig#bulkRead(java.util.function.Function)},
- * {@link ConcurrentConfig#bulkUpdate(java.util.function.Function)},
- * {@link ConcurrentCommentedConfig#bulkCommentedRead(java.util.function.Function)}
+ * {@link re.neotamia.nightconfig.core.concurrent.ConcurrentConfig#bulkRead(java.util.function.Function)},
+ * {@link re.neotamia.nightconfig.core.concurrent.ConcurrentConfig#bulkUpdate(java.util.function.Function)},
+ * {@link re.neotamia.nightconfig.core.concurrent.ConcurrentCommentedConfig#bulkCommentedRead(java.util.function.Function)}
  * and
- * {@link ConcurrentCommentedConfig#bulkCommentedUpdate(java.util.function.Function)}.
+ * {@link re.neotamia.nightconfig.core.concurrent.ConcurrentCommentedConfig#bulkCommentedUpdate(java.util.function.Function)}.
  * </li>
  * </ul>
  * 
@@ -74,8 +74,8 @@
  * }
  * </pre>
  * 
- * Some configurations like {@link StampedConfig} and {@link SynchronizedConfig} also provide a way to atomically
- * replace their entire content. At the moment, this feature is not part of the {@link ConcurrentConfig} interface.
+ * Some configurations like {@link re.neotamia.nightconfig.core.concurrent.StampedConfig} and {@link re.neotamia.nightconfig.core.concurrent.SynchronizedConfig} also provide a way to atomically
+ * replace their entire content. At the moment, this feature is not part of the {@link re.neotamia.nightconfig.core.concurrent.ConcurrentConfig} interface.
  * 
  * <h3>Important caveats</h3>
  * In order to guarantee the safety of the operations and prevent any deadlock:
@@ -87,7 +87,7 @@
  * </li>
  * <li>After replacement operations, the old configuration must not be used anymore, because its internal structure may have been
  * totally or partially "moved" to the new configuration. See the documentation of
- * {@link SynchronizedConfig#replaceContentBy(Config)}
+ * {@link re.neotamia.nightconfig.core.concurrent.SynchronizedConfig#replaceContentBy(Config)}
  * for more information.</li>
  * </ol>
  * 

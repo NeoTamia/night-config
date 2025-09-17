@@ -76,8 +76,8 @@ public final class YamlParser implements ConfigParser<CommentedConfig> {
 
                 Node rootNode = optionalNode.get();
                 parsingMode.prepareParsing(destination);
-                parseHeaderComment(reader, commentedConfig);
                 parseNodeWithComments(rootNode, commentedConfig, Collections.emptyList(), parsingMode);
+                parseHeaderComment(reader, commentedConfig);
             } catch (Exception e) {
                 throw new ParsingException("YAML parsing with comments failed", e);
             }

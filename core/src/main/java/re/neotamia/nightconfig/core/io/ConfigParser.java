@@ -344,8 +344,14 @@ public interface ConfigParser<C extends Config> {
 
         if (!collected.isEmpty() && hasSeparatorBlankLine) {
             String header = String.join("\n", collected);
-            if (!header.isBlank())
+            if (!header.isBlank()) {
                 commentedConfig.setHeaderComment(header);
+                commentedConfig.entrySet().stream().findFirst().ifPresent(entry -> {
+                    var comment = entry.getComment().replaceAll("\n\\s", "\n").trim();
+                    if (header.equals(comment))
+                        entry.setComment(null);
+                });
+            }
         }
     }
 }

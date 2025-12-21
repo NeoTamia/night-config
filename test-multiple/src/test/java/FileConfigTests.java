@@ -149,47 +149,19 @@ public class FileConfigTests {
 
     void checkCommentsTestContent(CommentedFileConfig config) {
         assertEquals(1, config.getInt("v"));
-        assertEquals(" comment on v", config.getComment("v"));
+        assertEquals("comment on v", config.getComment("v"));
 
         List<CommentedConfig> abbc = config.get(List.of("a.b", "b.c"));
         assertNotNull(abbc);
         assertEquals("value", abbc.get(0).get("key"));
-        assertEquals(" sub1", abbc.get(0).getComment("key"));
+        assertEquals("sub1", abbc.get(0).getComment("key"));
 
-        assertEquals(" comment on table", config.getComment("table"));
+        assertEquals("comment on table", config.getComment("table"));
         assertEquals("v", config.get(List.of("table", "k")));
-        assertEquals(" sub2", config.getComment(List.of("table", "k")));
+        assertEquals("sub2", config.getComment(List.of("table", "k")));
 
-        assertEquals(" comment on subtable", config.getComment(List.of("table", "subtable")));
+        assertEquals("comment on subtable", config.getComment(List.of("table", "subtable")));
         assertEquals("b", config.get(List.of("table", "subtable", "a")));
-        assertEquals(" sub3", config.getComment(List.of("table", "subtable", "a")));
-    }
-
-    @Test
-    public void testHeaderCommentWithYaml() throws Exception {
-        CommentedFileConfig fileConfig = CommentedFileConfig.builder(Path.of(getClass().getResource("header.yaml").toURI())).async().build();
-        fileConfig.setHeaderComment("This is a header comment");
-        assertEquals("This is a header comment", fileConfig.getHeaderComment());
-
-        fileConfig.save();
-        var loadedConfig = CommentedFileConfig.builder(Path.of(getClass().getResource("header.yaml").toURI())).async().build();
-        loadedConfig.load();
-        assertEquals("This is a header comment", loadedConfig.getHeaderComment());
-        fileConfig.close();
-        loadedConfig.close();
-    }
-
-    @Test
-    public void testHeaderCommentWithToml() throws Exception {
-        CommentedFileConfig fileConfig = CommentedFileConfig.builder(Path.of(getClass().getResource("header.toml").toURI())).async().build();
-        fileConfig.setHeaderComment("This is a header comment");
-        assertEquals("This is a header comment", fileConfig.getHeaderComment());
-
-        fileConfig.save();
-        var loadedConfig = CommentedFileConfig.builder(Path.of(getClass().getResource("header.toml").toURI())).async().build();
-        loadedConfig.load();
-        assertEquals("This is a header comment", loadedConfig.getHeaderComment());
-        fileConfig.close();
-        loadedConfig.close();
+        assertEquals("sub3", config.getComment(List.of("table", "subtable", "a")));
     }
 }

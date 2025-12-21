@@ -1,9 +1,12 @@
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.ConfigSpec;
 import re.neotamia.nightconfig.core.InMemoryFormat;
 import re.neotamia.nightconfig.core.file.FileConfig;
+import re.neotamia.nightconfig.core.file.FormatDetector;
+import re.neotamia.nightconfig.json.JsonFormat;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,6 +21,11 @@ public class ConfigSpecTests {
 		spec.defineInRange("n", 1, 0, 10);
 		spec.defineInList("sub.k", "A", Arrays.asList("A", "B", "C"));
 	}
+
+    @BeforeAll
+    public static void registerFormats() {
+        FormatDetector.registerExtension("json", JsonFormat.fancyInstance());
+    }
 
 	@Test
 	public void basicConfig() throws Exception {

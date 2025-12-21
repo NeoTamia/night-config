@@ -1,6 +1,6 @@
 name = "Config"
 version = 2
-#Whether the configuration is enabled
+# Whether the configuration is enabled
 isEnabled = true
 decimals = 0.5
 doubleValue = 0.123456789

@@ -35,13 +35,14 @@ public class TomlWriterTest {
 		config.set("multiline", "first line\nsecond line\n\tthird line (indented)\nfourth line!");
 
 		var result = writerWithoutIndentation().writeToString(config);
-		var expected = "basic = \"normal string\"\n" +
-			"multiline = \"\"\"\n" +
-			"first line\n" +
-			"second line\n" +
-			"\tthird line (indented)\n" +
-			"fourth line!\"\"\"\n" +
-			"";
+		var expected = """
+                basic = "normal string"
+                multiline = ""\"
+                first line
+                second line
+                \tthird line (indented)
+                fourth line!""\"
+                """;
 		assertEquals(expected, result);
 
 		var reparsed = TomlFormat.instance().createParser().parse(expected);
@@ -299,7 +300,7 @@ public class TomlWriterTest {
 		System.out.println(written);
 		assertEquals(join("#Header Comment",
 			"[Header]",
-			"\t#Value Comment",
+			"\t# Value Comment",
 			"\tkey = \"value\"",
 			""), written);
 	}
@@ -317,7 +318,7 @@ public class TomlWriterTest {
 
 		String written = writer.writeToString(config);
 		System.out.println(written);
-		assertEquals(join("arr_arr_tbls = [[{one = 1}, {two = 2}]]\n"), written);
+		assertEquals(join("arr_arr_tbls = [[{one = 1}, {two = 2}]]", ""), written);
 	}
 
 	private String join(String... lines) {

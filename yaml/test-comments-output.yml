@@ -1,0 +1,11 @@
+# Server configuration
+server:
+  host: localhost
+  port: 8080
+# Database settings
+database:
+  url: jdbc:postgresql://localhost/mydb
+  username: user
+# Logging configuration
+logging:
+  level: INFO

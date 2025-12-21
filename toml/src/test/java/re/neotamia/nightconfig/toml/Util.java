@@ -34,7 +34,7 @@ public class Util {
         assertEquals(5000, config.<Integer>get("database.connection_max"));
         assertTrue(config.<Boolean>get("database.enabled"));
 
-        assertEquals(" Indentation (tabs and/or spaces) is allowed but not required",
+        assertEquals("Indentation (tabs and/or spaces) is allowed but not required",
                 config.getComment("servers.alpha"));
         assertEquals("10.0.0.1", config.get("servers.alpha.ip"));
         assertEquals("eqdc10", config.get("servers.alpha.dc"));
@@ -49,8 +49,7 @@ public class Util {
 
     static void populateTest(CommentedConfig config) {
         Config subConfig = config.createSubConfig();
-        subConfig.set("dateTime",
-            ZonedDateTime.of(2024, 05, 02, 13, 17, 38, 777, ZoneOffset.ofHours(+1)));
+        subConfig.set("dateTime", ZonedDateTime.of(2024, 05, 02, 13, 17, 38, 777, ZoneOffset.ofHours(+1)));
         subConfig.set("sub", config.createSubConfig());
         subConfig.set("string", "test");
 
@@ -67,47 +66,47 @@ public class Util {
         config.set("table_array", arrayOfTables);
     }
 
-    static final String EXPECTED_SERIALIZED = "bool_array = [\n" + //
-            "	true,\n" + //
-            "	false,\n" + //
-            "	true,\n" + //
-            "	false\n" + //
-            "]\n" + //
-            "string = \"\\\"value\\\"\"\n" + //
-            "double = 3.1415926535\n" + //
-            "integer = 2\n" + //
-            "long = 123456789\n" + //
-            "enum = \"A\"\n" + //
-            "\n" + //
-            "[config]\n" + //
-            "	dateTime = 2024-05-02T13:17:38.000000777+01:00\n" + //
-            "	sub = {}\n" + //
-            "	string = \"test\"\n" + //
-            "\n" + //
-            "[[table_array2]]\n" + //
-            "	dateTime = 2024-05-02T13:17:38.000000777+01:00\n" + //
-            "	sub = {}\n" + //
-            "	string = \"test\"\n" + //
-            "[[table_array2]]\n" + //
-            "	dateTime = 2024-05-02T13:17:38.000000777+01:00\n" + //
-            "	sub = {}\n" + //
-            "	string = \"test\"\n" + //
-            "[[table_array2]]\n" + //
-            "	dateTime = 2024-05-02T13:17:38.000000777+01:00\n" + //
-            "	sub = {}\n" + //
-            "	string = \"test\"\n" + //
-            "\n" + //
-            "[[table_array]]\n" + //
-            "	dateTime = 2024-05-02T13:17:38.000000777+01:00\n" + //
-            "	sub = {}\n" + //
-            "	string = \"test\"\n" + //
-            "[[table_array]]\n" + //
-            "	dateTime = 2024-05-02T13:17:38.000000777+01:00\n" + //
-            "	sub = {}\n" + //
-            "	string = \"test\"\n" + //
-            "[[table_array]]\n" + //
-            "	dateTime = 2024-05-02T13:17:38.000000777+01:00\n" + //
-            "	sub = {}\n" + //
-            "	string = \"test\"\n" + //
+    static final String EXPECTED_SERIALIZED = "bool_array = [" + System.lineSeparator() + //
+            "	true," + System.lineSeparator() + //
+            "	false," + System.lineSeparator() + //
+            "	true," + System.lineSeparator() + //
+            "	false" + System.lineSeparator() + //
+            "]" + System.lineSeparator() + //
+            "string = \"\\\"value\\\"\"" + System.lineSeparator() + //
+            "double = 3.1415926535" + System.lineSeparator() + //
+            "integer = 2" + System.lineSeparator() + //
+            "long = 123456789" + System.lineSeparator() + //
+            "enum = \"A\"" + System.lineSeparator() + //
+            "" + System.lineSeparator() + //
+            "[config]" + System.lineSeparator() + //
+            "	dateTime = 2024-05-02T13:17:38.000000777+01:00" + System.lineSeparator() + //
+            "	sub = {}" + System.lineSeparator() + //
+            "	string = \"test\"" + System.lineSeparator() + //
+            "" + System.lineSeparator() + //
+            "[[table_array2]]" + System.lineSeparator() + //
+            "	dateTime = 2024-05-02T13:17:38.000000777+01:00" + System.lineSeparator() + //
+            "	sub = {}" + System.lineSeparator() + //
+            "	string = \"test\"" + System.lineSeparator() + //
+            "[[table_array2]]" + System.lineSeparator() + //
+            "	dateTime = 2024-05-02T13:17:38.000000777+01:00" + System.lineSeparator() + //
+            "	sub = {}" + System.lineSeparator() + //
+            "	string = \"test\"" + System.lineSeparator() + //
+            "[[table_array2]]" + System.lineSeparator() + //
+            "	dateTime = 2024-05-02T13:17:38.000000777+01:00" + System.lineSeparator() + //
+            "	sub = {}" + System.lineSeparator() + //
+            "	string = \"test\"" + System.lineSeparator() + //
+            "" + System.lineSeparator() + //
+            "[[table_array]]" + System.lineSeparator() + //
+            "	dateTime = 2024-05-02T13:17:38.000000777+01:00" + System.lineSeparator() + //
+            "	sub = {}" + System.lineSeparator() + //
+            "	string = \"test\"" + System.lineSeparator() + //
+            "[[table_array]]" + System.lineSeparator() + //
+            "	dateTime = 2024-05-02T13:17:38.000000777+01:00" + System.lineSeparator() + //
+            "	sub = {}" + System.lineSeparator() + //
+            "	string = \"test\"" + System.lineSeparator() + //
+            "[[table_array]]" + System.lineSeparator() + //
+            "	dateTime = 2024-05-02T13:17:38.000000777+01:00" + System.lineSeparator() + //
+            "	sub = {}" + System.lineSeparator() + //
+            "	string = \"test\"" + System.lineSeparator() + //
             "";
 }

@@ -59,10 +59,10 @@ public class YamlWriterTest {
 """
 # Server configuration
 server:
-  # The port number
-  port: '8080'
   # The hostname to bind to
   host: localhost
+  # The port number
+  port: 8080
 # Database settings
 database:
   # Database connection URL

@@ -1,14 +1,14 @@
+'null': null
+nullObject: null
+string: this is a string
 sub:
   'null': null
   nullObject: null
-'null': null
-string: this is a string
-not.a.subconfig: works
-nullObject: null
+enum: A
 list:
   - 10
   - 12
-enum: A
 objectList:
   - foo: bar
   - baz: true
+not.a.subconfig: works

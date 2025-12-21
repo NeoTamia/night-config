@@ -15,8 +15,8 @@ toto = 42
 titi = 24
 
 [settings]
-	key2 = "value2"
 	key1 = "value1"
+	key2 = "value2"
 
 [nested]
 	description = "Nested Config"

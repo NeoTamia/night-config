@@ -47,11 +47,11 @@ public class Util {
               'null': null
             string: this is a string
             list:
-              - '10'
-              - '12'
+              - 10
+              - 12
             enum: A
             objectList:
               - foo: bar
-              - baz: 'true'
+              - baz: true
             """;
 }

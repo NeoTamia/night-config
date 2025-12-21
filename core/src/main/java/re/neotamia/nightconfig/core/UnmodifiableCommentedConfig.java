@@ -175,7 +175,7 @@ public interface UnmodifiableCommentedConfig extends UnmodifiableConfig {
 		/**
 		 * @return the entry's comment, may contain several lines
 		 */
-		String getComment();
+		@Nullable String getComment();
 	}
 
 	/**

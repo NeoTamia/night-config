@@ -347,6 +347,7 @@ public interface ConfigParser<C extends Config> {
             if (!header.isBlank()) {
                 commentedConfig.setHeaderComment(header);
                 commentedConfig.entrySet().stream().findFirst().ifPresent(entry -> {
+                    if (entry.getComment() == null) return;
                     var comment = entry.getComment().replaceAll("\n\\s", "\n").trim();
                     if (header.equals(comment))
                         entry.setComment(null);

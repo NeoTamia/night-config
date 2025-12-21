@@ -1,14 +1,14 @@
 package re.neotamia.nightconfig.hocon;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import re.neotamia.nightconfig.core.CommentedConfig;
+import re.neotamia.nightconfig.core.file.FormatDetector;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class HoconHeaderCommentTest {
     @Test

@@ -12,19 +12,18 @@ import re.neotamia.sharedtests.TestEnum;
 
 public class Util {
     static void checkExample(CommentedConfig config) {
-        assertEquals(" Comment associated to the boolean array\n With multiple lines",
-                config.getComment("bool_array"));
+        assertEquals("Comment associated to the boolean array\nWith multiple lines", config.getComment("bool_array"));
         assertEquals(Arrays.asList(true, false, true, false), config.get("bool_array"));
 
-        assertEquals(" Comment associated to the string", config.getComment("string"));
+        assertEquals("Comment associated to the string", config.getComment("string"));
         assertEquals("\"value\"", config.get("string"));
         assertEquals(3.1415926535, config.<Double>get("double"));
         assertEquals(2, config.<Integer>get("integer"));
 
         List<? extends Config> configList = config.get("config_list");
         assertEquals(3, configList.size());
-        assertEquals("test", configList.get(0).get("string"));
-        assertTrue(configList.get(0).<Config>get("sub").isEmpty());
+        assertEquals("test", configList.getFirst().get("string"));
+        assertTrue(configList.getFirst().<Config>get("sub").isEmpty());
 
         assertEquals("test", config.get("config.string"));
         assertEquals(123456789, config.getLong("long"));
@@ -47,45 +46,45 @@ public class Util {
         config.set("bool_array", Arrays.asList(true, false, true, false));
         config.set("config", subConfig);
         config.set("config_list", configList);
-        config.setComment("string", " Comment 1\n Comment 2\n Comment 3");
+        config.setComment("string", "Comment 1\nComment 2\nComment 3");
         config.set("enum", TestEnum.A);
     }
 
     static final String EXPECTED_SERIALIZED =
-        "bool_array: [\n" + //
-        "\ttrue, \n" + //
-        "\tfalse, \n" + //
-        "\ttrue, \n" + //
-        "\tfalse\n" + //
-        "]\n" + //
-        "# Comment 1\n" + //
-        "# Comment 2\n" + //
-        "# Comment 3\n" + //
-        "string: \"\\\"value\\\"\"\n" + //
-        "double: 3.1415926535\n" + //
-        "integer: 2\n" + //
-        "config_list: [\n" + //
-        "\t{\n" + //
-        "\t\tsub {}\n" + //
-        "\t\tstring: test\n" + //
-        "\t\tenum: C\n" + //
-        "\t}, \n" + //
-        "\t{\n" + //
-        "\t\tsub {}\n" + //
-        "\t\tstring: test\n" + //
-        "\t\tenum: C\n" + //
-        "\t}, \n" + //
-        "\t{\n" + //
-        "\t\tsub {}\n" + //
-        "\t\tstring: test\n" + //
-        "\t\tenum: C\n" + //
-        "\t}\n" + //
-        "]\n" + //
-        "config {\n" + //
-        "\tsub {}\n" + //
-        "\tstring: test\n" + //
-        "\tenum: C\n" + //
-        "}\n" + //
-        "long: 123456789\n" + //
-        "enum: A\n";
+        "bool_array: [" + System.lineSeparator() + //
+        "\ttrue, " + System.lineSeparator() + //
+        "\tfalse, " + System.lineSeparator() + //
+        "\ttrue, " + System.lineSeparator() + //
+        "\tfalse" + System.lineSeparator() + //
+        "]" + System.lineSeparator() + //
+        "# Comment 1" + System.lineSeparator() + //
+        "# Comment 2" + System.lineSeparator() + //
+        "# Comment 3" + System.lineSeparator() + //
+        "string: \"\\\"value\\\"\"" + System.lineSeparator() + //
+        "double: 3.1415926535" + System.lineSeparator() + //
+        "integer: 2" + System.lineSeparator() + //
+        "config_list: [" + System.lineSeparator() + //
+        "\t{" + System.lineSeparator() + //
+        "\t\tsub {}" + System.lineSeparator() + //
+        "\t\tstring: test" + System.lineSeparator() + //
+        "\t\tenum: C" + System.lineSeparator() + //
+        "\t}, " + System.lineSeparator() + //
+        "\t{" + System.lineSeparator() + //
+        "\t\tsub {}" + System.lineSeparator() + //
+        "\t\tstring: test" + System.lineSeparator() + //
+        "\t\tenum: C" + System.lineSeparator() + //
+        "\t}, " + System.lineSeparator() + //
+        "\t{" + System.lineSeparator() + //
+        "\t\tsub {}" + System.lineSeparator() + //
+        "\t\tstring: test" + System.lineSeparator() + //
+        "\t\tenum: C" + System.lineSeparator() + //
+        "\t}" + System.lineSeparator() + //
+        "]" + System.lineSeparator() + //
+        "config {" + System.lineSeparator() + //
+        "\tsub {}" + System.lineSeparator() + //
+        "\tstring: test" + System.lineSeparator() + //
+        "\tenum: C" + System.lineSeparator() + //
+        "}" + System.lineSeparator() + //
+        "long: 123456789" + System.lineSeparator() + //
+        "enum: A" + System.lineSeparator();
 }

@@ -11,6 +11,7 @@ import re.neotamia.nightconfig.core.io.ParsingMode;
 
 import java.io.Reader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static re.neotamia.nightconfig.core.NullObject.NULL_OBJECT;
 
@@ -80,8 +81,12 @@ public final class HoconParser implements ConfigParser<CommentedConfig> {
                 parsingMode.put(destination, path, unwrap(value.unwrapped()));
             }
             List<String> comments = value.origin().comments();
-            if (!comments.isEmpty())
-                destination.setComment(path, String.join("\n", value.origin().comments()).replace("\r", "").stripLeading());
+            if (!comments.isEmpty()) {
+                destination.setComment(path, comments.stream()
+                        .map(String::stripLeading)
+                        .collect(Collectors.joining("\n"))
+                        .replace("\r", ""));
+            }
         }
     }
 

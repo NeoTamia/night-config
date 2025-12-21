@@ -1,6 +1,7 @@
 package re.neotamia.nightconfig.json;
 
 import re.neotamia.nightconfig.core.Config;
+import re.neotamia.nightconfig.core.file.FormatDetector;
 import re.neotamia.sharedtests.TestEnum;
 import re.neotamia.nightconfig.core.file.FileConfig;
 import re.neotamia.nightconfig.core.file.FileNotFoundAction;
@@ -115,6 +116,8 @@ public class JsonConfigTest {
 
 	@Test
 	public void testEmptyDataTolerance() throws IOException {
+        FormatDetector.registerExtension("json", JsonFormat.fancyInstance());
+
 		File f = new File("empty.json");
 		assertEquals(0, f.length());
 

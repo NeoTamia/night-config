@@ -48,57 +48,57 @@ public class Util {
         config.set("enum", TestEnum.A);
     }
 
-    static final String EXPECTED_SERIALIZED_FANCY = "{\n" + //
-            "\t\"bool_array\": [\n" + //
-            "\t\ttrue, \n" + //
-            "\t\tfalse, \n" + //
-            "\t\ttrue, \n" + //
-            "\t\tfalse\n" + //
-            "\t],\n" + //
-            "\t\"table_array2\": [\n" + //
-            "\t\t{\n" + //
-            "\t\t\t\"sub\": {},\n" + //
-            "\t\t\t\"string\": \"test\",\n" + //
-            "\t\t\t\"null value\": null\n" + //
-            "\t\t}, \n" + //
-            "\t\t{\n" + //
-            "\t\t\t\"sub\": {},\n" + //
-            "\t\t\t\"string\": \"test\",\n" + //
-            "\t\t\t\"null value\": null\n" + //
-            "\t\t}, \n" + //
-            "\t\t{\n" + //
-            "\t\t\t\"sub\": {},\n" + //
-            "\t\t\t\"string\": \"test\",\n" + //
-            "\t\t\t\"null value\": null\n" + //
-            "\t\t}\n" + //
-            "\t],\n" + //
-            "\t\"string\": \"\\\"value\\\"\",\n" + //
-            "\t\"double\": 3.1415926535,\n" + //
-            "\t\"integer\": 2,\n" + //
-            "\t\"table_array\": [\n" + //
-            "\t\t{\n" + //
-            "\t\t\t\"sub\": {},\n" + //
-            "\t\t\t\"string\": \"test\",\n" + //
-            "\t\t\t\"null value\": null\n" + //
-            "\t\t}, \n" + //
-            "\t\t{\n" + //
-            "\t\t\t\"sub\": {},\n" + //
-            "\t\t\t\"string\": \"test\",\n" + //
-            "\t\t\t\"null value\": null\n" + //
-            "\t\t}, \n" + //
-            "\t\t{\n" + //
-            "\t\t\t\"sub\": {},\n" + //
-            "\t\t\t\"string\": \"test\",\n" + //
-            "\t\t\t\"null value\": null\n" + //
-            "\t\t}\n" + //
-            "\t],\n" + //
-            "\t\"config\": {\n" + //
-            "\t\t\"sub\": {},\n" + //
-            "\t\t\"string\": \"test\",\n" + //
-            "\t\t\"null value\": null\n" + //
-            "\t},\n" + //
-            "\t\"long\": 123456789,\n" + //
-            "\t\"enum\": \"A\"\n" + //
+    static final String EXPECTED_SERIALIZED_FANCY = "{" + System.lineSeparator() + //
+            "\t\"bool_array\": [" + System.lineSeparator() + //
+            "\t\ttrue, " + System.lineSeparator() + //
+            "\t\tfalse, " + System.lineSeparator() + //
+            "\t\ttrue, " + System.lineSeparator() + //
+            "\t\tfalse" + System.lineSeparator() + //
+            "\t]," + System.lineSeparator() + //
+            "\t\"table_array2\": [" + System.lineSeparator() + //
+            "\t\t{" + System.lineSeparator() + //
+            "\t\t\t\"sub\": {}," + System.lineSeparator() + //
+            "\t\t\t\"string\": \"test\"," + System.lineSeparator() + //
+            "\t\t\t\"null value\": null" + System.lineSeparator() + //
+            "\t\t}, " + System.lineSeparator() + //
+            "\t\t{" + System.lineSeparator() + //
+            "\t\t\t\"sub\": {}," + System.lineSeparator() + //
+            "\t\t\t\"string\": \"test\"," + System.lineSeparator() + //
+            "\t\t\t\"null value\": null" + System.lineSeparator() + //
+            "\t\t}, " + System.lineSeparator() + //
+            "\t\t{" + System.lineSeparator() + //
+            "\t\t\t\"sub\": {}," + System.lineSeparator() + //
+            "\t\t\t\"string\": \"test\"," + System.lineSeparator() + //
+            "\t\t\t\"null value\": null" + System.lineSeparator() + //
+            "\t\t}" + System.lineSeparator() + //
+            "\t]," + System.lineSeparator() + //
+            "\t\"string\": \"\\\"value\\\"\"," + System.lineSeparator() + //
+            "\t\"double\": 3.1415926535," + System.lineSeparator() + //
+            "\t\"integer\": 2," + System.lineSeparator() + //
+            "\t\"table_array\": [" + System.lineSeparator() + //
+            "\t\t{" + System.lineSeparator() + //
+            "\t\t\t\"sub\": {}," + System.lineSeparator() + //
+            "\t\t\t\"string\": \"test\"," + System.lineSeparator() + //
+            "\t\t\t\"null value\": null" + System.lineSeparator() + //
+            "\t\t}, " + System.lineSeparator() + //
+            "\t\t{" + System.lineSeparator() + //
+            "\t\t\t\"sub\": {}," + System.lineSeparator() + //
+            "\t\t\t\"string\": \"test\"," + System.lineSeparator() + //
+            "\t\t\t\"null value\": null" + System.lineSeparator() + //
+            "\t\t}, " + System.lineSeparator() + //
+            "\t\t{" + System.lineSeparator() + //
+            "\t\t\t\"sub\": {}," + System.lineSeparator() + //
+            "\t\t\t\"string\": \"test\"," + System.lineSeparator() + //
+            "\t\t\t\"null value\": null" + System.lineSeparator() + //
+            "\t\t}" + System.lineSeparator() + //
+            "\t]," + System.lineSeparator() + //
+            "\t\"config\": {" + System.lineSeparator() + //
+            "\t\t\"sub\": {}," + System.lineSeparator() + //
+            "\t\t\"string\": \"test\"," + System.lineSeparator() + //
+            "\t\t\"null value\": null" + System.lineSeparator() + //
+            "\t}," + System.lineSeparator() + //
+            "\t\"long\": 123456789," + System.lineSeparator() + //
+            "\t\"enum\": \"A\"" + System.lineSeparator() + //
             "}";
     static final String EXPECTED_SERIALIZED_MINIMAL = "{\"bool_array\":[true,false,true,false],\"table_array2\":[{\"sub\":{},\"string\":\"test\",\"null value\":null},{\"sub\":{},\"string\":\"test\",\"null value\":null},{\"sub\":{},\"string\":\"test\",\"null value\":null}],\"string\":\"\\\"value\\\"\",\"double\":3.1415926535,\"integer\":2,\"table_array\":[{\"sub\":{},\"string\":\"test\",\"null value\":null},{\"sub\":{},\"string\":\"test\",\"null value\":null},{\"sub\":{},\"string\":\"test\",\"null value\":null}],\"config\":{\"sub\":{},\"string\":\"test\",\"null value\":null},\"long\":123456789,\"enum\":\"A\"}";
 }

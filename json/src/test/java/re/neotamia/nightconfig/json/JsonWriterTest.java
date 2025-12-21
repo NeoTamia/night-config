@@ -25,7 +25,7 @@ public class JsonWriterTest {
 
     @Test
     public void write() throws IOException {
-        Config config = Config.inMemory();
+        Config config = new SynchronizedConfig(InMemoryCommentedFormat.defaultInstance(), HashMap::new);
         Util.populateTest(config);
 
         var fancy = new FancyJsonWriter().writeToString(config);
@@ -37,8 +37,7 @@ public class JsonWriterTest {
 
     @Test
     public void writeSynchronizedConfig() {
-        Config config = new SynchronizedConfig(InMemoryCommentedFormat.defaultInstance(),
-                HashMap::new);
+        Config config = new SynchronizedConfig(InMemoryCommentedFormat.defaultInstance(), HashMap::new);
         Util.populateTest(config);
 
         var fancy = new FancyJsonWriter().writeToString(config);
@@ -50,8 +49,7 @@ public class JsonWriterTest {
 
     @Test
     public void writeStampedConfig() {
-        Config config = new StampedConfig(InMemoryCommentedFormat.defaultInstance(),
-                HashMap::new);
+        Config config = new StampedConfig(InMemoryCommentedFormat.defaultInstance(), HashMap::new);
         Util.populateTest(config);
 
         var fancy = new FancyJsonWriter().writeToString(config);
@@ -63,7 +61,7 @@ public class JsonWriterTest {
 
     @Test
     public void writeAppend() throws IOException {
-        var config = Config.inMemory();
+        Config config = new SynchronizedConfig(InMemoryCommentedFormat.defaultInstance(), HashMap::new);
         Util.populateTest(config);
 
         Path configFile = tmp.resolve("appended.json");
@@ -76,7 +74,7 @@ public class JsonWriterTest {
 
     @Test
     public void writeAtomic() throws IOException {
-        var config = Config.inMemory();
+        Config config = new SynchronizedConfig(InMemoryCommentedFormat.defaultInstance(), HashMap::new);
         Util.populateTest(config);
 
         Path configFile = tmp.resolve("config.json");

@@ -1,8 +1,13 @@
 {
 	"string": "This is a string with a lot of characters to escape \n\r\t \\ \" ",
-	"null": null,
-	"double": 0.123456,
+	"int": 123456,
+	"long": 1234567890,
 	"float": 0.123456,
+	"double": 0.123456,
+	"config": {
+		"boolean": true,
+		"false": false
+	},
 	"list": [
 		"a", 
 		"b", 
@@ -12,12 +17,7 @@
 		false, 
 		17.5
 	],
-	"config": {
-		"boolean": true,
-		"false": false
-	},
-	"dots.in.key": "value",
-	"int": 123456,
-	"long": 1234567890,
-	"enum": "A"
+	"null": null,
+	"enum": "A",
+	"dots.in.key": "value"
 }

@@ -170,40 +170,40 @@ public final class ConversionTable implements Cloneable {
 	 * @return a wrapper that converts the config's values using this conversion table.
 	 */
 	public UnmodifiableConfig wrap(UnmodifiableConfig config) {
-		return new UnmodifiableConfigWrapper<UnmodifiableConfig>(config) {
-			@Override
-			@SuppressWarnings("unchecked")
-			public <T> T getRaw(@NotNull List<String> path) {
-				return (T)convert(config.getRaw(path));
-			}
+		return new UnmodifiableConfigWrapper<>(config) {
+            @Override
+            @SuppressWarnings("unchecked")
+            public <T> T getRaw(@NotNull List<String> path) {
+                return (T) convert(config.getRaw(path));
+            }
 
-			@Override
-			public Map<String, Object> valueMap() {
-				return new TransformingMap<>(config.valueMap(), v -> convert(v), v -> v, v -> v);
-			}
+            @Override
+            public Map<String, Object> valueMap() {
+                return new TransformingMap<>(config.valueMap(), v -> convert(v), v -> v, v -> v);
+            }
 
-			@Override
-			public Set<? extends Entry> entrySet() {
-				Function<Entry, Entry> readTransfo = entry -> new Entry() {
-					@Override
-					public String getKey() {
-						return entry.getKey();
-					}
+            @Override
+            public Set<? extends Entry> entrySet() {
+                Function<Entry, Entry> readTransfo = entry -> new Entry() {
+                    @Override
+                    public String getKey() {
+                        return entry.getKey();
+                    }
 
-					@Override
-					@SuppressWarnings("unchecked")
-					public <T> T getRawValue() {
-						return (T)convert(entry.getRawValue());
-					}
-				};
-				return new TransformingSet<>(config.entrySet(), readTransfo, o -> null, e -> e);
-			}
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getRawValue() {
+                        return (T) convert(entry.getRawValue());
+                    }
+                };
+                return new TransformingSet<>(config.entrySet(), readTransfo, o -> null, e -> e);
+            }
 
-			@Override
-			public ConfigFormat<?> configFormat() {
-				return config.configFormat();
-			}
-		};
+            @Override
+            public ConfigFormat<?> configFormat() {
+                return config.configFormat();
+            }
+        };
 	}
 
 	/**

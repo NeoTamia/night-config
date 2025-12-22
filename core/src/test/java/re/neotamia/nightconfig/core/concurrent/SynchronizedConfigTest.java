@@ -62,11 +62,11 @@ public class SynchronizedConfigTest {
 
     @Test
     public void replaceContentByAccumulator() throws InterruptedException {
-        CommonTests.testReplaceContent(4, newConfig(), StampedConfigTest.newAccumulator(), (a,b) -> a.replaceContentBy(b));
+        CommonTests.testReplaceContent(4, newConfig(), StampedConfigTest.newAccumulator(), SynchronizedConfig::replaceContentBy);
     }
 
     @Test
     public void replaceContentByConfig() throws InterruptedException {
-        CommonTests.testReplaceContent(4, newConfig(), newConfig(), (a,b) -> a.replaceContentBy(b));
+        CommonTests.testReplaceContent(4, newConfig(), newConfig(), SynchronizedConfig::replaceContentBy);
     }
 }

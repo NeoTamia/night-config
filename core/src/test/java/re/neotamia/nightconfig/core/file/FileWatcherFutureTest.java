@@ -85,7 +85,7 @@ public class FileWatcherFutureTest {
 
 		// ---- change the watcher
 		CountDownLatch newLatch = new CountDownLatch(1);
-		watcher.setWatchFuture(file, () -> newLatch.countDown()).get(10, TimeUnit.MILLISECONDS);
+		watcher.setWatchFuture(file, newLatch::countDown).get(10, TimeUnit.MILLISECONDS);
 		Files.write(file, Arrays.asList(":)"));
 		assertTrue(ref.get().await(100, TimeUnit.MILLISECONDS));
 
@@ -154,8 +154,8 @@ public class FileWatcherFutureTest {
 		Path file2 = dir2.resolve("file2");
 		AtomicInteger notifCount1 = new AtomicInteger(0);
 		AtomicInteger notifCount2 = new AtomicInteger(0);
-		watcher.addWatchFuture(file1, () -> notifCount1.incrementAndGet()).get(10, TimeUnit.MILLISECONDS);
-		watcher.addWatchFuture(file2, () -> notifCount2.incrementAndGet()).get(10, TimeUnit.MILLISECONDS);
+		watcher.addWatchFuture(file1, notifCount1::incrementAndGet).get(10, TimeUnit.MILLISECONDS);
+		watcher.addWatchFuture(file2, notifCount2::incrementAndGet).get(10, TimeUnit.MILLISECONDS);
 
 		// generate events on the files
 		writeAndSync(file1, Arrays.asList("1"));
@@ -235,7 +235,7 @@ public class FileWatcherFutureTest {
 
 		// watch the file
 		AtomicInteger callCounter = new AtomicInteger(0);
-		watcher.addWatchFuture(file, () -> callCounter.getAndIncrement()).get(10, TimeUnit.MILLISECONDS);
+		watcher.addWatchFuture(file, callCounter::getAndIncrement).get(10, TimeUnit.MILLISECONDS);
 
 		// generate plenty of events, they should be debounced to only one
 		Files.createFile(file);

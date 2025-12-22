@@ -208,9 +208,8 @@ public class StandardTomlTests {
 				res.add(convertJsonExpectValue(element, key));
 			}
 			return res;
-		} else if (jsonExpect instanceof Config) {
-			var jsonConfig = (Config) jsonExpect;
-			if (jsonConfig.contains("type") && jsonConfig.contains("value")
+		} else if (jsonExpect instanceof Config jsonConfig) {
+            if (jsonConfig.contains("type") && jsonConfig.contains("value")
 					&& jsonConfig.get("type") instanceof String) {
 				// specification of a toml value: {"type": the_type, "value": string_of_value}.
 				String valueType = jsonConfig.get("type");
@@ -309,9 +308,8 @@ public class StandardTomlTests {
 				assertMatchJsonExpectValue(key, tomlElement, jsonElement,
 						String.format("%s: invalid element %d of key %s", msg, i, key));
 			}
-		} else if (jsonExpectValue instanceof Config) {
-			Config jsonConfig = (Config) jsonExpectValue;
-			if (jsonConfig.contains("type") && jsonConfig.contains("value")
+		} else if (jsonExpectValue instanceof Config jsonConfig) {
+            if (jsonConfig.contains("type") && jsonConfig.contains("value")
 					&& jsonConfig.get("type") instanceof String) {
 				// Expect value that matches the structure:
 				// {"type": value_type, "value": value_string}

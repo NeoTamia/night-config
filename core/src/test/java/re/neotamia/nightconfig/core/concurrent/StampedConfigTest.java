@@ -92,13 +92,13 @@ public class StampedConfigTest {
     @Test
     public void replaceContentByAccumulator() throws InterruptedException {
         CommonTests.testReplaceContent(4, newConfig(), newAccumulator(),
-                (a, b) -> a.replaceContentBy(b));
+                StampedConfig::replaceContentBy);
     }
 
     @Test
     public void replaceContentByConfig() throws InterruptedException {
         CommonTests.testReplaceContent(4, newConfig(), newConfig(),
-                (a, b) -> a.replaceContentBy(b));
+                StampedConfig::replaceContentBy);
     }
 
     @Test
@@ -216,16 +216,14 @@ public class StampedConfigTest {
         });
 
         assertThrows(exception, () -> {
-            config.bulkUpdate(view -> {
-                config.addAll(view); // wrong
-            });
+            // wrong
+            config.bulkUpdate(config::addAll);
         });
         System.out.println("221");
 
         assertThrows(exception, () -> {
-            config.bulkUpdate(view -> {
-                config.putAll(view); // wrong
-            });
+            // wrong
+            config.bulkUpdate(config::putAll);
         });
         System.out.println("228");
 
@@ -237,9 +235,8 @@ public class StampedConfigTest {
         System.out.println("235");
 
         assertThrows(exception, () -> {
-            config.bulkUpdate(view -> {
-                config.removeAll(view); // wrong
-            });
+            // wrong
+            config.bulkUpdate(config::removeAll);
         });
         System.out.println("242");
 
@@ -293,9 +290,8 @@ public class StampedConfigTest {
         System.out.println("291");
 
         assertThrows(exception, () -> {
-            config.bulkUpdate(view -> {
-                config.removeAll(view); // wrong
-            });
+            // wrong
+            config.bulkUpdate(config::removeAll);
         });
         System.out.println("298");
     }

@@ -85,11 +85,11 @@ public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
 		for (Map.Entry<String, CommentNode> entry : comments.entrySet()) {
 			String key = entry.getKey();
 			CommentNode node = entry.getValue();
-			String comment = node.getComment();
+			String comment = node.comment();
 			if (comment != null) {
 				setComment(Collections.singletonList(key), comment);
 			}
-			Map<String, CommentNode> children = node.getChildren();
+			Map<String, CommentNode> children = node.children();
 			if (children != null) {
 				CommentedConfig config = getRaw(Collections.singletonList(key));
 				if (config != null) {

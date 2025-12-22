@@ -317,7 +317,7 @@ class CommonTests {
             assertEquals(setTestComments, commentsFromEntries);
 
             Map<String, CommentNode> commentNodes = config.getComments();
-            var commentsFromNodes = commentNodes.entrySet().stream().map(e -> e.getValue().getComment()).collect(Collectors.toSet());
+            var commentsFromNodes = commentNodes.entrySet().stream().map(e -> e.getValue().comment()).collect(Collectors.toSet());
             var entriesFromNodes = commentNodes.entrySet().stream().map(e -> e.getKey()).collect(Collectors.toSet());
             assertEquals(setTestComments, commentsFromNodes);
             assertEquals(setTestKeys, entriesFromNodes);

@@ -145,11 +145,11 @@ public class TypeConstraintMapTest {
 	}
 
 	private List<TypeConstraint> extractMapValueType(TypeConstraint t) {
-		return t.resolveTypeArgumentsFor(Map.class).map(c -> Arrays.asList(c)).orElse(null);
+		return t.resolveTypeArgumentsFor(Map.class).map(Arrays::asList).orElse(null);
 	}
 
 	private List<Type> fullType(List<TypeConstraint> t) {
-		return t.stream().map(c -> c.getFullType()).collect(Collectors.toList());
+		return t.stream().map(TypeConstraint::getFullType).collect(Collectors.toList());
 	}
 
 	private List<String> fullTypeString(List<TypeConstraint> t) {
@@ -157,7 +157,7 @@ public class TypeConstraintMapTest {
 	}
 
 	private List<Optional<? extends Type>> rawType(List<TypeConstraint> t) {
-		return t.stream().map(c -> c.getSatisfyingRawType()).collect(Collectors.toList());
+		return t.stream().map(TypeConstraint::getSatisfyingRawType).collect(Collectors.toList());
 	}
 
 	static class ObjectA {

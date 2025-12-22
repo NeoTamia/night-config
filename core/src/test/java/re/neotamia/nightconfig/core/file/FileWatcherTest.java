@@ -85,7 +85,7 @@ public class FileWatcherTest {
 
 		// ---- change the watcher
 		CountDownLatch newLatch = new CountDownLatch(1);
-		watcher.setWatch(file, () -> newLatch.countDown());
+		watcher.setWatch(file, newLatch::countDown);
 		Thread.sleep(10);
 		Files.write(file, Arrays.asList(":)"));
 		assertTrue(ref.get().await(100, TimeUnit.MILLISECONDS));
@@ -153,8 +153,8 @@ public class FileWatcherTest {
 		Path file2 = dir2.resolve("file2");
 		AtomicInteger notifCount1 = new AtomicInteger(0);
 		AtomicInteger notifCount2 = new AtomicInteger(0);
-		watcher.addWatch(file1, () -> notifCount1.incrementAndGet());
-		watcher.addWatch(file2, () -> notifCount2.incrementAndGet());
+		watcher.addWatch(file1, notifCount1::incrementAndGet);
+		watcher.addWatch(file2, notifCount2::incrementAndGet);
 
 		// wait for the watchers to activate (should be quick)
 		Thread.sleep(10);
@@ -232,7 +232,7 @@ public class FileWatcherTest {
 
 		// watch the file
 		AtomicInteger callCounter = new AtomicInteger(0);
-		watcher.addWatch(file, () -> callCounter.getAndIncrement());
+		watcher.addWatch(file, callCounter::getAndIncrement);
 
 		// generate plenty of events, they should be debounced to only one
 		Files.createFile(file);

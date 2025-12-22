@@ -3,6 +3,7 @@ package re.neotamia.nightconfig.core.conversion;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +25,7 @@ public class GenericParamTest {
 		conf.set("list", Arrays.asList("a", "b"));
 
 		// expected to fail: config -> object with unknown generic parameter
-		assertThrows(IndexOutOfBoundsException.class, () -> {
+		assertThrows(NoSuchElementException.class, () -> { // throw no such element with java 21 List#getLast
 			converter.toObject(conf, GenericClass<String>::new);
 		});
 

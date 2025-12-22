@@ -180,26 +180,32 @@ public class TomlParserTest {
 	}
 
 	private void testAlreadyDefinedTable() {
-		String toml = "string = \"value\"\n"
-				+ "[table.subTable.subDefinedFirst]\n"
-				+ "   test = 'success'\n"
-				+ "[table.subTable]\n"
-				+ "    subDefinedFirst = {}"
-				+ "\r\n# 'key' = 0.2";
+		String toml = """
+                string = "value"
+                [table.subTable.subDefinedFirst]
+                   test = 'success'
+                [table.subTable]
+                    subDefinedFirst = {}\
+                \r
+                # 'key' = 0.2""";
 		parseAndPrint(toml);
 	}
 
 	private void testAlreadyDefinedTable2() {
-		String toml = "string = \"value\"\n"
-				+ "[table.subTable]\n"
-				+ "   test = 'success'\n"
-				+ "[table.subTable]\n"
-				+ "   subDefinedFirst = {}";
+		String toml = """
+                string = "value"
+                [table.subTable]
+                   test = 'success'
+                [table.subTable]
+                   subDefinedFirst = {}""";
 		parseAndPrint(toml);
 	}
 
 	private void testAlreadyDefinedKey() {
-		String toml = "string = \"value\"\n" + "test = 'success'\n" + "test = 'already defined!'";
+		String toml = """
+                string = "value"
+                test = 'success'
+                test = 'already defined!'""";
 		parseAndPrint(toml);
 	}
 
@@ -301,30 +307,38 @@ public class TomlParserTest {
 	}
 
 	private void testMixedArraySubtableTable() {
-		String toml = "array = [{}, 42, {}]\n"
-				+ "[array.subtable]\n"
-				+ "   test = 'success'\n";
+		String toml = """
+                array = [{}, 42, {}]
+                [array.subtable]
+                   test = 'success'
+                """;
 		parseAndPrint(toml);
 	}
 
 	private void testMixedArraySubtablePrimitive() {
-		String toml = "array = [{}, 42]\n"
-				+ "[array.subtable]\n"
-				+ "   test = 'success'\n";
+		String toml = """
+                array = [{}, 42]
+                [array.subtable]
+                   test = 'success'
+                """;
 		parseAndPrint(toml);
 	}
 
 	private void testInlineTableArraySubtable() {
-		String toml = "array_full_inline = [{}, {}]\n"
-				+ "[array_full_inline.subtable]\n"
-				+ "   test = 'success'\n";
+		String toml = """
+                array_full_inline = [{}, {}]
+                [array_full_inline.subtable]
+                   test = 'success'
+                """;
 		parseAndPrint(toml);
 	}
 
 	private void testInlineTableArraySubtable2() {
-		String toml = "array_full_inline = [{}, {}]\n"
-				+ "[array_full_inline.sub2.subtable]\n"
-				+ "   test = 'success'\n";
+		String toml = """
+                array_full_inline = [{}, {}]
+                [array_full_inline.sub2.subtable]
+                   test = 'success'
+                """;
 		parseAndPrint(toml);
 	}
 

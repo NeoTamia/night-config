@@ -231,8 +231,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 throw new IllegalStateException("Invalid sub-configuration of type "
                         + v.getClass().getSimpleName()
                         + " in the Accumulator. Sub-configurations must always be created with createSubConfig().");
-            } else if (v instanceof List) {
-                List<?> l = (List<?>) v;
+            } else if (v instanceof List<?> l) {
                 List<Object> newList = new ArrayList<>(l);
                 newList.replaceAll(this::replaceValue);
                 return newList;
@@ -895,8 +894,8 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
         try {
             comments.forEach((key, node) -> {
-                this.comments.put(key, node.getComment());
-                Map<String, CommentNode> children = node.getChildren();
+                this.comments.put(key, node.comment());
+                Map<String, CommentNode> children = node.children();
                 if (children != null) {
                     Object config = values.get(key);
                     if (config instanceof StampedConfig) {
@@ -1880,236 +1879,231 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         CONSUMED
     }
 
-	/**
-	 * A "Map<K, V>" view of the StampedConfig. This implementation is limited because it's hard,
-	 * or maybe impossible, to provide it in a way that is correct, multi-readers and that behaves as a normal map.
-	 */
-	private static final class ValueMap implements Map<String, Object> {
-		private final CommentedConfig config;
+    /**
+     * A "Map<K, V>" view of the StampedConfig. This implementation is limited because it's hard,
+     * or maybe impossible, to provide it in a way that is correct, multi-readers and that behaves as a normal map.
+     */
+    private record ValueMap(CommentedConfig config) implements Map<String, Object> {
 
-		ValueMap(CommentedConfig config) {
-			this.config = config;
-		}
+        @Override
+        public void clear() {
+            config.clear();
+        }
 
-		@Override
-		public void clear() {
-			config.clear();
-		}
+        @Override
+        public boolean containsKey(Object key) {
+            if (!(key instanceof String)) {
+                return false;
+            }
+            return config.contains(Collections.singletonList((String) key));
+        }
 
-		@Override
-		public boolean containsKey(Object key) {
-			if (!(key instanceof String)) {
-				return false;
-			}
-			return config.contains(Collections.singletonList((String)key));
-		}
+        @Override
+        public boolean containsValue(Object value) {
+            return config.entrySet().stream().anyMatch(e -> Objects.equals(value, e.getRawValue()));
+        }
 
-		@Override
-		public boolean containsValue(Object value) {
-			return config.entrySet().stream().anyMatch(e -> Objects.equals(value, e.getRawValue()));
-		}
-
-		@Override
-		public Set<Entry<String, Object>> entrySet() {
-			return new Set<>() {
-                @Override
-                public int size() {
-                    return config.size();
-                }
-
-                @Override
-                public boolean isEmpty() {
-                    return config.isEmpty();
-                }
-
-                @Override
-                @SuppressWarnings("unlikely-arg-type")
-                public boolean contains(Object o) {
-                    if (!(o instanceof Entry<?, ?> search)) {
-                        return false;
+        @Override
+        public Set<Entry<String, Object>> entrySet() {
+            return new Set<>() {
+                    @Override
+                    public int size() {
+                        return config.size();
                     }
-                    if (!(search.getKey() instanceof String)) {
-                        return false;
+
+                    @Override
+                    public boolean isEmpty() {
+                        return config.isEmpty();
                     }
-                    return config.entrySet().contains(new UnmodifiableConfig.Entry() {
-                        @Override
-                        public String getKey() {
-                            return (String) search.getKey();
-                        }
 
-                        @Override
-                        @SuppressWarnings("unchecked")
-                        public <T> T getRawValue() {
-                            return (T) search.getValue();
-                        }
-
-                    });
-                }
-
-                @Override
-                public Iterator<Entry<String, Object>> iterator() {
-                    Iterator<? extends Config.Entry> it = config.entrySet().iterator();
-                    return new Iterator<>() {
-
-                        @Override
-                        public boolean hasNext() {
-                            return it.hasNext();
-                        }
-
-                        @Override
-                        public Entry<String, Object> next() {
-                            Config.Entry entry = it.next();
-                            return new Entry<>() {
-
-                                @Override
-                                public String getKey() {
-                                    return entry.getKey();
-                                }
-
-                                @Override
-                                public Object getValue() {
-                                    return entry.getRawValue();
-                                }
-
-                                @Override
-                                public Object setValue(Object value) {
-                                    return entry.setValue(value);
-                                }
-
-                            };
-                        }
-
-                        @Override
-                        public void remove() {
-                            it.remove();
-                        }
-
-                    };
-                }
-
-                @Override
-                public Object[] toArray() {
-                    throw new UnsupportedOperationException("Unimplemented method 'toArray'");
-                }
-
-                @Override
-                public <T> T[] toArray(T[] a) {
-                    throw new UnsupportedOperationException("Unimplemented method 'toArray'");
-                }
-
-                @Override
-                public boolean add(Entry<String, Object> e) {
-                    return config.add(Collections.singletonList(e.getKey()), e.getValue());
-                }
-
-                @Override
-                public boolean remove(Object o) {
-                    if (!(o instanceof Entry<?, ?> entry)) {
-                        return false;
-                    }
-                    Object key = entry.getKey();
-                    if (!(key instanceof String)) {
-                        return false;
-                    }
-                    return config.remove(Collections.singletonList((String) key)) != null;
-                }
-
-                @Override
-                public boolean containsAll(Collection<?> c) {
-                    for (Object o : c) {
-                        if (!contains(o)) {
+                    @Override
+                    @SuppressWarnings("unlikely-arg-type")
+                    public boolean contains(Object o) {
+                        if (!(o instanceof Entry<?, ?> search)) {
                             return false;
                         }
-                    }
-                    return true;
-                }
-
-                @Override
-                public boolean addAll(Collection<? extends Entry<String, Object>> c) {
-                    boolean changed = false;
-                    for (Map.Entry<String, Object> o : c) {
-                        changed |= add(o);
-                    }
-                    return changed;
-                }
-
-                @Override
-                public boolean retainAll(Collection<?> c) {
-                    boolean changed = false;
-                    Iterator<Map.Entry<String, Object>> it = iterator();
-                    while (it.hasNext()) {
-                        if (!c.contains(it.next())) {
-                            it.remove();
-                            changed = true;
+                        if (!(search.getKey() instanceof String)) {
+                            return false;
                         }
+                        return config.entrySet().contains(new UnmodifiableConfig.Entry() {
+                            @Override
+                            public String getKey() {
+                                return (String) search.getKey();
+                            }
+
+                            @Override
+                            @SuppressWarnings("unchecked")
+                            public <T> T getRawValue() {
+                                return (T) search.getValue();
+                            }
+
+                        });
                     }
-                    return changed;
-                }
 
-                @Override
-                public boolean removeAll(Collection<?> c) {
-                    boolean changed = false;
-                    for (Object o : c) {
-                        changed |= remove(o);
+                    @Override
+                    public Iterator<Entry<String, Object>> iterator() {
+                        Iterator<? extends Config.Entry> it = config.entrySet().iterator();
+                        return new Iterator<>() {
+
+                            @Override
+                            public boolean hasNext() {
+                                return it.hasNext();
+                            }
+
+                            @Override
+                            public Entry<String, Object> next() {
+                                Config.Entry entry = it.next();
+                                return new Entry<>() {
+
+                                    @Override
+                                    public String getKey() {
+                                        return entry.getKey();
+                                    }
+
+                                    @Override
+                                    public Object getValue() {
+                                        return entry.getRawValue();
+                                    }
+
+                                    @Override
+                                    public Object setValue(Object value) {
+                                        return entry.setValue(value);
+                                    }
+
+                                };
+                            }
+
+                            @Override
+                            public void remove() {
+                                it.remove();
+                            }
+
+                        };
                     }
-                    return changed;
-                }
 
-                @Override
-                public void clear() {
-                    config.clear();
-                }
+                    @Override
+                    public Object[] toArray() {
+                        throw new UnsupportedOperationException("Unimplemented method 'toArray'");
+                    }
 
-            };
-		}
+                    @Override
+                    public <T> T[] toArray(T[] a) {
+                        throw new UnsupportedOperationException("Unimplemented method 'toArray'");
+                    }
 
-		@Override
-		public Object get(Object key) {
-			if (!(key instanceof String)) {
-				return false;
-			}
-			return config.get(Collections.singletonList((String)key));
-		}
+                    @Override
+                    public boolean add(Entry<String, Object> e) {
+                        return config.add(Collections.singletonList(e.getKey()), e.getValue());
+                    }
 
-		@Override
-		public boolean isEmpty() {
-			return config.isEmpty();
-		}
+                    @Override
+                    public boolean remove(Object o) {
+                        if (!(o instanceof Entry<?, ?> entry)) {
+                            return false;
+                        }
+                        Object key = entry.getKey();
+                        if (!(key instanceof String)) {
+                            return false;
+                        }
+                        return config.remove(Collections.singletonList((String) key)) != null;
+                    }
 
-		@Override
-		public Set<String> keySet() {
-			return config.entrySet().stream().map(UnmodifiableConfig.Entry::getKey).collect(Collectors.toSet());
-		}
+                    @Override
+                    public boolean containsAll(Collection<?> c) {
+                        for (Object o : c) {
+                            if (!contains(o)) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
 
-		@Override
-		public Collection<Object> values() {
-			return config.entrySet().stream().map(UnmodifiableConfig.Entry::getRawValue).collect(Collectors.toList());
-		}
+                    @Override
+                    public boolean addAll(Collection<? extends Entry<String, Object>> c) {
+                        boolean changed = false;
+                        for (Entry<String, Object> o : c) {
+                            changed |= add(o);
+                        }
+                        return changed;
+                    }
 
-		@Override
-		public Object put(String key, Object value) {
-			return config.set(Collections.singletonList(key), value);
-		}
+                    @Override
+                    public boolean retainAll(Collection<?> c) {
+                        boolean changed = false;
+                        Iterator<Entry<String, Object>> it = iterator();
+                        while (it.hasNext()) {
+                            if (!c.contains(it.next())) {
+                                it.remove();
+                                changed = true;
+                            }
+                        }
+                        return changed;
+                    }
 
-		@Override
-		public void putAll(Map<? extends String, ?> m) {
-			for (Map.Entry<? extends String, ?> entry : m.entrySet()) {
-				config.set(Collections.singletonList(entry.getKey()), entry.getValue());
-			}
-		}
+                    @Override
+                    public boolean removeAll(Collection<?> c) {
+                        boolean changed = false;
+                        for (Object o : c) {
+                            changed |= remove(o);
+                        }
+                        return changed;
+                    }
 
-		@Override
-		public Object remove(Object key) {
-			if (!(key instanceof String)) {
-				return null;
-			}
-			return config.remove(Collections.singletonList((String)key));
-		}
+                    @Override
+                    public void clear() {
+                        config.clear();
+                    }
 
-		@Override
-		public int size() {
-			return config.size();
-		}
-	}
+                };
+        }
+
+        @Override
+        public Object get(Object key) {
+            if (!(key instanceof String)) {
+                return false;
+            }
+            return config.get(Collections.singletonList((String) key));
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return config.isEmpty();
+        }
+
+        @Override
+        public Set<String> keySet() {
+            return config.entrySet().stream().map(UnmodifiableConfig.Entry::getKey).collect(Collectors.toSet());
+        }
+
+        @Override
+        public Collection<Object> values() {
+            return config.entrySet().stream().map(UnmodifiableConfig.Entry::getRawValue).collect(Collectors.toList());
+        }
+
+        @Override
+        public Object put(String key, Object value) {
+            return config.set(Collections.singletonList(key), value);
+        }
+
+        @Override
+        public void putAll(Map<? extends String, ?> m) {
+            for (Entry<? extends String, ?> entry : m.entrySet()) {
+                config.set(Collections.singletonList(entry.getKey()), entry.getValue());
+            }
+        }
+
+        @Override
+        public Object remove(Object key) {
+            if (!(key instanceof String)) {
+                return null;
+            }
+            return config.remove(Collections.singletonList((String) key));
+        }
+
+        @Override
+        public int size() {
+            return config.size();
+        }
+    }
 
 }

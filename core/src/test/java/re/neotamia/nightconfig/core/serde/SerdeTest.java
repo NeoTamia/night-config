@@ -507,10 +507,9 @@ public final class SerdeTest {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof ArrayValues))
+			if (!(obj instanceof ArrayValues<?> other))
 				return false;
-			ArrayValues<?> other = (ArrayValues<?>) obj;
-			return Arrays.deepEquals(str, other.str) &&
+            return Arrays.deepEquals(str, other.str) &&
 					Arrays.equals(nested, other.nested) &&
 					Arrays.deepEquals(iii, other.iii) &&
 					Arrays.deepEquals(seqs, other.seqs);
@@ -565,11 +564,10 @@ public final class SerdeTest {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof SimpleAnnotations)) {
+			if (!(obj instanceof SimpleAnnotations o)) {
 				return false;
 			}
-			SimpleAnnotations o = (SimpleAnnotations) obj;
-			return Objects.equals(myUniqueId, o.myUniqueId) && Objects.equals(uid, o.uid)
+            return Objects.equals(myUniqueId, o.myUniqueId) && Objects.equals(uid, o.uid)
 					&& Objects.equals(nested, o.nested);
 		}
 
@@ -610,11 +608,10 @@ public final class SerdeTest {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof EnumValues)) {
+			if (!(obj instanceof EnumValues o)) {
 				return false;
 			}
-			EnumValues o = (EnumValues) obj;
-			return Objects.equals(enumStr, o.enumStr);
+            return Objects.equals(enumStr, o.enumStr);
 		}
 
 		@Override

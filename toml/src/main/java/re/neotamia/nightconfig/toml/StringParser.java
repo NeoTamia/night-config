@@ -17,26 +17,27 @@ final class StringParser {
 	 * method.
 	 */
 	static String parseBasic(CharacterInput input, TomlParser parser) {
-		CharsWrapper.Builder builder = parser.createBuilder();
-		boolean escape = false;
-		char c;
-		while ((c = input.readChar()) != '\"' || escape) {
-			if (escape) {
-				builder.write(unescape(c, input));
-				escape = false;
-			} else if (c == '\\') {
-				escape = true;
-			} else if (c == '\n' || c == '\r') {
-				throw new ParsingException("Invalid newline in basic string, you should use a multiline string or escape the newline by writing \\n. The string begins with: \"" + builder + "\"");
-			} else if (c != '\t' && Toml.isControlChar(c)) {
-				String properEscape = "\\u" + Integer.toHexString((int)c).toUpperCase();
-				throw new ParsingException("Invalid control character '" + c + "' in string, you should escape it by writing " + properEscape);
-			} else {
-				builder.write(c);
-			}
-		}
-		return builder.toString();
-	}
+        try (CharsWrapper.Builder builder = parser.createBuilder()) {
+            boolean escape = false;
+            char c;
+            while ((c = input.readChar()) != '\"' || escape) {
+                if (escape) {
+                    builder.write(unescape(c, input));
+                    escape = false;
+                } else if (c == '\\') {
+                    escape = true;
+                } else if (c == '\n' || c == '\r') {
+                    throw new ParsingException("Invalid newline in basic string, you should use a multiline string or escape the newline by writing \\n. The string begins with: \"" + builder + "\"");
+                } else if (c != '\t' && Toml.isControlChar(c)) {
+                    String properEscape = "\\u" + Integer.toHexString(c).toUpperCase();
+                    throw new ParsingException("Invalid control character '" + c + "' in string, you should escape it by writing " + properEscape);
+                } else {
+                    builder.write(c);
+                }
+            }
+            return builder.toString();
+        }
+    }
 
 	/**
 	 * Parses a literal string (surrounded by '). The opening quote must be read before calling
@@ -81,7 +82,7 @@ final class StringParser {
 				}
 				builder.write(unescape(next, input));
 			} else if (c != '\n' && c != '\r' && c != '\t' && Toml.isControlChar(c)) {
-				String properEscape = "\\u" + Integer.toHexString((int)c).toUpperCase();
+				String properEscape = "\\u" + Integer.toHexString(c).toUpperCase();
 				throw new ParsingException("Invalid control character '" + c + "' in multiline string, you should escape it by writing " + properEscape);
 			} else {
 				builder.write(c);
@@ -112,7 +113,7 @@ final class StringParser {
 		char c;
 		while ((c = input.readChar()) != '\'' || input.peek() != '\'' || input.peek(1) != '\'') {
 			if (c != '\n' && c != '\r' && c != '\t' && Toml.isControlChar(c)) {
-				String properEscape = "\\u" + Integer.toHexString((int)c).toUpperCase();
+				String properEscape = "\\u" + Integer.toHexString(c).toUpperCase();
 				throw new ParsingException("Invalid control character '" + c + "' in multiline literal string, you should escape it by writing " + properEscape);
 			}
 			builder.append(c);

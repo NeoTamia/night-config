@@ -111,14 +111,14 @@ final class StringWriter {
 	}
 
 	static String escapeUnicode(int codePoint) {
-		String hexa = Integer.toHexString(codePoint).toUpperCase();
+		StringBuilder hexa = new StringBuilder(Integer.toHexString(codePoint).toUpperCase());
 		if (hexa.length() < 4) {
 			while (hexa.length() < 4) {
-				hexa = "0" + hexa;
+				hexa.insert(0, "0");
 			}
 		} else if (hexa.length() < 8) {
 			while (hexa.length() < 8) {
-				hexa = "0" + hexa;
+				hexa.insert(0, "0");
 			}
 		}
 		return "\\u" + hexa;

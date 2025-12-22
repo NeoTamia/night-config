@@ -95,27 +95,20 @@ final class Util {
 			return new EmptyableClass(cls, m);
 		}
 
-		private static class EmptyableClass {
-			final Class<?> cls;
-			final Method isEmptyMethod;
+        private record EmptyableClass(Class<?> cls, Method isEmptyMethod) {
 
-			EmptyableClass(Class<?> cls, Method isEmptyMethod) {
-				this.cls = cls;
-				this.isEmptyMethod = isEmptyMethod;
-			}
+            boolean isInstance(Class<?> instanceClass) {
+                return cls.isAssignableFrom(instanceClass);
+            }
 
-			boolean isInstance(Class<?> instanceClass) {
-				return cls.isAssignableFrom(instanceClass);
-			}
-
-			boolean isEmpty(Object instance) {
-				try {
-					return (boolean) isEmptyMethod.invoke(instance);
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					throw new SerdeException("Exception during call to isEmpty() on " + instance, e);
-				}
-			}
-		}
+            boolean isEmpty(Object instance) {
+                try {
+                    return (boolean) isEmptyMethod.invoke(instance);
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    throw new SerdeException("Exception during call to isEmpty() on " + instance, e);
+                }
+            }
+        }
 	}
 
 	/**
@@ -173,30 +166,23 @@ final class Util {
 		addPrimitiveAndWrapper(Double.TYPE, Double.class);
 	}
 
-	private static final class TypeAndOrder {
-		final int order;
-		final Class<?> type;
+    private record TypeAndOrder(int order, Class<?> type) {
 
-		TypeAndOrder(int order, Class<?> type) {
-			this.order = order;
-			this.type = type;
-		}
+        boolean canAssignValue(TypeAndOrder valueType) {
+            // no widening conversion for boolean
+            if (this.order == 0) {
+                return valueType.order == 0;
+            } else if (valueType.order == 0) {
+                return false;
+            }
+            // widening conversions for numbers: int <- short, float <- int, ...
+            return this.order >= valueType.order;
+        }
 
-		boolean canAssignValue(TypeAndOrder valueType) {
-			// no widening conversion for boolean
-			if (this.order == 0) {
-				return valueType.order == 0;
-			} else if (valueType.order == 0) {
-				return false;
-			}
-			// widening conversions for numbers: int <- short, float <- int, ...
-			return this.order >= valueType.order;
-		}
+        @Override
+        public String toString() {
+            return "TypeAndOrder [order=" + order + ", type=" + type + "]";
+        }
 
-		@Override
-		public String toString() {
-			return "TypeAndOrder [order=" + order + ", type=" + type + "]";
-		}
-
-	}
+    }
 }

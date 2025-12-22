@@ -510,120 +510,106 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
 
     }
 
-    private static final class SynchronizedMap<K, V> implements Map<K, V> {
-        private final Map<K, V> map;
-        private final Object rootMonitor;
-
-        SynchronizedMap(Map<K, V> map, Object monitor) {
-            this.map = map;
-            this.rootMonitor = monitor;
-        }
+    private record SynchronizedMap<K, V>(Map<K, V> map, Object rootMonitor) implements Map<K, V> {
 
         @Override
-        public boolean equals(Object obj) {
-            synchronized (rootMonitor) {
-                return map.equals(obj);
+            public boolean equals(Object obj) {
+                synchronized (rootMonitor) {
+                    return map.equals(obj);
+                }
             }
-        }
 
         @Override
-        public int hashCode() {
-            synchronized (rootMonitor) {
-                return map.hashCode();
+            public String toString() {
+                synchronized (rootMonitor) {
+                    return map.toString();
+                }
             }
-        }
 
-        @Override
-        public String toString() {
-            synchronized (rootMonitor) {
-                return map.toString();
+            @Override
+            public void clear() {
+                synchronized (rootMonitor) {
+                    map.clear();
+                }
             }
-        }
 
-        @Override
-        public void clear() {
-            synchronized (rootMonitor) {
-                map.clear();
+            @Override
+            public boolean containsKey(Object key) {
+                synchronized (rootMonitor) {
+                    return map.containsKey(key);
+                }
             }
-        }
 
-        @Override
-        public boolean containsKey(Object key) {
-            synchronized (rootMonitor) {
-                return map.containsKey(key);
+            @Override
+            public boolean containsValue(Object value) {
+                synchronized (rootMonitor) {
+                    return map.containsValue(value);
+                }
             }
-        }
 
-        @Override
-        public boolean containsValue(Object value) {
-            synchronized (rootMonitor) {
-                return map.containsValue(value);
+            @Override
+            public Set<Entry<K, V>> entrySet() {
+                synchronized (rootMonitor) {
+                    return new SynchronizedSet<>(map.entrySet(), rootMonitor);
+                }
             }
-        }
 
-        @Override
-        public Set<Entry<K, V>> entrySet() {
-            synchronized (rootMonitor) {
-                return new SynchronizedSet<>(map.entrySet(), rootMonitor);
+            @Override
+            public V get(Object key) {
+                synchronized (rootMonitor) {
+                    return map.get(key);
+                }
             }
-        }
 
-        @Override
-        public V get(Object key) {
-            synchronized (rootMonitor) {
-                return map.get(key);
+            @Override
+            public boolean isEmpty() {
+                synchronized (rootMonitor) {
+                    return map.isEmpty();
+                }
             }
-        }
 
-        @Override
-        public boolean isEmpty() {
-            synchronized (rootMonitor) {
-                return map.isEmpty();
+            @Override
+            public Set<K> keySet() {
+                synchronized (rootMonitor) {
+                    return map.keySet();
+                }
             }
-        }
 
-        @Override
-        public Set<K> keySet() {
-            synchronized (rootMonitor) {
-                return map.keySet();
+            @Override
+            public V put(K key, V value) {
+                synchronized (rootMonitor) {
+                    return map.put(key, value);
+                }
             }
-        }
 
-        @Override
-        public V put(K key, V value) {
-            synchronized (rootMonitor) {
-                return map.put(key, value);
+            @Override
+            public void putAll(Map<? extends K, ? extends V> m) {
+                synchronized (rootMonitor) {
+                    map.putAll(m);
+                }
             }
-        }
 
-        @Override
-        public void putAll(Map<? extends K, ? extends V> m) {
-            synchronized (rootMonitor) {
-                map.putAll(m);
+            @Override
+            public V remove(Object key) {
+                synchronized (rootMonitor) {
+                    return map.remove(key);
+                }
             }
-        }
 
-        @Override
-        public V remove(Object key) {
-            synchronized (rootMonitor) {
-                return map.remove(key);
+            @Override
+            public int size() {
+                synchronized (rootMonitor) {
+                    return map.size();
+                }
             }
-        }
 
-        @Override
-        public int size() {
-            synchronized (rootMonitor) {
-                return map.size();
+            @Override
+            public Collection<V> values() {
+                synchronized (rootMonitor) {
+                    return map.values();
+                }
             }
         }
-
-        @Override
-        public Collection<V> values() {
-            synchronized (rootMonitor) {
-                return map.values();
-            }
-        }
-    }
 
     private static class SynchronizedCollection<E> implements Collection<E> {
         private final Collection<E> coll;
@@ -741,43 +727,36 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
 
     }
 
-    private static final class SynchronizedIterator<E> implements Iterator<E> {
-        private final Iterator<E> iter;
-        private final Object rootMonitor;
-
-        SynchronizedIterator(Iterator<E> iter, Object rootMonitor) {
-            this.iter = iter;
-            this.rootMonitor = rootMonitor;
-        }
+    private record SynchronizedIterator<E>(Iterator<E> iter, Object rootMonitor) implements Iterator<E> {
 
         @Override
-        public void forEachRemaining(Consumer<? super E> action) {
-            synchronized (rootMonitor) {
-                iter.forEachRemaining(action);
+            public void forEachRemaining(Consumer<? super E> action) {
+                synchronized (rootMonitor) {
+                    iter.forEachRemaining(action);
+                }
             }
-        }
 
-        @Override
-        public boolean hasNext() {
-            synchronized (rootMonitor) {
-                return iter.hasNext();
+            @Override
+            public boolean hasNext() {
+                synchronized (rootMonitor) {
+                    return iter.hasNext();
+                }
             }
-        }
 
-        @Override
-        public E next() {
-            synchronized (rootMonitor) {
-                return iter.next();
+            @Override
+            public E next() {
+                synchronized (rootMonitor) {
+                    return iter.next();
+                }
             }
-        }
 
-        @Override
-        public void remove() {
-            synchronized (rootMonitor) {
-                iter.remove();
+            @Override
+            public void remove() {
+                synchronized (rootMonitor) {
+                    iter.remove();
+                }
             }
         }
-    }
 
     private static final class SynchronizedSet<E> extends SynchronizedCollection<E>
             implements Set<E> {

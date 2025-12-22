@@ -384,67 +384,61 @@ public final class ObjectBinder {
 		}
 	}
 
-	/**
-	 * Informations about a java field used by the BoundConfig.
-	 */
-	@SuppressWarnings("deprecation")
-	private static final class FieldInfos {
-		final Field field;// always non-null
-		final BoundConfig boundConfig;// non-null iff the field is a sub config
-		final Converter<Object, Object> converter;
+    /**
+     * Informations about a java field used by the BoundConfig.
+     *
+     * @param field       always non-null
+     * @param boundConfig non-null iff the field is a sub config
+     */
+    @SuppressWarnings("deprecation")
+    private record FieldInfos(Field field, BoundConfig boundConfig, Converter<Object, Object> converter) {
 
-		FieldInfos(Field field, BoundConfig boundConfig, Converter<Object, Object> converter) {
-			this.field = field;
-			this.boundConfig = boundConfig;
-			this.converter = converter;
-		}
+        Object setValue(Object fieldObject, Object value, boolean bypassFinal) {
+            if (!bypassFinal && Modifier.isFinal(field.getModifiers())) {
+                throw new UnsupportedOperationException("Cannot modify the field " + field);
+            }
+            try {
+                Object previousValue = converter.convertFromField(field.get(fieldObject));
+                Object newValue = converter.convertToField(value);
+                AnnotationUtils.checkField(field, newValue);
+                field.set(fieldObject, newValue);
+                return previousValue;
+            } catch (IllegalAccessException e) {
+                throw new ReflectionException("Failed to set field " + field, e);
+            }
+        }
 
-		Object setValue(Object fieldObject, Object value, boolean bypassFinal) {
-			if (!bypassFinal && Modifier.isFinal(field.getModifiers())) {
-				throw new UnsupportedOperationException("Cannot modify the field " + field);
-			}
-			try {
-				Object previousValue = converter.convertFromField(field.get(fieldObject));
-				Object newValue = converter.convertToField(value);
-				AnnotationUtils.checkField(field, newValue);
-				field.set(fieldObject, newValue);
-				return previousValue;
-			} catch (IllegalAccessException e) {
-				throw new ReflectionException("Failed to set field " + field, e);
-			}
-		}
+        Object removeValue(Object fieldObject, boolean bypassFinal) {
+            Object previousValue = getValue(fieldObject);
+            if (field.getType().isPrimitive()) {
+                setValue(fieldObject, (byte) 0, bypassFinal);
+            } else {
+                setValue(fieldObject, null, bypassFinal);
+                if (boundConfig != null) {
+                    boundConfig.clear();
+                }
+            }
+            return previousValue;
+        }
 
-		Object removeValue(Object fieldObject, boolean bypassFinal) {
-			Object previousValue = getValue(fieldObject);
-			if (field.getType().isPrimitive()) {
-				setValue(fieldObject, (byte)0, bypassFinal);
-			} else {
-				setValue(fieldObject, null, bypassFinal);
-				if (boundConfig != null) {
-					boundConfig.clear();
-				}
-			}
-			return previousValue;
-		}
+        Object getValue(Object fieldObject) {
+            try {
+                return converter.convertFromField(field.get(fieldObject));
+            } catch (IllegalAccessException e) {
+                throw new ReflectionException("Failed to get field " + field, e);
+            }
+        }
 
-		Object getValue(Object fieldObject) {
-			try {
-				return converter.convertFromField(field.get(fieldObject));
-			} catch (IllegalAccessException e) {
-				throw new ReflectionException("Failed to get field " + field, e);
-			}
-		}
+        BoundConfig getUpdatedConfig(Object fieldObject) {
+            boundConfig.object = getValue(fieldObject);
+            return boundConfig;
+        }
 
-		BoundConfig getUpdatedConfig(Object fieldObject) {
-			boundConfig.object = getValue(fieldObject);
-			return boundConfig;
-		}
-
-		@Override
-		public String toString() {
-			return "FieldInfos{" + "field=" + field + ", boundConfig=" + boundConfig + '}';
-		}
-	}
+        @Override
+        public String toString() {
+            return "FieldInfos{" + "field=" + field + ", boundConfig=" + boundConfig + '}';
+        }
+    }
 
 	@SuppressWarnings("deprecation")
 	private static final class NoOpConverter implements Converter<Object, Object> {
@@ -461,24 +455,17 @@ public final class ObjectBinder {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
-    private static final class EnumValueConverter<T extends Enum<T>> implements Converter<T, Object> {
-        private final Class<T> enumType;
-        private final EnumGetMethod method;
+    @SuppressWarnings("deprecation")
+        private record EnumValueConverter<T extends Enum<T>>(Class<T> enumType, EnumGetMethod method) implements Converter<T, Object> {
 
-        EnumValueConverter(Class<T> enumType, EnumGetMethod method) {
-            this.enumType = enumType;
-            this.method = method;
+        @Override
+        public T convertToField(Object value) {
+            return method.get(value, enumType);
         }
 
         @Override
-		public T convertToField(Object value) {
-			return method.get(value, enumType);
-		}
-
-		@Override
-		public String convertFromField(T value) {
-			return (value == null) ? null : value.toString();
-		}
-    }
+        public String convertFromField(T value) {
+            return (value == null) ? null : value.toString();
+        }
+        }
 }

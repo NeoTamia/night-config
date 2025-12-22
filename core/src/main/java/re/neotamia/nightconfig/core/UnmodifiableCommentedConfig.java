@@ -129,41 +129,38 @@ public interface UnmodifiableCommentedConfig extends UnmodifiableConfig {
 		}
 	}
 
-	final class CommentNode {
-		private final String comment;
-		private final Map<String, CommentNode> children;
+    record CommentNode(String comment, Map<String, CommentNode> children) {
+        /**
+         * Creates a new CommentNode.
+         * <p>
+         * Note: The comment and children are never both null.
+         *
+         * @param comment  the comment, may be null
+         * @param children the children Map, may be null
+         */
+        public CommentNode {
+            if (comment == null && children == null) {
+                throw new IllegalArgumentException("There is no point in creating a CommentNode "
+                        + "if the comment AND the children are null.");
+            }
+        }
 
-		/**
-		 * Creates a new CommentNode.
-		 * <p>
-		 * Note: The comment and children are never both null.
-		 *
-		 * @param comment  the comment, may be null
-		 * @param children the children Map, may be null
-		 */
-		public CommentNode(String comment, Map<String, CommentNode> children) {
-			if (comment == null && children == null) {
-				throw new IllegalArgumentException("There is no point in creating a CommentNode "
-												   + "if the comment AND the children are null.");
-			}
-			this.comment = comment;
-			this.children = children;
-		}
+        /**
+         * @return the node's comment
+         */
+        @Override
+        public String comment() {
+            return comment;
+        }
 
-		/**
-		 * @return the node's comment
-		 */
-		public String getComment() {
-			return comment;
-		}
-
-		/**
-		 * @return the Map of the node's children
-		 */
-		public Map<String, CommentNode> getChildren() {
-			return children;
-		}
-	}
+        /**
+         * @return the Map of the node's children
+         */
+        @Override
+        public Map<String, CommentNode> children() {
+            return children;
+        }
+    }
 
 	@Override
 	Set<? extends Entry> entrySet();

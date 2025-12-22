@@ -588,85 +588,70 @@ public final class FileWatcher {
 		}
 	}
 
-	private static final class WatchedDirectory {
-		private final WatchKey key;
-		private final Map<Path, DebouncedRunnable> fileChangeHandlers;
+    private record WatchedDirectory(WatchKey key, Map<Path, DebouncedRunnable> fileChangeHandlers) {
+        private WatchedDirectory(WatchKey key, Map<Path, DebouncedRunnable> fileChangeHandlers) {
+            this.key = Objects.requireNonNull(key);
+            this.fileChangeHandlers = Objects.requireNonNull(fileChangeHandlers);
+        }
+    }
 
-		WatchedDirectory(WatchKey key, Map<Path, DebouncedRunnable> fileChangeHandlers) {
-			this.key = Objects.requireNonNull(key);
-			this.fileChangeHandlers = Objects.requireNonNull(fileChangeHandlers);
-		}
-	}
+    /**
+     * Control message that can be send to a watcher thread.
+     *
+     * @param path    null for poison
+     * @param handler null for some poison and remove
+     * @param future  Allows to notify the caller when the processing of the message is complete.  optional
+     */
+    private record ControlMessage(ControlMessageKind kind, CanonicalPath path, Runnable handler, CompletableFuture<Void> future) {
 
-	/** Control message that can be send to a watcher thread. */
-	private static final class ControlMessage {
-		private final ControlMessageKind kind;
-		private final CanonicalPath path; // null for poison
-		private final Runnable handler; // null for some poison and remove
-		/** Allows to notify the caller when the processing of the message is complete. */
-		private final CompletableFuture<Void> future; // optional
+        static ControlMessage addOrPut(ControlMessageKind kind, CanonicalPath path, Runnable handler, CompletableFuture<Void> future) {
+            if (kind != ControlMessageKind.ADD && kind != ControlMessageKind.PUT) {
+                throw new IllegalArgumentException("Unexpected message kind " + kind);
+            }
+            return new ControlMessage(kind, path, handler, future);
+        }
 
-		private ControlMessage(ControlMessageKind kind, CanonicalPath path, Runnable handler, CompletableFuture<Void> future) {
-			this.path = path;
-			this.kind = kind;
-			this.handler = handler;
-			this.future = future;
-		}
+        static ControlMessage remove(CanonicalPath path, CompletableFuture<Void> future) {
+            return new ControlMessage(ControlMessageKind.REMOVE, path, null, future);
+        }
 
-		static ControlMessage addOrPut(ControlMessageKind kind, CanonicalPath path, Runnable handler, CompletableFuture<Void> future) {
-			if (kind != ControlMessageKind.ADD && kind != ControlMessageKind.PUT) {
-				throw new IllegalArgumentException("Unexpected message kind " + kind);
-			}
-			return new ControlMessage(kind, path, handler, future);
-		}
+        static ControlMessage poison(CompletableFuture<Void> future) {
+            return new ControlMessage(ControlMessageKind.POISON, null, null, future);
+        }
 
-		static ControlMessage remove(CanonicalPath path, CompletableFuture<Void> future) {
-			return new ControlMessage(ControlMessageKind.REMOVE, path, null, future);
-		}
+        @Override
+        public String toString() {
+            return "ControlMessage[kind=" + kind + ", path=" + path + ", handler=" + handler + ", future=" + future + "]";
+        }
+    }
 
-		static ControlMessage poison(CompletableFuture<Void> future) {
-			return new ControlMessage(ControlMessageKind.POISON, null, null, future);
-		}
+    private record CanonicalPath(Path parentDirectory, Path fileName) {
 
-		@Override
-		public String toString() {
-			return "ControlMessage[kind=" + kind + ", path=" + path + ", handler=" + handler + ", future=" + future + "]";
-		}
-	}
+        public static CanonicalPath from(Path fullFilePath) {
+            try {
+                // To avoid duplicate entries in the map of dirs, make the path absolute and resolve links and special names like ".."
+                // toRealPath() only works if the file exists, so we call `toRealPath` on its parent if it doesn't
+                Path dir, fileName;
+                try {
+                    Path realFile = fullFilePath.toRealPath();
+                    dir = realFile.getParent();
+                    fileName = realFile.getFileName();
+                } catch (NoSuchFileException e) {
+                    dir = fullFilePath.getParent().toRealPath();
+                    fileName = fullFilePath.getFileName();
+                }
+                return new CanonicalPath(dir, fileName);
+            } catch (IOException ex) {
+                throw new WatchingException("Failed to determine the canonical path of: " + fullFilePath + "\nHint: make sure that all parent directories exist.", ex);
+            }
+        }
 
-	private static class CanonicalPath {
-		public final Path parentDirectory, fileName;
+        @Override
+        public String toString() {
+            return parentDirectory + "/" + fileName;
+        }
 
-		private CanonicalPath(Path parentDirectory, Path fileName) {
-			this.parentDirectory = parentDirectory;
-			this.fileName = fileName;
-		}
-
-		public static CanonicalPath from(Path fullFilePath) {
-			try {
-			// To avoid duplicate entries in the map of dirs, make the path absolute and resolve links and special names like ".."
-			// toRealPath() only works if the file exists, so we call `toRealPath` on its parent if it doesn't
-			Path dir, fileName;
-			try {
-				Path realFile = fullFilePath.toRealPath();
-				dir = realFile.getParent();
-				fileName = realFile.getFileName();
-			} catch (NoSuchFileException e) {
-				dir = fullFilePath.getParent().toRealPath();
-				fileName = fullFilePath.getFileName();
-			}
-			return new CanonicalPath(dir, fileName);
-			} catch (IOException ex) {
-				throw new WatchingException("Failed to determine the canonical path of: " + fullFilePath + "\nHint: make sure that all parent directories exist.", ex);
-			}
-		}
-
-		@Override
-		public String toString() {
-			return parentDirectory + "/" + fileName;
-		}
-
-	}
+    }
 
 	private enum ControlMessageKind {
 		PUT, ADD, REMOVE, POISON

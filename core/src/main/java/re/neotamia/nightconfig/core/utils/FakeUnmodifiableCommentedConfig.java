@@ -57,26 +57,21 @@ public final class FakeUnmodifiableCommentedConfig extends UnmodifiableConfigWra
 		return new TransformingSet<>(config.entrySet(), FakeCommentedEntry::new, o -> null, o -> o);
 	}
 
-	private static final class FakeCommentedEntry implements UnmodifiableCommentedConfig.Entry {
-		private final UnmodifiableConfig.Entry entry;
+    private record FakeCommentedEntry(UnmodifiableConfig.Entry entry) implements UnmodifiableCommentedConfig.Entry {
 
-		private FakeCommentedEntry(UnmodifiableConfig.Entry entry) {
-			this.entry = entry;
-		}
+        @Override
+        public String getComment() {
+            return null;
+        }
 
-		@Override
-		public String getComment() {
-			return null;
-		}
+        @Override
+        public String getKey() {
+            return entry.getKey();
+        }
 
-		@Override
-		public String getKey() {
-			return entry.getKey();
-		}
-
-		@Override
-		public <T> T getRawValue() {
-			return entry.getRawValue();
-		}
-	}
+        @Override
+        public <T> T getRawValue() {
+            return entry.getRawValue();
+        }
+    }
 }

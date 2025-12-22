@@ -770,39 +770,33 @@ public class ConfigSpec {
 		REMOVE
 	}
 
-	/**
-	 * Container for the supplier of the default value and the validator.
-	 */
-	private static final class ValueSpec {
-		private final Supplier<?> defaultValueSupplier;
-		private final Predicate<Object> validator;
+    /**
+     * Container for the supplier of the default value and the validator.
+     */
+    private record ValueSpec(Supplier<?> defaultValueSupplier, Predicate<Object> validator) {
+        private ValueSpec(Object defaultValue, Predicate<Object> validator) {
+            this(new DumbSupplier<>(
+                            Objects.requireNonNull(defaultValue, "The default value must not be null.")),
+                    validator);
+        }
 
-		private ValueSpec(Object defaultValue, Predicate<Object> validator) {
-			this(new DumbSupplier<>(
-						 Objects.requireNonNull(defaultValue, "The default value must not be null.")),
-				 validator);
-		}
+        private ValueSpec(Supplier<?> defaultValueSupplier, Predicate<Object> validator) {
+            this.defaultValueSupplier = Objects.requireNonNull(defaultValueSupplier,
+                    "The supplier of the default value must not be null.");
+            this.validator = Objects.requireNonNull(validator, "The validator must not be null.");
+        }
+    }
 
-		private ValueSpec(Supplier<?> defaultValueSupplier, Predicate<Object> validator) {
-			this.defaultValueSupplier = Objects.requireNonNull(defaultValueSupplier,
-															   "The supplier of the default value must not be null.");
-			this.validator = Objects.requireNonNull(validator, "The validator must not be null.");
-		}
-	}
+    /**
+     * A Supplier that always returns the value it has been created with.
+     *
+     * @param <T> the value's type
+     */
+    private record DumbSupplier<T>(T value) implements Supplier<T> {
 
-	/**
-	 * A Supplier that always returns the value it has been created with.
-	 *
-	 * @param <T> the value's type
-	 */
-	private static final class DumbSupplier<T> implements Supplier<T> {
-		private final T value;
-
-		private DumbSupplier(T value) {this.value = value;}
-
-		@Override
-		public T get() {
-			return value;
-		}
-	}
+        @Override
+        public T get() {
+            return value;
+        }
+    }
 }

@@ -92,43 +92,38 @@ public final class FakeCommentedConfig extends ConfigWrapper<Config> implements 
 		return new TransformingSet<>(config.entrySet(), FakeCommentedEntry::new, o -> null, o -> o);
 	}
 
-	private static final class FakeCommentedEntry implements CommentedConfig.Entry {
-		private final Config.Entry entry;
+    private record FakeCommentedEntry(Config.Entry entry) implements CommentedConfig.Entry {
 
-		private FakeCommentedEntry(Config.Entry entry) {
-			this.entry = entry;
-		}
+        @Override
+        public String getComment() {
+            return null;
+        }
 
-		@Override
-		public String getComment() {
-			return null;
-		}
+        @Override
+        public String getKey() {
+            return entry.getKey();
+        }
 
-		@Override
-		public String getKey() {
-			return entry.getKey();
-		}
+        @Override
+        public <T> T getRawValue() {
+            return entry.getRawValue();
+        }
 
-		@Override
-		public <T> T getRawValue() {
-			return entry.getRawValue();
-		}
+        @Override
+        public String setComment(String comment) {
+            return null;
+        }
 
-		@Override
-		public String setComment(String comment) {
-			return null;
-		}
+        @Override
+        public String removeComment() {
+            return null;
+        }
 
-		@Override
-		public String removeComment() {
-			return null;
-		}
-
-		@Override
-		public <T> T setValue(Object value) {
-			return entry.setValue(value);
-		}
-	}
+        @Override
+        public <T> T setValue(Object value) {
+            return entry.setValue(value);
+        }
+    }
 
 	@Override
 	public CommentedConfig createSubConfig() {

@@ -140,7 +140,6 @@ public final class ObjectDeserializerBuilder {
 		ValueDeserializer enumDe = new StandardDeserializers.EnumDeserializer();
 		ValueDeserializer uuidDe = new StandardDeserializers.UuidDeserializer();
 		ValueDeserializer numberDe = new StandardDeserializers.RiskyNumberDeserializer();
-        ValueDeserializer floatDe = new StandardDeserializers.FloatDeserializer();
 
 		withDeserializerProvider(((valueClass, resultType) -> {
 			Type fullType = resultType.getFullType();
@@ -167,8 +166,6 @@ public final class ObjectDeserializerBuilder {
 					return enumDe; // value to Enum
 				if (RiskyNumberDeserializer.isNumberTypeSupported(valueClass) && Util.isPrimitiveOrWrapperNumber(resultClass))
 					return numberDe;
-                if (resultClass.isAssignableFrom(Float.class))
-                    return floatDe;
 				return null; // no standard deserializer matches this case
 			}).orElse(null);
 		}));

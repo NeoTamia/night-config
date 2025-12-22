@@ -255,7 +255,8 @@ final class StandardDeserializers {
 	static final class RiskyNumberDeserializer implements ValueDeserializer<Number, Number> {
 
 		public static boolean isNumberTypeSupported(Class<?> t) {
-			return t == Integer.class || t == int.class || t == Long.class || t == long.class;
+			return t == Integer.class || t == int.class || t == Long.class || t == long.class
+                    || t == Double.class || t == double.class || t == Float.class || t == float.class;
 		}
 
 		@Override
@@ -264,73 +265,43 @@ final class StandardDeserializers {
                 throw new SerdeException("Cannot deserialize a value with a risky number conversion without knowing the number type");
 			Class<?> resultCls = resultType.getSatisfyingRawType()
 					.orElseThrow(() -> new SerdeException("Could not find a concrete number type that can satisfy the constraint " + resultType));
-			Class<?> valueCls = value.getClass();
 
-			if (valueCls == Long.class) {
-				long l = value.longValue();
-				if (resultCls == Integer.class || resultCls == int.class) {
-					// long to int
-					int i = (int) l;
-					if ((long) i == l) {
-						return i;
-					} else {
-						// error: lossy
-					}
-
-				} else if (resultCls == Short.class || resultCls == short.class) {
-					// long to short
-					short s = (short) l;
-					if ((long) s == l) {
-						return s;
-					} else {
-						// error: lossy
-					}
-				} else if (resultCls == Byte.class || resultCls == byte.class) {
-					// long to byte
-					byte b = (byte) l;
-					if ((long) b == l) {
-						return b;
-					} else {
-						// error: lossy
-					}
-				} else {
-					throw new SerdeException(String.format(
-							"Cannot deserialize from %s to %s: risky conversion not implemented, you should change your types.",
-							valueCls, resultCls));
-				}
-			} else if (valueCls == Integer.class) {
-				int i = value.intValue();
-				if (resultCls == Short.class || resultCls == short.class) {
-					// int to short
-					short s = (short) i;
-					if ((int) s == i) {
-						return s;
-					} else {
-						// error: lossy
-					}
-				} else if (resultCls == Byte.class || resultCls == byte.class) {
-					// int to byte
-					byte b = (byte) i;
-					if ((int) b == i) {
-						return b;
-					} else {
-						// error: lossy
-					}
-				} else {
-					throw new SerdeException(String.format("Cannot deserialize from %s to %s: risky conversion not implemented, you should change your types.", valueCls, resultCls));
-				}
-			}
-			throw new SerdeException(String.format("Cannot deserialize %s to %s: the conversion would be lossy", value, resultCls));
+            if (resultCls == int.class || resultCls == Integer.class) {
+                int i = value.intValue();
+                if (value instanceof Float || value instanceof Double) {
+                    if (value.doubleValue() == (double)i) return i;
+                } else if (value.longValue() == (long)i) {
+                    return i;
+                }
+            } else if (resultCls == long.class || resultCls == Long.class) {
+                long l = value.longValue();
+                if (value instanceof Float || value instanceof Double) {
+                    if (value.doubleValue() == (double)l) return l;
+                } else {
+                    return l;
+                }
+            } else if (resultCls == short.class || resultCls == Short.class) {
+                short s = value.shortValue();
+                if (value instanceof Float || value instanceof Double) {
+                    if (value.doubleValue() == (double)s) return s;
+                } else if (value.longValue() == (long)s) {
+                    return s;
+                }
+            } else if (resultCls == byte.class || resultCls == Byte.class) {
+                byte b = value.byteValue();
+                if (value instanceof Float || value instanceof Double) {
+                    if (value.doubleValue() == (double)b) return b;
+                } else if (value.longValue() == (long)b) {
+                    return b;
+                }
+            } else if (resultCls == float.class || resultCls == Float.class) {
+                float f = value.floatValue();
+                if (value.doubleValue() == (double)f) return f;
+            } else if (resultCls == double.class || resultCls == Double.class) {
+                return value.doubleValue();
+            }
+			throw new SerdeException(String.format("Cannot deserialize %s (%s) to %s: the conversion would be lossy", value, value.getClass().getSimpleName(), resultCls.getSimpleName()));
 		}
 	}
 
-    /**
-     * Deserializes a {@code Double} into a {@code Float}.
-     */
-    static final class FloatDeserializer implements ValueDeserializer<Double, Float> {
-        @Override
-        public Float deserialize(Double value, TypeConstraint resultType, DeserializerContext ctx) {
-            return value.floatValue();
-        }
-    }
 }

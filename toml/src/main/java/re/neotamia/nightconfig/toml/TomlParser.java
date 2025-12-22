@@ -159,7 +159,7 @@ public final class TomlParser implements ConfigParser<CommentedConfig> {
 	private void checkContainsOnlySubtables(Config table, List<String> path) {
 		for (Entry entry : table.entrySet()) {
 			Object value = entry.getValue();
-			if (!(value instanceof Config || (value instanceof List && !((List<?>)value).isEmpty() && ((List<?>)value).get(0) instanceof Config))) {
+			if (!(value instanceof Config || (value instanceof List && !((List<?>)value).isEmpty() && ((List<?>)value).getFirst() instanceof Config))) {
 				throw new ParsingException("Table with path " + path + " has been declared twice.");
 			}
 		}

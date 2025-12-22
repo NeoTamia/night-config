@@ -34,9 +34,9 @@ public class FileConfigTests {
 
         assertEquals(2024, fileConfig.getInt(List.of("year")));
         assertInstanceOf(List.class, fileConfig.get(List.of("dependencies", "testproject")));
-        assertEquals("dep-a", (fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).get("a"));
-        assertNull((fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).get("null"));
-        assertTrue((fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).contains("null"));
+        assertEquals("dep-a", (fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).getFirst().get("a"));
+        assertNull((fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).getFirst().get("null"));
+        assertTrue((fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).getFirst().contains("null"));
     }
 
     @Test
@@ -48,7 +48,7 @@ public class FileConfigTests {
 
         assertEquals(2024, fileConfig.getInt(List.of("year")));
         assertInstanceOf(List.class, fileConfig.get(List.of("dependencies", "testproject")));
-        assertEquals("dep-a", (fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).get(0).get("a"));
+        assertEquals("dep-a", (fileConfig.<List<Config>>get(List.of("dependencies", "testproject"))).getFirst().get("a"));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class FileConfigTests {
         assertEquals(1, fileConfig.getInt("v"));
 
         List<Config> arrayOfTables = fileConfig.get(List.of("a.b", "b.c"));
-        assertEquals("value", arrayOfTables.get(0).get("key"));
+        assertEquals("value", arrayOfTables.getFirst().get("key"));
     }
 
     @Test
@@ -98,7 +98,7 @@ public class FileConfigTests {
         assertEquals(1, fileConfig.getInt("v"));
 
         List<Config> arrayOfTables = fileConfig.get(List.of("a.b", "b.c"));
-        assertEquals("value", arrayOfTables.get(0).get("key"));
+        assertEquals("value", arrayOfTables.getFirst().get("key"));
     }
 
     void checkForgeTestContent(FileConfig fileConfig) {
@@ -107,12 +107,12 @@ public class FileConfigTests {
         assertEquals("CC0", fileConfig.get("license"));
 
         List<Config> mods = fileConfig.get("mods");
-        Config mod0 = mods.get(0);
+        Config mod0 = mods.getFirst();
         assertEquals("testproject", mod0.get("modId"));
         assertEquals("A test project.", mod0.get("description"));
 
         List<Config> dependencies = fileConfig.get("dependencies.testproject");
-        Config dep0 = dependencies.get(0);
+        Config dep0 = dependencies.getFirst();
         assertEquals("neoforge", dep0.get("modId"));
         assertEquals("required", dep0.get("type"));
         assertEquals("NONE", dep0.get("ordering"));
@@ -153,8 +153,8 @@ public class FileConfigTests {
 
         List<CommentedConfig> abbc = config.get(List.of("a.b", "b.c"));
         assertNotNull(abbc);
-        assertEquals("value", abbc.get(0).get("key"));
-        assertEquals("sub1", abbc.get(0).getComment("key"));
+        assertEquals("value", abbc.getFirst().get("key"));
+        assertEquals("sub1", abbc.getFirst().getComment("key"));
 
         assertEquals("comment on table", config.getComment("table"));
         assertEquals("v", config.get(List.of("table", "k")));

@@ -115,7 +115,7 @@ public class ObjectConverterTest {
             assertEquals(config.getEnum("subObject.enumValue", TestEnum.class, EnumGetMethod.ORDINAL_OR_NAME), object.subObject.enumValue);
 
 			assertTrue(object.nestedObjList3 instanceof LinkedList);
-			assertTrue(object.nestedObjList3.get(0) instanceof LinkedList);
+			assertTrue(object.nestedObjList3.getFirst() instanceof LinkedList);
 		}
 
 		System.out.println();

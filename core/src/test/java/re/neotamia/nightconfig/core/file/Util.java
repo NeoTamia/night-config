@@ -41,8 +41,8 @@ final class Util {
         assertNotEquals(1234, config.<Object>get("nested.sub"));
         assertEquals("nss", config.get("nested.sub.sub"));
 		assertInstanceOf(List.class, config.get("array"));
-		assertInstanceOf(Config.class, (config.<List<Object>>get("array")).get(0));
-		assertEquals("value", ((Config)(config.<List<Object>>get("array")).get(0)).get("inConfigInArray"));
+		assertInstanceOf(Config.class, (config.<List<Object>>get("array")).getFirst());
+		assertEquals("value", ((Config)(config.<List<Object>>get("array")).getFirst()).get("inConfigInArray"));
     }
 
     /**
@@ -65,7 +65,7 @@ final class Util {
         assertFalse(config.contains("nested.a"));
         assertFalse(config.contains("nested.b"));
         assertFalse(config.contains("nested.sub.sub"));
-		assertEquals("value", ((Config)(config.<List<Object>>get("array")).get(0)).get("inConfigInArray"));
+		assertEquals("value", ((Config)(config.<List<Object>>get("array")).getFirst()).get("inConfigInArray"));
     }
 
     /**
@@ -85,7 +85,7 @@ final class Util {
         assertFalse(config.contains("nested.c"));
         assertEquals("nss", config.get("nested.sub.sub"));
         assertNotEquals(1234, config.<Object>get("nested.sub"));
-		assertEquals("value", ((Config)(config.<List<Object>>get("array")).get(0)).get("inConfigInArray"));
+		assertEquals("value", ((Config)(config.<List<Object>>get("array")).getFirst()).get("inConfigInArray"));
     }
 
     static final class TestFormat implements ConfigFormat<CommentedConfig> {

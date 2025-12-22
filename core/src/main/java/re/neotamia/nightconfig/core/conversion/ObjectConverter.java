@@ -270,7 +270,7 @@ public final class ObjectConverter {
 
 						final ParameterizedType genericType = (ParameterizedType)field.getGenericType();
 						final List<Class<?>> dstTypes = elementTypes(genericType);
-						final Class<?> dstBottomType = dstTypes.get(dstTypes.size()-1);
+						final Class<?> dstBottomType = dstTypes.getLast();
 
 						if (srcBottomType == null
 							|| dstBottomType == null

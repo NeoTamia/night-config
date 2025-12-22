@@ -358,7 +358,7 @@ public final class SerdeTestSkip {
         var deserialized = deserialize(configWithNull, SkipMultipleConditionsDeserialization::new);
         assertEquals("default_name", deserialized.name); // Null ignoré
         assertEquals(2, deserialized.numbers.size()); // Pas null, désérialisé
-        assertEquals(10, deserialized.numbers.get(0));
+        assertEquals(10, deserialized.numbers.getFirst());
 
         // Test avec valeur vide
         var configWithEmpty = Config.inMemory();
@@ -368,7 +368,7 @@ public final class SerdeTestSkip {
         deserialized = deserialize(configWithEmpty, SkipMultipleConditionsDeserialization::new);
         assertEquals("default_name", deserialized.name); // Vide ignoré
         assertEquals(3, deserialized.numbers.size()); // Vide ignoré, valeur par défaut
-        assertEquals(1, deserialized.numbers.get(0));
+        assertEquals(1, deserialized.numbers.getFirst());
 
         // Test avec valeurs valides
         var configWithValid = Config.inMemory();
@@ -378,7 +378,7 @@ public final class SerdeTestSkip {
         deserialized = deserialize(configWithValid, SkipMultipleConditionsDeserialization::new);
         assertEquals("john", deserialized.name);
         assertEquals(3, deserialized.numbers.size());
-        assertEquals(100, deserialized.numbers.get(0));
+        assertEquals(100, deserialized.numbers.getFirst());
     }
 
     static class SkipInternalCustomDeserialization {

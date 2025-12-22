@@ -298,7 +298,7 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 	 * CharsWrapper and is completely independant.
 	 */
 	@Override
-	public @NotNull @NotNull CharsWrapper subSequence(int start, int end) {
+	public @NotNull CharsWrapper subSequence(int start, int end) {
 		if (offset + end > limit) {
 			throw new ArrayIndexOutOfBoundsException(String.format("Out of bounds: this wrapper has a length of %d, but chars [%d..<%d] were requested", length(), start, end));
 		}
@@ -355,7 +355,7 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 	}
 
 	@Override
-	public @NotNull @NotNull String toString() {
+	public @NotNull String toString() {
 		return new String(chars, offset, length());
 	}
 
@@ -392,7 +392,7 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 	}
 
 	@Override
-	public @NotNull @NotNull Iterator<Character> iterator() {
+	public @NotNull Iterator<Character> iterator() {
 		return new Iterator<>() {
             private int index = offset;
 

@@ -49,7 +49,7 @@ class AbstractObjectDeserializer {
 	protected <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass, Class<V> valueClass) {
 		DeserializerContext ctx = new DeserializerContext(this);
 		TypeConstraint t = new TypeConstraint(new TypeConstraint.ManuallyParameterized(collectionClass, valueClass));
-		return (C) ctx.deserializeValue(configValue, Optional.of(t));
+		return (C) ctx.deserializeValue(configValue, t);
 	}
 
 	/**
@@ -67,7 +67,7 @@ class AbstractObjectDeserializer {
 	protected <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass, Class<V> valueClass) {
 		DeserializerContext ctx = new DeserializerContext(this);
 		TypeConstraint t = new TypeConstraint(new TypeConstraint.ManuallyParameterized(mapClass, String.class, valueClass));
-		return (M) ctx.deserializeValue(configValue, Optional.of(t));
+		return (M) ctx.deserializeValue(configValue, t);
 	}
 
 	/**

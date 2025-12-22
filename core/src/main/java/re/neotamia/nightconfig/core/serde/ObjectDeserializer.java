@@ -151,7 +151,7 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 		}
 		DeserializerContext ctx = new DeserializerContext(this);
 		TypeConstraint t = new TypeConstraint(recordClass);
-		return (R) ctx.deserializeValue(source, Optional.of(t));
+		return (R) ctx.deserializeValue(source, t);
 	}
 
 	/**

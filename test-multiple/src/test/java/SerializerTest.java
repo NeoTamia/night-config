@@ -1,11 +1,15 @@
 import re.neotamia.nightconfig.core.concurrent.SynchronizedConfig;
 import re.neotamia.nightconfig.core.file.CommentedFileConfig;
 import re.neotamia.nightconfig.core.file.FileConfig;
+import re.neotamia.nightconfig.core.file.FormatDetector;
 import re.neotamia.nightconfig.core.serde.ObjectSerializer;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeComment;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeKey;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import re.neotamia.nightconfig.json.JsonFormat;
+import re.neotamia.nightconfig.toml.TomlFormat;
+import re.neotamia.nightconfig.yaml.YamlFormat;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SerializerTest {
     @BeforeAll
     public static void setup() {
+        FormatDetector.registerExtension("yaml", YamlFormat.defaultInstance());
+        FormatDetector.registerExtension("yml", YamlFormat.defaultInstance());
+        FormatDetector.registerExtension("json", JsonFormat.fancyInstance());
+        FormatDetector.registerExtension("toml", TomlFormat.instance());
         re.neotamia.nightconfig.core.Config.setInsertionOrderPreserved(true);
     }
 

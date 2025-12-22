@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.serde;
 
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.NullObject;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 import re.neotamia.nightconfig.core.serde.annotations.*;
@@ -35,8 +36,8 @@ public final class DeserializerContext extends AbstractDeSerializerContext {
      * @return deserialization result
      * @throws SerdeException if no suitable deserializer is found
      */
-    public Object deserializeValue(Object value, Optional<TypeConstraint> typeConstraint) {
-        TypeConstraint t = typeConstraint.orElse(new TypeConstraint(Object.class));
+    public Object deserializeValue(Object value, @Nullable TypeConstraint typeConstraint) {
+        TypeConstraint t = typeConstraint == null ? new TypeConstraint(Object.class) : typeConstraint;
         ValueDeserializer<Object, ?> deserializer = settings.findValueDeserializer(value, t);
         return deserializer.deserialize(value, typeConstraint, this);
     }
@@ -85,8 +86,7 @@ public final class DeserializerContext extends AbstractDeSerializerContext {
 
                         // deserialize
                         try {
-                            Optional<TypeConstraint> type = Optional.of(resultType);
-                            deserialized = deserializer.deserialize(value, type, this);
+                            deserialized = deserializer.deserialize(value, resultType, this);
                         } catch (Exception ex) {
                             throw new SerdeException("Error during deserialization of value `" + value + "` to field `" + field + "` with deserializer " + deserializer, ex);
                         }

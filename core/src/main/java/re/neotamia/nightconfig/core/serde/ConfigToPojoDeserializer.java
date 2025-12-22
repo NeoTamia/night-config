@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.serde;
 
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.NullObject;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 
@@ -15,18 +16,16 @@ import java.util.stream.Collectors;
 /**
  * Deserialize a {@code Config} to the fields of a Plain-Old-Java-Object (POJO).
  */
-final class ConfigToPojoDeserializer
-	implements ValueDeserializer<UnmodifiableConfig, Object> {
+final class ConfigToPojoDeserializer implements ValueDeserializer<UnmodifiableConfig, Object> {
 
 	@Override
-	public Object deserialize(UnmodifiableConfig value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
-		if (resultType.isEmpty()) {
+	public Object deserialize(UnmodifiableConfig value, @Nullable TypeConstraint resultType, DeserializerContext ctx) {
+		if (resultType == null) {
 			// no constraint, we don't know the type of the POJO!
 			// Assume the easiest result: return the value as is
 			return value;
 		} else {
-			TypeConstraint t = resultType.get();
-			Class<?> cls = t.getSatisfyingRawType().orElseThrow(() -> new SerdeException("Could not find a concrete type that can satisfy the constraint " + t));
+            Class<?> cls = resultType.getSatisfyingRawType().orElseThrow(() -> new SerdeException("Could not find a concrete type that can satisfy the constraint " + resultType));
 
 			if (cls.isRecord()) return deserializeToRecord(value, cls);
 			return deserializeToNormalClass(value, cls, ctx);

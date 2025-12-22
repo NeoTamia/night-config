@@ -19,7 +19,7 @@ final class StandardDeserializers {
 	 */
     static final class TrivialDeserializer implements ValueDeserializer<Object, Object> {
 		@Override
-		public Object deserialize(Object value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
+		public Object deserialize(Object value, TypeConstraint resultType, DeserializerContext ctx) {
 			return value;
 		}
 	}
@@ -30,7 +30,7 @@ final class StandardDeserializers {
 	static final class MapDeserializer implements ValueDeserializer<Object, Map<String, ?>> {
 
 		@Override
-		public Map<String, ?> deserialize(Object mapValue, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
+		public Map<String, ?> deserialize(Object mapValue, TypeConstraint resultType, DeserializerContext ctx) {
 
 			int size;
 			if (mapValue instanceof UnmodifiableConfig) {
@@ -44,14 +44,12 @@ final class StandardDeserializers {
 
 			Optional<TypeConstraint[]> mapKVType;
 			Map<String, Object> res;
-			if (resultType.isPresent()) {
-				TypeConstraint mapType = resultType.get();
-				res = createMapInstance(mapType.getSatisfyingRawType().get(), size);
-				mapKVType = extractMapKVType(mapType);
+			if (resultType != null) {
+                res = createMapInstance(resultType.getSatisfyingRawType().get(), size);
+				mapKVType = extractMapKVType(resultType);
 			} else {
 				mapKVType = Optional.empty();
-				res = Config.isInsertionOrderPreserved() ? new java.util.LinkedHashMap<>(size)
-						: new java.util.HashMap<>(size);
+				res = Config.isInsertionOrderPreserved() ? new java.util.LinkedHashMap<>(size) : new java.util.HashMap<>(size);
 			}
 
 			// separate types of Key and Value
@@ -63,7 +61,7 @@ final class StandardDeserializers {
 				if (!mapKeyType.get().getSatisfyingRawType().equals(Optional.of(String.class))) {
 					throw new SerdeException(
 							"Invalid map type for deserialization, the keys should be of type String instead of "
-									+ mapKeyType.get() + ". Full map type: " + resultType.get());
+									+ mapKeyType.get() + ". Full map type: " + resultType);
 				}
 			}
 
@@ -72,7 +70,7 @@ final class StandardDeserializers {
 				for (UnmodifiableConfig.Entry entry : ((UnmodifiableConfig) mapValue).entrySet()) {
 					String key = entry.getKey();
 					Object value = entry.getValue();
-					Object deserialized = ctx.deserializeValue(value, mapValueType);
+					Object deserialized = ctx.deserializeValue(value, mapValueType.orElse(null));
 					res.put(key, deserialized);
 				}
 			} else {
@@ -83,10 +81,10 @@ final class StandardDeserializers {
 						String keyClassStr = key == null ? "null" : key.getClass().toString();
 						throw new SerdeException(
 								"Invalid map type for deserialization, the keys should be of type String instead of "
-										+ keyClassStr + ". Full map type: " + resultType.get());
+										+ keyClassStr + ". Full map type: " + resultType);
 					}
 					Object value = entry.getValue();
-					Object deserialized = ctx.deserializeValue(value, mapValueType);
+					Object deserialized = ctx.deserializeValue(value, mapValueType.orElse(null));
 					res.put((String) key, deserialized);
 				}
 			}
@@ -140,14 +138,13 @@ final class StandardDeserializers {
 	static final class CollectionDeserializer implements ValueDeserializer<Collection<?>, Collection<?>> {
 
 		@Override
-		public Collection<?> deserialize(Collection<?> collectionValue, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
+		public Collection<?> deserialize(Collection<?> collectionValue, TypeConstraint resultType, DeserializerContext ctx) {
 			int size = collectionValue.size();
 			Collection<Object> res;
 			Optional<TypeConstraint> valueType;
-			if (resultType.isPresent()) {
-				TypeConstraint collectionType = resultType.get();
-				res = createCollectionInstance(collectionType.getSatisfyingRawType().get(), size);
-				valueType = extractCollectionValueType(collectionType);
+			if (resultType != null) {
+                res = createCollectionInstance(resultType.getSatisfyingRawType().get(), size);
+				valueType = extractCollectionValueType(resultType);
 			} else {
 				// no constraint, choose arbitrarily: it will be ArrayList
 				res = new ArrayList<>(size);
@@ -156,7 +153,7 @@ final class StandardDeserializers {
 
 			// convert the values
 			for (Object v : collectionValue) {
-				Object deserialized = ctx.deserializeValue(v, valueType);
+				Object deserialized = ctx.deserializeValue(v, valueType.orElse(null));
 				res.add(deserialized);
 			}
 			return res;
@@ -193,14 +190,13 @@ final class StandardDeserializers {
 	static final class CollectionToArrayDeserializer implements ValueDeserializer<Collection<?>, Object> {
 
 		@Override
-		public Object deserialize(Collection<?> collectionValue, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
+		public Object deserialize(Collection<?> collectionValue, TypeConstraint resultType, DeserializerContext ctx) {
 
 			int size = collectionValue.size();
 			Object res;
 			Optional<TypeConstraint> valueType;
-			if (resultType.isPresent()) {
-				TypeConstraint arrayType = resultType.get();
-				Class<?> componentType = ((Class<?>) arrayType.getFullType()).getComponentType();
+			if (resultType != null) {
+                Class<?> componentType = ((Class<?>) resultType.getFullType()).getComponentType();
 				assert componentType != null;
 				res = Array.newInstance(componentType, size);
 				valueType = Optional.of(new TypeConstraint(componentType));
@@ -213,7 +209,7 @@ final class StandardDeserializers {
 			// convert the values
 			int i = 0;
 			for (Object v : collectionValue) {
-				Object deserialized = ctx.deserializeValue(v, valueType);
+				Object deserialized = ctx.deserializeValue(v, valueType.orElse(null));
 				Array.set(res, i, deserialized);
 				i++;
 			}
@@ -228,11 +224,12 @@ final class StandardDeserializers {
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public Enum<?> deserialize(String value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
-			TypeConstraint enumType = resultType.orElseThrow(() -> new SerdeException(
-					"Cannot deserialize a value to an enum without knowing the enum type"));
-			Class<?> cls = enumType.getSatisfyingRawType()
-					.orElseThrow(() -> new SerdeException("Could not find a concrete enum type that can satisfy the constraint " + enumType));
+		public Enum<?> deserialize(String value, TypeConstraint resultType, DeserializerContext ctx) {
+            if (resultType == null) {
+                throw new SerdeException("Cannot deserialize a value to an enum without knowing the enum type");
+            }
+            Class<?> cls = resultType.getSatisfyingRawType()
+					.orElseThrow(() -> new SerdeException("Could not find a concrete enum type that can satisfy the constraint " + resultType));
 			// TODO use the field's annotations, if any, to get the right variant of EnumGetMethod
 			return EnumGetMethod.NAME.get(value, (Class) cls);
 		}
@@ -243,7 +240,7 @@ final class StandardDeserializers {
 	 */
 	static final class UuidDeserializer implements ValueDeserializer<String, UUID> {
 		@Override
-		public UUID deserialize(String value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
+		public UUID deserialize(String value, TypeConstraint resultType, DeserializerContext ctx) {
 			return UUID.fromString(value);
 		}
 	}
@@ -262,11 +259,11 @@ final class StandardDeserializers {
 		}
 
 		@Override
-		public Number deserialize(Number value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
-			TypeConstraint numberType = resultType.orElseThrow(() -> new SerdeException(
-					"Cannot deserialize a value with a risky number conversion without knowing the number type"));
-			Class<?> resultCls = numberType.getSatisfyingRawType()
-					.orElseThrow(() -> new SerdeException("Could not find a concrete number type that can satisfy the constraint " + numberType));
+		public Number deserialize(Number value, TypeConstraint resultType, DeserializerContext ctx) {
+            if (resultType == null)
+                throw new SerdeException("Cannot deserialize a value with a risky number conversion without knowing the number type");
+			Class<?> resultCls = resultType.getSatisfyingRawType()
+					.orElseThrow(() -> new SerdeException("Could not find a concrete number type that can satisfy the constraint " + resultType));
 			Class<?> valueCls = value.getClass();
 
 			if (valueCls == Long.class) {
@@ -332,7 +329,7 @@ final class StandardDeserializers {
      */
     static final class FloatDeserializer implements ValueDeserializer<Double, Float> {
         @Override
-        public Float deserialize(Double value, Optional<TypeConstraint> resultType, DeserializerContext ctx) {
+        public Float deserialize(Double value, TypeConstraint resultType, DeserializerContext ctx) {
             return value.floatValue();
         }
     }

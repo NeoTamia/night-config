@@ -11,16 +11,16 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TypeConstraintArrayTest {
-    private void checkField(Field f, Type fullType, Optional<Class<?>> rawType) {
+    private void checkField(Field f, Type fullType, Class<?> rawType) {
         var t = new TypeConstraint(f.getGenericType());
         assertEquals(fullType, t.getFullType());
-        assertEquals(rawType, t.getSatisfyingRawType());
+        assertEquals(Optional.ofNullable(rawType), t.getSatisfyingRawType());
     }
 
-    private void checkField(Field f, String fullTypeString, Optional<Class<?>> rawType) {
+    private void checkField(Field f, String fullTypeString, Class<?> rawType) {
         var t = new TypeConstraint(f.getGenericType());
         assertEquals(fullTypeString, t.getFullType().toString());
-        assertEquals(rawType, t.getSatisfyingRawType());
+        assertEquals(Optional.ofNullable(rawType), t.getSatisfyingRawType());
     }
 
     @Test
@@ -49,9 +49,9 @@ public class TypeConstraintArrayTest {
     @Test
     public void resolveArrayArgumentsFromClassTypeArg() throws Exception {
         Class<?> cls = Generic1.class;
-        checkField(cls.getDeclaredField("a"), "A[]", Optional.of(Object[].class));
-        checkField(cls.getDeclaredField("aa"), "A[][]", Optional.of(Object[][].class));
-        checkField(cls.getDeclaredField("aaa"), "A[][][]", Optional.of(Object[][][].class));
+        checkField(cls.getDeclaredField("a"), "A[]", Object[].class);
+        checkField(cls.getDeclaredField("aa"), "A[][]", Object[][].class);
+        checkField(cls.getDeclaredField("aaa"), "A[][][]", Object[][][].class);
     }
 
     @Test
@@ -62,22 +62,22 @@ public class TypeConstraintArrayTest {
         // checkField(Generic1_1.class.getField("aa"), "A[][]", Optional.of(CharSequence[][].class));
         // checkField(Generic1_1.class.getField("aaa"), "A[][][]", Optional.of(CharSequence[][][].class));
         checkField(Generic1_1.class.getDeclaredField("more"), CharSequence[].class,
-                Optional.of(CharSequence[].class));
-        checkField(Generic1_2.class.getDeclaredField("more"), "A[]", Optional.of(Object[].class));
-        checkField(Generic1_3.class.getDeclaredField("more"), "A[]", Optional.of(CharSequence[].class));
-        checkField(Generic1_4.class.getDeclaredField("more"), "A[]", Optional.empty());
-        checkField(Generic2.class.getDeclaredField("more"), "A[]", Optional.of(Serializable[].class));
+                CharSequence[].class);
+        checkField(Generic1_2.class.getDeclaredField("more"), "A[]", Object[].class);
+        checkField(Generic1_3.class.getDeclaredField("more"), "A[]", CharSequence[].class);
+        checkField(Generic1_4.class.getDeclaredField("more"), "A[]", null);
+        checkField(Generic2.class.getDeclaredField("more"), "A[]", Serializable[].class);
     }
 
     @Test
     public void resolveMixedArrayAndGenericTypes() throws Exception {
         Class<?> cls = Mixed.class;
-        checkField(cls.getDeclaredField("nested"), "java.util.List<X[]>", Optional.of(List.class));
-        checkField(cls.getDeclaredField("nestedExtend"), "java.util.List<? extends X[]>", Optional.of(List.class));
-        checkField(cls.getDeclaredField("nestedSuper"), "java.util.List<? super X[]>", Optional.of(List.class));
+        checkField(cls.getDeclaredField("nested"), "java.util.List<X[]>", List.class);
+        checkField(cls.getDeclaredField("nestedExtend"), "java.util.List<? extends X[]>", List.class);
+        checkField(cls.getDeclaredField("nestedSuper"), "java.util.List<? super X[]>", List.class);
 
         var custom = cls.getDeclaredField("custom");
-        checkField(custom, "re.neotamia.nightconfig.core.serde.TypeConstraintArrayTest$MyListOfString<X>", Optional.of(MyListOfString.class));
+        checkField(custom, "re.neotamia.nightconfig.core.serde.TypeConstraintArrayTest$MyListOfString<X>", MyListOfString.class);
         var vt = TypeConstraintCollectionTest.extractCollectionValueType(new TypeConstraint(custom.getGenericType()));
         assertEquals(String[].class, vt.getFullType());
         assertEquals(Optional.of(String[].class), vt.getSatisfyingRawType());

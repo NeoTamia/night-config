@@ -294,23 +294,18 @@ public final class JsonParser implements ConfigParser<Config> {
 	}
 
 	private Object parseValue(CharacterInput input, char firstChar, ParsingMode parsingMode, Config parentConfig) {
-		switch (firstChar) {
-			case '"':
-				return parseString(input);
-			case '{':
-				return parseObject(input, parentConfig.createSubConfig(), parsingMode);
-			case '[':
-				return parseArray(input, new ArrayList<>(), parsingMode, parentConfig);
-			case 't':
-				return parseTrue(input);
-			case 'f':
-				return parseFalse(input);
-			case 'n':
-				return parseNull(input);
-			default:
-				input.pushBack(firstChar);
-				return parseNumber(input);
-		}
+        return switch (firstChar) {
+            case '"' -> parseString(input);
+            case '{' -> parseObject(input, parentConfig.createSubConfig(), parsingMode);
+            case '[' -> parseArray(input, new ArrayList<>(), parsingMode, parentConfig);
+            case 't' -> parseTrue(input);
+            case 'f' -> parseFalse(input);
+            case 'n' -> parseNull(input);
+            default -> {
+                input.pushBack(firstChar);
+                yield parseNumber(input);
+            }
+        };
 	}
 
 	private Number parseNumber(CharacterInput input) {
@@ -368,26 +363,18 @@ public final class JsonParser implements ConfigParser<Config> {
 	}
 
 	private char unescape(char c, CharacterInput input) {
-		switch (c) {
-			case '"':
-			case '\\':
-			case '/':
-				return c;
-			case 'b':
-				return '\b';
-			case 'f':
-				return '\f';
-			case 'n':
-				return '\n';
-			case 'r':
-				return '\r';
-			case 't':
-				return '\t';
-			case 'u':
-				CharsWrapper chars = input.readChars(4);
-				return (char)Utils.parseInt(chars, 16);
-			default:
-				throw new ParsingException("Invalid escapement: \\" + c);
-		}
+        return switch (c) {
+            case '"', '\\', '/' -> c;
+            case 'b' -> '\b';
+            case 'f' -> '\f';
+            case 'n' -> '\n';
+            case 'r' -> '\r';
+            case 't' -> '\t';
+            case 'u' -> {
+                CharsWrapper chars = input.readChars(4);
+                yield (char) Utils.parseInt(chars, 16);
+            }
+            default -> throw new ParsingException("Invalid escapement: \\" + c);
+        };
 	}
 }

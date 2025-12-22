@@ -102,17 +102,12 @@ final class ValueParser {
 		CharsWrapper numberChars = valueChars;
 		int base = 10;
 		if (valueChars.length() > 2) {
-			switch (valueChars.subView(0, 2).toString()) {
-				case "0x":
-					base = 16;
-					break;
-				case "0b":
-					base = 2;
-					break;
-				case "0o":
-					base = 8;
-					break;
-			}
+            base = switch (valueChars.subView(0, 2).toString()) {
+                case "0x" -> 16;
+                case "0b" -> 2;
+                case "0o" -> 8;
+                default -> base;
+            };
 			if (base != 10) {
 				numberChars = valueChars.subView(2);
 			}
@@ -158,23 +153,13 @@ final class ValueParser {
 	}
 
 	private static boolean isDigitChar(char c, int base) {
-		switch(base) {
-			case 2: {
-				return c == '0' || c == '1';
-			}
-			case 8: {
-				return (c >= '0' && c <= '7');
-			}
-			case 10: {
-				return (c >= '0' && c <= '9');
-			}
-			case 16: {
-				return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
-			}
-			default: {
-				throw new IllegalArgumentException("Unsupported base " + base);
-			}
-		}
+        return switch (base) {
+            case 2 -> c == '0' || c == '1';
+            case 8 -> (c >= '0' && c <= '7');
+            case 10 -> (c >= '0' && c <= '9');
+            case 16 -> (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+            default -> throw new IllegalArgumentException("Unsupported base " + base);
+        };
 	}
 
 	/**

@@ -152,31 +152,23 @@ final class StringParser {
 	 * @param c the first character, ie the one just after the backslash.
 	 */
 	private static String unescape(char c, CharacterInput input) {
-		switch (c) {
-			case '"':
-			case '\\':
-				return String.valueOf(c);
-			case 'b':
-				return "\b";
-			case 'f':
-				return "\f";
-			case 'n':
-				return "\n";
-			case 'r':
-				return "\r";
-			case 't':
-				return "\t";
-			case 'u': {
-				CharsWrapper chars = input.readChars(4);
-				return parseUnicodeCodepoint(chars);
-			}
-			case 'U': {
-				CharsWrapper chars = input.readChars(8);
-				return parseUnicodeCodepoint(chars);
-			}
-			default:
-				throw new ParsingException("Invalid escapement: \\" + c);
-		}
+        return switch (c) {
+            case '"', '\\' -> String.valueOf(c);
+            case 'b' -> "\b";
+            case 'f' -> "\f";
+            case 'n' -> "\n";
+            case 'r' -> "\r";
+            case 't' -> "\t";
+            case 'u' -> {
+                CharsWrapper chars = input.readChars(4);
+                yield parseUnicodeCodepoint(chars);
+            }
+            case 'U' -> {
+                CharsWrapper chars = input.readChars(8);
+                yield parseUnicodeCodepoint(chars);
+            }
+            default -> throw new ParsingException("Invalid escapement: \\" + c);
+        };
 	}
 
 	private static String parseUnicodeCodepoint(CharsWrapper chars) {

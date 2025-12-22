@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import re.neotamia.nightconfig.core.CommentedConfig;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.serde.annotations.*;
-import re.neotamia.nightconfig.core.serde.annotations.SerdeAssert;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeAssert.AssertThat;
 
 public final class SerdeTestAssert {

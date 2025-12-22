@@ -117,8 +117,6 @@ public final class IoUtils {
 				} catch (InterruptedException e) {
 					// ignore
 				}
-			} catch (IOException ex) {
-				throw ex;
 			}
 		}
 		String msg = String.format("IO operation '%s' failed after %s attempts", name, maxRetries);

@@ -1,12 +1,10 @@
 package re.neotamia.nightconfig.hocon;
 
-import org.junit.jupiter.api.BeforeAll;
 import re.neotamia.nightconfig.core.CommentedConfig;
 import re.neotamia.nightconfig.core.InMemoryCommentedFormat;
 import re.neotamia.nightconfig.core.concurrent.StampedConfig;
 import re.neotamia.nightconfig.core.concurrent.SynchronizedConfig;
 import re.neotamia.nightconfig.core.file.FileNotFoundAction;
-import re.neotamia.nightconfig.core.file.FormatDetector;
 import re.neotamia.nightconfig.core.io.ParsingMode;
 
 import java.io.File;

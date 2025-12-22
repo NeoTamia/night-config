@@ -3,7 +3,6 @@ package re.neotamia.nightconfig.core.serde;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.serde.annotations.*;
-import re.neotamia.nightconfig.core.serde.annotations.SerdeDefault;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeDefault.WhenValue;
 
 public final class SerdeTestDefaultValue {

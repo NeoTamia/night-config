@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.serde.annotations.*;
-import re.neotamia.nightconfig.core.serde.annotations.SerdeSkipDeserializingIf;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeSkipDeserializingIf.SkipDeIf;
 
 public final class SerdeTestSkipDeserializingIf {

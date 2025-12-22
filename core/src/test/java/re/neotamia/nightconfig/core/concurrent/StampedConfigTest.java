@@ -2,7 +2,6 @@ package re.neotamia.nightconfig.core.concurrent;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.AssertionError;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;

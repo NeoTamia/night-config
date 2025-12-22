@@ -249,7 +249,7 @@ public final class TypeConstraint {
 			return res;
 		}
 		if (t instanceof WildcardType w) {
-            TypeConstraint[] res = null;
+            TypeConstraint[] res;
 			for (Type bound : w.getUpperBounds()) {
 				res = resolveTypeArgumentsFor(resolveIfVariable(bound, resolvedVariables), classToFind, resolvedVariables);
 				if (res != null) {

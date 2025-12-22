@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Map;
@@ -103,18 +105,18 @@ public final class TransformingMap<K, InternalV, ExternalV> extends AbstractMap<
 	}
 
 	@Override
-	public Set<K> keySet() {
+	public @NotNull Set<K> keySet() {
 		return internalMap.keySet();
 	}
 
 	@Override
-	public Collection<ExternalV> values() {
+	public @NotNull Collection<ExternalV> values() {
 		return new TransformingCollection<>(internalMap.values(), readTransformation,
 											writeTransformation, searchTransformation);
 	}
 
 	@Override
-	public Set<Map.Entry<K, ExternalV>> entrySet() {
+	public @NotNull Set<Map.Entry<K, ExternalV>> entrySet() {
 		Function<Entry<K, InternalV>, Entry<K, ExternalV>> internalToExternal = internalEntry -> new TransformingMapEntry<>(
 				internalEntry, readTransformation, writeTransformation);
 
@@ -172,27 +174,27 @@ public final class TransformingMap<K, InternalV, ExternalV> extends AbstractMap<
 
 	@Override
 	public ExternalV computeIfAbsent(K key,
-									 Function<? super K, ? extends ExternalV> mappingFunction) {
+                                     @NotNull Function<? super K, ? extends ExternalV> mappingFunction) {
 		Function<K, InternalV> function = k -> writeTransformation.apply(mappingFunction.apply(k));
 		return readTransformation.apply(internalMap.computeIfAbsent(key, function));
 	}
 
 	@Override
 	public ExternalV computeIfPresent(K key,
-									  BiFunction<? super K, ? super ExternalV, ? extends ExternalV> remappingFunction) {
+                                      @NotNull BiFunction<? super K, ? super ExternalV, ? extends ExternalV> remappingFunction) {
 		return readTransformation.apply(
 				internalMap.computeIfPresent(key, transform(remappingFunction)));
 	}
 
 	@Override
 	public ExternalV compute(K key,
-							 BiFunction<? super K, ? super ExternalV, ? extends ExternalV> remappingFunction) {
+                             @NotNull BiFunction<? super K, ? super ExternalV, ? extends ExternalV> remappingFunction) {
 		return readTransformation.apply(internalMap.compute(key, transform(remappingFunction)));
 	}
 
 	@Override
-	public ExternalV merge(K key, ExternalV value,
-						   BiFunction<? super ExternalV, ? super ExternalV, ? extends ExternalV> remappingFunction) {
+	public ExternalV merge(K key, @NotNull ExternalV value,
+                           @NotNull BiFunction<? super ExternalV, ? super ExternalV, ? extends ExternalV> remappingFunction) {
 		return readTransformation.apply(internalMap.merge(key, writeTransformation.apply(value),
 														  transform2(remappingFunction)));
 	}

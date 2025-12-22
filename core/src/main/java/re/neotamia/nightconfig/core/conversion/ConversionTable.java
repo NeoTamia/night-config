@@ -201,7 +201,7 @@ public final class ConversionTable implements Cloneable {
 
             @Override
             public ConfigFormat<?> configFormat() {
-                return config.configFormat();
+                return super.configFormat();
             }
         };
 	}

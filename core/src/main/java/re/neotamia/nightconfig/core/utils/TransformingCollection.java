@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -51,12 +53,12 @@ public class TransformingCollection<InternalV, ExternalV> implements Collection<
 	}
 
 	@Override
-	public Iterator<ExternalV> iterator() {
+	public @NotNull Iterator<ExternalV> iterator() {
 		return new TransformingIterator<>(internalCollection.iterator(), readTransformation);
 	}
 
 	@Override
-	public Object[] toArray() {
+	public Object @NotNull [] toArray() {
 		Object[] array = internalCollection.toArray();
 		for (int i = 0; i < array.length; i++) {
 			array[i] = readTransformation.apply((InternalV)array[i]);
@@ -65,7 +67,7 @@ public class TransformingCollection<InternalV, ExternalV> implements Collection<
 	}
 
 	@Override
-	public <T> T[] toArray(T[] a) {
+	public <T> T @NotNull [] toArray(T @NotNull [] a) {
 		T[] array = internalCollection.toArray(a);
 		for (int i = 0; i < array.length; i++) {
 			array[i] = (T)readTransformation.apply((InternalV)array[i]);
@@ -85,14 +87,14 @@ public class TransformingCollection<InternalV, ExternalV> implements Collection<
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public boolean containsAll(Collection<?> c) {
+	public boolean containsAll(@NotNull Collection<?> c) {
 		return internalCollection.containsAll(
 			new TransformingCollection(c, searchTransformation, o -> o, searchTransformation));
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public boolean addAll(Collection<? extends ExternalV> c) {
+	public boolean addAll(@NotNull Collection<? extends ExternalV> c) {
 		return internalCollection.addAll(
 			new TransformingCollection(c, writeTransformation, readTransformation,
 				searchTransformation));
@@ -100,20 +102,20 @@ public class TransformingCollection<InternalV, ExternalV> implements Collection<
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public boolean removeAll(Collection<?> c) {
+	public boolean removeAll(@NotNull Collection<?> c) {
 		return internalCollection.removeAll(
 			new TransformingCollection(c, searchTransformation, o -> o, searchTransformation));
 	}
 
 	@Override
-	public boolean removeIf(Predicate<? super ExternalV> filter) {
+	public boolean removeIf(@NotNull Predicate<? super ExternalV> filter) {
 		return internalCollection.removeIf(
 				internalV -> filter.test(readTransformation.apply(internalV)));
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public boolean retainAll(Collection<?> c) {
+	public boolean retainAll(@NotNull Collection<?> c) {
 		return internalCollection.retainAll(
 			new TransformingCollection(c, searchTransformation, o -> o, searchTransformation));
 	}
@@ -124,18 +126,18 @@ public class TransformingCollection<InternalV, ExternalV> implements Collection<
 	}
 
 	@Override
-	public Spliterator<ExternalV> spliterator() {
+	public @NotNull Spliterator<ExternalV> spliterator() {
 		return new TransformingSpliterator<>(internalCollection.spliterator(), readTransformation,
 											 writeTransformation);
 	}
 
 	@Override
-	public Stream<ExternalV> stream() {
+	public @NotNull Stream<ExternalV> stream() {
 		return internalCollection.stream().map(readTransformation);
 	}
 
 	@Override
-	public Stream<ExternalV> parallelStream() {
+	public @NotNull Stream<ExternalV> parallelStream() {
 		return internalCollection.parallelStream().map(readTransformation);
 	}
 

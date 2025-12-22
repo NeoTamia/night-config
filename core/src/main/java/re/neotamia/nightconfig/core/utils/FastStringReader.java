@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Reader;
 import java.util.Objects;
 
@@ -32,7 +34,7 @@ public final class FastStringReader extends Reader {
 	}
 
 	@Override
-	public int read(char[] cbuf, int off, int len) {
+	public int read(char @NotNull [] cbuf, int off, int len) {
 		if (cursor == lim) {
 			return -1;
 		}

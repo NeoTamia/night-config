@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
@@ -16,7 +18,7 @@ public final class TransformingList<InternalV, ExternalV>
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public boolean addAll(int index, Collection<? extends ExternalV> c) {
+	public boolean addAll(int index, @NotNull Collection<? extends ExternalV> c) {
 		return ((List<InternalV>) internalCollection).addAll(index,
 			new TransformingCollection(c, writeTransformation, readTransformation, searchTransformation));
 	}
@@ -52,17 +54,17 @@ public final class TransformingList<InternalV, ExternalV>
 	}
 
 	@Override
-	public ListIterator<ExternalV> listIterator() {
+	public @NotNull ListIterator<ExternalV> listIterator() {
 		return new TransformingListIterator<>(((List<InternalV>) internalCollection).listIterator(), readTransformation, writeTransformation);
 	}
 
 	@Override
-	public ListIterator<ExternalV> listIterator(int index) {
+	public @NotNull ListIterator<ExternalV> listIterator(int index) {
 		return new TransformingListIterator<>(((List<InternalV>) internalCollection).listIterator(index), readTransformation, writeTransformation);
 	}
 
 	@Override
-	public List<ExternalV> subList(int fromIndex, int toIndex) {
+	public @NotNull List<ExternalV> subList(int fromIndex, int toIndex) {
 		return new TransformingList<>(((List<InternalV>) internalCollection).subList(fromIndex, toIndex),
 			readTransformation, writeTransformation, searchTransformation);
 	}

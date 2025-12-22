@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +59,7 @@ public final class ObservedMap<K, V> extends AbstractObserved implements Map<K, 
 	}
 
 	@Override
-	public void putAll(Map<? extends K, ? extends V> m) {
+	public void putAll(@NotNull Map<? extends K, ? extends V> m) {
 		map.putAll(m);
 		callback.run();
 	}
@@ -97,7 +99,7 @@ public final class ObservedMap<K, V> extends AbstractObserved implements Map<K, 
 	}
 
 	@Override
-	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+	public V computeIfAbsent(K key, @NotNull Function<? super K, ? extends V> mappingFunction) {
 		V result = map.computeIfAbsent(key, mappingFunction);
 		if (result != null) { callback.run(); }
 		return result;
@@ -105,22 +107,22 @@ public final class ObservedMap<K, V> extends AbstractObserved implements Map<K, 
 
 	@Override
 	public V computeIfPresent(K key,
-							  BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+                              @NotNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
 		V result = map.computeIfPresent(key, remappingFunction);
 		callback.run();
 		return result;
 	}
 
 	@Override
-	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+	public V compute(K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
 		V result = map.compute(key, remappingFunction);
 		callback.run();
 		return result;
 	}
 
 	@Override
-	public V merge(K key, V value,
-				   BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+	public V merge(K key, @NotNull V value,
+                   @NotNull BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
 		V result = map.merge(key, value, remappingFunction);
 		callback.run();
 		return result;
@@ -133,17 +135,17 @@ public final class ObservedMap<K, V> extends AbstractObserved implements Map<K, 
 	}
 
 	@Override
-	public Set<K> keySet() {
+	public @NotNull Set<K> keySet() {
 		return new ObservedSet<>(map.keySet(), callback);
 	}
 
 	@Override
-	public Collection<V> values() {
+	public @NotNull Collection<V> values() {
 		return map.values();
 	}
 
 	@Override
-	public Set<Entry<K, V>> entrySet() {
+	public @NotNull Set<Entry<K, V>> entrySet() {
 		Function<Entry<K, V>, ObservedEntry<K, V>> readT = e -> new ObservedEntry<>(e, callback);
 		Function<ObservedEntry<K, V>, Entry<K, V>> writeT = oe -> oe.entry;
 		Function<Object, Object> searchT = o -> {

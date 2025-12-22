@@ -185,8 +185,7 @@ final class TableWriter {
 		boolean hasArraysOfTables = !table.arraysOfTables.isEmpty();
 		for (Iterator<Entry> it = table.subTables.iterator(); it.hasNext();) {
 			Entry entry = it.next();
-			UnmodifiableCommentedConfig sub = UnmodifiableCommentedConfig
-					.fake((UnmodifiableConfig) entry.getRawValue());
+			UnmodifiableCommentedConfig sub = UnmodifiableCommentedConfig.fake(entry.getRawValue());
 			configPath.add(entry.getKey());
 			writeWithHeader(sub, entry.getComment(), false, true, configPath, output, writer);
 			configPath.removeLast();
@@ -204,7 +203,7 @@ final class TableWriter {
 			Entry entry = it.next();
 			configPath.add(entry.getKey());
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			List<? extends UnmodifiableConfig> array = (List) entry.getRawValue();
+			List<? extends UnmodifiableConfig> array = entry.getRawValue();
 			for (UnmodifiableConfig sub : array) {
 				writeWithHeader(UnmodifiableCommentedConfig.fake(sub), entry.getComment(), true,
 						true, configPath, output, writer);

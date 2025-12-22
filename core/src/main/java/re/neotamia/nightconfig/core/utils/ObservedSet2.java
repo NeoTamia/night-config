@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -33,17 +35,17 @@ public final class ObservedSet2<K, KImpl extends K> extends AbstractObserved imp
 	}
 
 	@Override
-	public Iterator<K> iterator() {
+	public @NotNull Iterator<K> iterator() {
 		return new TransformingIterator<>(set.iterator(), k -> k);
 	}
 
 	@Override
-	public Object[] toArray() {
+	public Object @NotNull [] toArray() {
 		return set.toArray();
 	}
 
 	@Override
-	public <T> T[] toArray(T[] a) {
+	public <T> T @NotNull [] toArray(T @NotNull [] a) {
 		return set.toArray(a);
 	}
 
@@ -62,7 +64,7 @@ public final class ObservedSet2<K, KImpl extends K> extends AbstractObserved imp
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
+	public boolean containsAll(@NotNull Collection<?> c) {
 		return set.containsAll(c);
 	}
 
@@ -78,14 +80,14 @@ public final class ObservedSet2<K, KImpl extends K> extends AbstractObserved imp
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
+	public boolean retainAll(@NotNull Collection<?> c) {
 		boolean result = set.retainAll(c);
 		callback.run();
 		return result;
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
+	public boolean removeAll(@NotNull Collection<?> c) {
 		boolean result = set.removeAll(c);
 		callback.run();
 		return result;
@@ -98,7 +100,7 @@ public final class ObservedSet2<K, KImpl extends K> extends AbstractObserved imp
 	}
 
 	@Override
-	public boolean removeIf(Predicate<? super K> filter) {
+	public boolean removeIf(@NotNull Predicate<? super K> filter) {
 		boolean removed = set.removeIf(filter);
 		if (removed) { callback.run(); }
 		return removed;

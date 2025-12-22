@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.file;
 
+import org.jetbrains.annotations.NotNull;
+
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
@@ -461,7 +463,7 @@ public final class FileWatcher {
 			ScheduledExecutorService executor = Executors.newScheduledThreadPool(1, threadFactory);
 
 			// future that initiated the shutdown and needs to be completed with the result or error
-			CompletableFuture<Void> shutdownFuture = null;
+			CompletableFuture<Void> shutdownFuture;
 
 			mainLoop:
 			while (true) {
@@ -526,7 +528,7 @@ public final class FileWatcher {
 				}
 
 				// poll the events from the filesystem (monitoring of the files)
-				WatchKey key = null;
+				WatchKey key;
 				try {
 					key = watchService.poll(servicePollTimeoutNanos, TimeUnit.NANOSECONDS);
 				} catch (InterruptedException e) {
@@ -620,7 +622,7 @@ public final class FileWatcher {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "ControlMessage[kind=" + kind + ", path=" + path + ", handler=" + handler + ", future=" + future + "]";
         }
     }
@@ -647,7 +649,7 @@ public final class FileWatcher {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return parentDirectory + "/" + fileName;
         }
 
@@ -667,7 +669,7 @@ public final class FileWatcher {
 		}
 
 		@Override
-		public Thread newThread(Runnable r) {
+		public Thread newThread(@NotNull Runnable r) {
 			Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
 			t.setDaemon(true);
 			t.setPriority(Thread.NORM_PRIORITY);

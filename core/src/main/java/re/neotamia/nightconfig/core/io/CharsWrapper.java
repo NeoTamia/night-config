@@ -1,5 +1,7 @@
 package re.neotamia.nightconfig.core.io;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -296,7 +298,7 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 	 * CharsWrapper and is completely independant.
 	 */
 	@Override
-	public CharsWrapper subSequence(int start, int end) {
+	public @NotNull @NotNull CharsWrapper subSequence(int start, int end) {
 		if (offset + end > limit) {
 			throw new ArrayIndexOutOfBoundsException(String.format("Out of bounds: this wrapper has a length of %d, but chars [%d..<%d] were requested", length(), start, end));
 		}
@@ -353,7 +355,7 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 	}
 
 	@Override
-	public String toString() {
+	public @NotNull @NotNull String toString() {
 		return new String(chars, offset, length());
 	}
 
@@ -390,7 +392,7 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 	}
 
 	@Override
-	public Iterator<Character> iterator() {
+	public @NotNull @NotNull Iterator<Character> iterator() {
 		return new Iterator<>() {
             private int index = offset;
 
@@ -581,12 +583,12 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 		}
 
 		@Override
-		public void write(char... cbuf) {
+		public void write(char @NotNull ... cbuf) {
 			CharacterOutput.super.write(cbuf);
 		}
 
 		@Override
-		public void write(char[] chars, int offset, int length) {
+		public void write(char @NotNull [] chars, int offset, int length) {
 			final int newCursor = cursor + length;
 			ensureCapacity(newCursor);
 			System.arraycopy(chars, offset, data, cursor, length);
@@ -594,7 +596,7 @@ public final class CharsWrapper implements CharSequence, Cloneable, Iterable<Cha
 		}
 
 		@Override
-		public void write(String str) {
+		public void write(@NotNull String str) {
 			CharacterOutput.super.write(str);
 		}
 

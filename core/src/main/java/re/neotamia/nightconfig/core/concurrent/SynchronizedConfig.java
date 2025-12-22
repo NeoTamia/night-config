@@ -520,7 +520,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
             }
 
         @Override
-            public String toString() {
+            public @NotNull String toString() {
                 synchronized (rootMonitor) {
                     return map.toString();
                 }
@@ -548,7 +548,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
             }
 
             @Override
-            public Set<Entry<K, V>> entrySet() {
+            public @NotNull Set<Entry<K, V>> entrySet() {
                 synchronized (rootMonitor) {
                     return new SynchronizedSet<>(map.entrySet(), rootMonitor);
                 }
@@ -569,7 +569,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
             }
 
             @Override
-            public Set<K> keySet() {
+            public @NotNull Set<K> keySet() {
                 synchronized (rootMonitor) {
                     return map.keySet();
                 }
@@ -583,7 +583,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
             }
 
             @Override
-            public void putAll(Map<? extends K, ? extends V> m) {
+            public void putAll(@NotNull Map<? extends K, ? extends V> m) {
                 synchronized (rootMonitor) {
                     map.putAll(m);
                 }
@@ -604,7 +604,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
             }
 
             @Override
-            public Collection<V> values() {
+            public @NotNull Collection<V> values() {
                 synchronized (rootMonitor) {
                     return map.values();
                 }
@@ -628,7 +628,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
-        public boolean addAll(Collection<? extends E> c) {
+        public boolean addAll(@NotNull Collection<? extends E> c) {
             synchronized (rootMonitor) {
                 return coll.addAll(c);
             }
@@ -649,7 +649,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
-        public boolean containsAll(Collection<?> c) {
+        public boolean containsAll(@NotNull Collection<?> c) {
             synchronized (rootMonitor) {
                 return coll.containsAll(c);
             }
@@ -663,7 +663,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
-        public Iterator<E> iterator() {
+        public @NotNull Iterator<E> iterator() {
             synchronized (rootMonitor) {
                 return new SynchronizedIterator<>(coll.iterator(), rootMonitor);
             }
@@ -677,14 +677,14 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
-        public boolean removeAll(Collection<?> c) {
+        public boolean removeAll(@NotNull Collection<?> c) {
             synchronized (rootMonitor) {
                 return coll.removeAll(c);
             }
         }
 
         @Override
-        public boolean retainAll(Collection<?> c) {
+        public boolean retainAll(@NotNull Collection<?> c) {
             synchronized (rootMonitor) {
                 return coll.retainAll(c);
             }
@@ -698,21 +698,21 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
-        public Object[] toArray() {
+        public Object @NotNull [] toArray() {
             synchronized (rootMonitor) {
                 return coll.toArray();
             }
         }
 
         @Override
-        public <T> T[] toArray(T[] a) {
+        public <T> T @NotNull [] toArray(T @NotNull [] a) {
             synchronized (rootMonitor) {
                 return coll.toArray(a);
             }
         }
 
         @Override
-        public boolean removeIf(Predicate<? super E> filter) {
+        public boolean removeIf(@NotNull Predicate<? super E> filter) {
             synchronized (rootMonitor) {
                 return coll.removeIf(filter);
             }
@@ -758,8 +758,7 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
             }
         }
 
-    private static final class SynchronizedSet<E> extends SynchronizedCollection<E>
-            implements Set<E> {
+    private static final class SynchronizedSet<E> extends SynchronizedCollection<E> implements Set<E> {
         SynchronizedSet(Set<E> coll, Object rootMonitor) {
             super(coll, rootMonitor);
         }

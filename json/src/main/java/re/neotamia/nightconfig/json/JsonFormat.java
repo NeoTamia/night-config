@@ -17,28 +17,28 @@ import java.util.function.Supplier;
  */
 public abstract class JsonFormat<W extends ConfigWriter> implements ConfigFormat<Config> {
 
-	private static final JsonFormat<FancyJsonWriter> FANCY = new JsonFormat<FancyJsonWriter>() {
-		@Override
-		public FancyJsonWriter createWriter() {
-			return new FancyJsonWriter();
-		}
+	private static final JsonFormat<FancyJsonWriter> FANCY = new JsonFormat<>() {
+        @Override
+        public FancyJsonWriter createWriter() {
+            return new FancyJsonWriter();
+        }
 
-		@Override
-		public ConfigParser<Config> createParser() {
-			return new JsonParser(this);
-		}
-	};
-	private static final JsonFormat<MinimalJsonWriter> MINIMAL = new JsonFormat<MinimalJsonWriter>() {
-		@Override
-		public MinimalJsonWriter createWriter() {
-			return new MinimalJsonWriter();
-		}
+        @Override
+        public ConfigParser<Config> createParser() {
+            return new JsonParser(this);
+        }
+    };
+	private static final JsonFormat<MinimalJsonWriter> MINIMAL = new JsonFormat<>() {
+        @Override
+        public MinimalJsonWriter createWriter() {
+            return new MinimalJsonWriter();
+        }
 
-		@Override
-		public ConfigParser<Config> createParser() {
-			return new JsonParser(this);
-		}
-	};
+        @Override
+        public ConfigParser<Config> createParser() {
+            return new JsonParser(this);
+        }
+    };
 
 	/**
 	 * @return the unique instance of JsonFormat that creates FancyJsonWriters.
@@ -58,34 +58,34 @@ public abstract class JsonFormat<W extends ConfigWriter> implements ConfigFormat
 	 * @return an instance of JsonFormat with a parser that accepts empty inputs and a fancy writer
 	 */
 	public static JsonFormat<FancyJsonWriter> emptyTolerantInstance() {
-		return new JsonFormat<FancyJsonWriter>() {
-			@Override
-			public FancyJsonWriter createWriter() {
-				return new FancyJsonWriter();
-			}
+		return new JsonFormat<>() {
+            @Override
+            public FancyJsonWriter createWriter() {
+                return new FancyJsonWriter();
+            }
 
-			@Override
-			public ConfigParser<Config> createParser() {
-				return new JsonParser(this).setEmptyDataAccepted(true);
-			}
-		};
+            @Override
+            public ConfigParser<Config> createParser() {
+                return new JsonParser(this).setEmptyDataAccepted(true);
+            }
+        };
 	}
 
 	/**
 	 * @return an instance of JsonFormat with a parser that accepts empty inputs and a minimal writer
 	 */
 	public static JsonFormat<MinimalJsonWriter> minimalEmptyTolerantInstance() {
-		return new JsonFormat<MinimalJsonWriter>() {
-			@Override
-			public MinimalJsonWriter createWriter() {
-				return new MinimalJsonWriter();
-			}
+		return new JsonFormat<>() {
+            @Override
+            public MinimalJsonWriter createWriter() {
+                return new MinimalJsonWriter();
+            }
 
-			@Override
-			public ConfigParser<Config> createParser() {
-				return new JsonParser(this).setEmptyDataAccepted(true);
-			}
-		};
+            @Override
+            public ConfigParser<Config> createParser() {
+                return new JsonParser(this).setEmptyDataAccepted(true);
+            }
+        };
 	}
 
 	/**

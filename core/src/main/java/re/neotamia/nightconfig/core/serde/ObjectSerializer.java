@@ -175,7 +175,7 @@ public final class ObjectSerializer {
     @SuppressWarnings("unchecked")
     <T, R> ValueSerializer<T, R> findValueSerializer(Object value, SerializerContext ctx) {
         Class<?> valueClass = value == null ? null : value.getClass();
-        ValueSerializer<?, ?> maybeSe = null;
+        ValueSerializer<?, ?> maybeSe;
         for (ValueSerializerProvider<?, ?> provider : generalProviders) {
             maybeSe = provider.provide(valueClass, ctx);
             if (maybeSe != null) {

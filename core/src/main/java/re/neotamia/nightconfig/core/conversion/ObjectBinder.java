@@ -434,7 +434,7 @@ public final class ObjectBinder {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "FieldInfos{" + "field=" + field + ", boundConfig=" + boundConfig + '}';
         }
     }

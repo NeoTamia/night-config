@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.util.*;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 
 final class Util {
@@ -180,7 +181,7 @@ final class Util {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "TypeAndOrder [order=" + order + ", type=" + type + "]";
         }
 

@@ -957,7 +957,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
 
     private class EntrySet extends AbstractCollection<LazyEntry> implements Set<LazyEntry> {
         @Override
-        public Iterator<LazyEntry> iterator() {
+        public @NotNull Iterator<LazyEntry> iterator() {
             // Check the state because there can be bad interactions between iterators and bulk operations (when misused),
             // which sometimes leads to a deadlock.
             StampedConfig.this.checkStateForNormalOp();
@@ -1904,7 +1904,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
-        public Set<Entry<String, Object>> entrySet() {
+        public @NotNull Set<Entry<String, Object>> entrySet() {
             return new Set<>() {
                     @Override
                     public int size() {
@@ -1941,7 +1941,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                     }
 
                     @Override
-                    public Iterator<Entry<String, Object>> iterator() {
+                    public @NotNull Iterator<Entry<String, Object>> iterator() {
                         Iterator<? extends Config.Entry> it = config.entrySet().iterator();
                         return new Iterator<>() {
 
@@ -1982,12 +1982,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                     }
 
                     @Override
-                    public Object[] toArray() {
+                    public Object @NotNull [] toArray() {
                         throw new UnsupportedOperationException("Unimplemented method 'toArray'");
                     }
 
                     @Override
-                    public <T> T[] toArray(T[] a) {
+                    public <T> T @NotNull [] toArray(T @NotNull [] a) {
                         throw new UnsupportedOperationException("Unimplemented method 'toArray'");
                     }
 
@@ -2009,7 +2009,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                     }
 
                     @Override
-                    public boolean containsAll(Collection<?> c) {
+                    public boolean containsAll(@NotNull Collection<?> c) {
                         for (Object o : c) {
                             if (!contains(o)) {
                                 return false;
@@ -2019,7 +2019,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                     }
 
                     @Override
-                    public boolean addAll(Collection<? extends Entry<String, Object>> c) {
+                    public boolean addAll(@NotNull Collection<? extends Entry<String, Object>> c) {
                         boolean changed = false;
                         for (Entry<String, Object> o : c) {
                             changed |= add(o);
@@ -2028,7 +2028,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                     }
 
                     @Override
-                    public boolean retainAll(Collection<?> c) {
+                    public boolean retainAll(@NotNull Collection<?> c) {
                         boolean changed = false;
                         Iterator<Entry<String, Object>> it = iterator();
                         while (it.hasNext()) {
@@ -2041,7 +2041,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                     }
 
                     @Override
-                    public boolean removeAll(Collection<?> c) {
+                    public boolean removeAll(@NotNull Collection<?> c) {
                         boolean changed = false;
                         for (Object o : c) {
                             changed |= remove(o);
@@ -2071,12 +2071,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
-        public Set<String> keySet() {
+        public @NotNull Set<String> keySet() {
             return config.entrySet().stream().map(UnmodifiableConfig.Entry::getKey).collect(Collectors.toSet());
         }
 
         @Override
-        public Collection<Object> values() {
+        public @NotNull Collection<Object> values() {
             return config.entrySet().stream().map(UnmodifiableConfig.Entry::getRawValue).collect(Collectors.toList());
         }
 

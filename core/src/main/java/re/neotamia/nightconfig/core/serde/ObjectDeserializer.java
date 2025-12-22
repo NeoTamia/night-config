@@ -2,7 +2,6 @@ package re.neotamia.nightconfig.core.serde;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;

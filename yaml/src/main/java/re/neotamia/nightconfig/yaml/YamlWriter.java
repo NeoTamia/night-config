@@ -150,6 +150,14 @@ public final class YamlWriter implements ConfigWriter {
             return createNodeWithComments(commentedConfig);
         } else if (value instanceof UnmodifiableConfig config) {
             return createNodeWithComments(UnmodifiableCommentedConfig.fake(config));
+        } else if (value instanceof Map<?, ?> map) {
+            List<NodeTuple> tuples = new ArrayList<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                Node keyNode = createValueNode(entry.getKey());
+                Node valueNode = createValueNode(entry.getValue());
+                tuples.add(new NodeTuple(keyNode, valueNode));
+            }
+            return new MappingNode(Tag.MAP, tuples, FlowStyle.BLOCK);
         } else if (value instanceof List<?> list) {
             List<Node> nodes = new ArrayList<>();
             for (Object item : list) {
@@ -180,10 +188,16 @@ public final class YamlWriter implements ConfigWriter {
         return new TransformingList<>(list, YamlWriter::unwrapObject, v -> v, v -> v);
     }
 
+    private static Map<Object, Object> unwrapMap(Map<Object, Object> map) {
+        return new TransformingMap<>(map, YamlWriter::unwrapObject, v -> v, v -> v);
+    }
+
     @SuppressWarnings("unchecked")
     private static Object unwrapObject(Object value) {
         if (value instanceof UnmodifiableConfig unmodifiableConfig)
             return unwrap(unmodifiableConfig);
+        if (value instanceof Map)
+            return unwrapMap((Map<Object, Object>) value);
         if (value instanceof List)
             return unwrapList((List<Object>) value);
         if (value == NULL_OBJECT)

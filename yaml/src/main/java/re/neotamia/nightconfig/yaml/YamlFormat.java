@@ -143,6 +143,7 @@ public final class YamlFormat implements ConfigFormat<CommentedConfig> {
                 || Number.class.isAssignableFrom(type)
                 || Set.class.isAssignableFrom(type)
                 || List.class.isAssignableFrom(type)
+                || Map.class.isAssignableFrom(type)
                 || Config.class.isAssignableFrom(type);
     }
 

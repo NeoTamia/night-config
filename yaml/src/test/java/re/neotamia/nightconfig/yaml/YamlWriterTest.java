@@ -6,8 +6,11 @@ import re.neotamia.nightconfig.core.InMemoryCommentedFormat;
 import re.neotamia.nightconfig.core.concurrent.StampedConfig;
 import re.neotamia.nightconfig.core.concurrent.SynchronizedConfig;
 import org.junit.jupiter.api.Test;
+import re.neotamia.nightconfig.core.file.FileConfig;
 
+import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -73,6 +76,26 @@ database:
 logging:
   # Log level: DEBUG, INFO, WARN, ERROR
   level: INFO
+""",
+                result);
+    }
+
+    @Test
+    public void writeMap() {
+        CommentedConfig config = YamlFormat.defaultInstance().createConfig();
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>() {{
+            put("tat", "test");
+            put("tazet", "test");
+            put("taazeaz", "test");
+        }};
+        config.set("body-part", map);
+        var result = new YamlWriter().writeToString(config);
+        assertEquals(
+"""
+body-part:
+  tat: test
+  tazet: test
+  taazeaz: test
 """,
                 result);
     }

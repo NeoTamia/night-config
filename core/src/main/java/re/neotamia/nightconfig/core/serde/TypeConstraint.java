@@ -122,6 +122,63 @@ public final class TypeConstraint {
 		return Optional.ofNullable(resolveTypeArgumentsFor(fullType, classToFind, new HashMap<>()));
 	}
 
+	/**
+	 * Returns the component type of this type constraint, if it's an array type.
+	 *
+	 * @return the component type of this type constraint, if it's an array type
+	 */
+	public Optional<TypeConstraint> getComponentType() {
+		if (fullType instanceof Class<?> cls) {
+			Class<?> comp = cls.getComponentType();
+			return (comp == null) ? Optional.empty() : Optional.of(new TypeConstraint(comp));
+		}
+		if (fullType instanceof GenericArrayType gat) {
+			return Optional.of(new TypeConstraint(gat.getGenericComponentType()));
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * Checks if the type represented by this constraint can be assigned to the given type.
+	 * This is a more powerful version of {@link Class#isAssignableFrom(Class)} that handles
+	 * generic types.
+	 *
+	 * @param otherType the type to check assignment to
+	 * @return true if this type can be assigned to otherType
+	 */
+	public boolean isAssignableTo(Type otherType) {
+		if (otherType instanceof Class<?> otherClass) {
+			return getSatisfyingRawType().map(raw -> Util.canAssign(otherClass, raw)).orElse(false);
+		}
+		if (otherType instanceof ParameterizedType otherPt) {
+			Type otherRaw = otherPt.getRawType();
+			if (!(otherRaw instanceof Class<?> otherRawClass)) {
+				return false;
+			}
+			Optional<TypeConstraint[]> myArgs = resolveTypeArgumentsFor(otherRawClass);
+			if (!myArgs.isPresent()) {
+				return false;
+			}
+			Type[] otherArgs = otherPt.getActualTypeArguments();
+			TypeConstraint[] myArgsArr = myArgs.get();
+			if (myArgsArr.length != otherArgs.length) {
+				return false;
+			}
+			for (int i = 0; i < otherArgs.length; i++) {
+				if (!Objects.equals(myArgsArr[i].getFullType(), otherArgs[i])) {
+					// For simplicity, we require exact match for type arguments.
+					// Java's generic types are invariant unless wildcards are used.
+					return false;
+				}
+			}
+			return true;
+		}
+		if (otherType instanceof GenericArrayType otherGat) {
+			return getComponentType().map(comp -> comp.isAssignableTo(otherGat.getGenericComponentType())).orElse(false);
+		}
+		return Objects.equals(fullType, otherType);
+	}
+
 	@Override
 	public String toString() {
 		return String.format("TypeConstraint[%s, rawType=%s]", fullType, getSatisfyingRawType());
@@ -439,6 +496,39 @@ public final class TypeConstraint {
 		@Override
 		public int hashCode() {
 			return Arrays.hashCode(arguments) ^ Objects.hashCode(rawType);
+		}
+	}
+
+	/** A manually-created instance of GenericArrayType. */
+	static final class ManuallyGenericArray implements GenericArrayType {
+		private final Type componentType;
+
+		public ManuallyGenericArray(Type componentType) {
+			this.componentType = Objects.requireNonNull(componentType);
+		}
+
+		@Override
+		public Type getGenericComponentType() {
+			return componentType;
+		}
+
+		@Override
+		public String toString() {
+			return componentType + "[]";
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof GenericArrayType other))
+				return false;
+			if (obj == this)
+				return true;
+			return Objects.equals(componentType, other.getGenericComponentType());
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hashCode(componentType) ^ 31;
 		}
 	}
 }

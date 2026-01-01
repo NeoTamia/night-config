@@ -198,7 +198,7 @@ public final class ObjectSerializer {
         if (maybeSe != null) {
             return (ValueSerializer<T, R>) maybeSe;
         }
-        throw ObjectSerializer.noSerializerFound(value, valueClass, ctx);
+        throw ObjectSerializer.noSerializerFound(value, valueType, ctx);
     }
 
     Supplier<?> findDefaultValueSupplier(Object fieldValue, Field field, Object instance) {
@@ -229,7 +229,8 @@ public final class ObjectSerializer {
         return AnnotationProcessor.resolveConfigDefaultProvider(applicableDefault, instance);
     }
 
-    static SerdeException noSerializerFound(Object value, Class<?> valueClass, SerializerContext ctx) {
+    static SerdeException noSerializerFound(Object value, Type valueType, SerializerContext ctx) {
+        Class<?> valueClass = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
         ConfigFormat<?> format = ctx.configFormat();
         String supportedStr;
         if (format == null) {
@@ -239,7 +240,7 @@ public final class ObjectSerializer {
         } else {
             supportedStr = "The value's type is NOT supported by the ConfigFormat of the current SerializerContext.";
         }
-        String ofTypeStr = valueClass == null ? "" : " of type " + valueClass;
+        String ofTypeStr = valueType == null ? "" : " of type " + valueType;
         return new SerdeException("No suitable serializer found for value" + ofTypeStr + ": " + value + ". " + supportedStr);
     }
 
@@ -255,7 +256,7 @@ public final class ObjectSerializer {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public <V, R> void registerSerializerForClass(Class<V> cls, ValueSerializer<? super V, ? extends R> serializer) {
-        generalProviders.add((valueType, ctx) -> {
+        registerSerializerProvider((valueType, ctx) -> {
             Class<?> valueClass = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
             return valueClass != null && Util.canAssign(cls, valueClass)
                     ? (ValueSerializer) serializer
@@ -265,6 +266,7 @@ public final class ObjectSerializer {
 
     /**
      * Adds a {@link ValueSerializer} that will be used to serialize values of a specific type.
+     * This method supports generic types and will match subtypes if possible.
      *
      * @param <V>          type of the values to serialize
      * @param <R>          resulting type of the serialization
@@ -273,7 +275,12 @@ public final class ObjectSerializer {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public <V, R> void registerSerializerForType(Type type, ValueSerializer<? super V, ? extends R> serializer) {
-        classBasedSerializers.put(type, serializer);
+        registerSerializerProvider((valueType, ctx) -> {
+            if (new TypeConstraint(valueType).isAssignableTo(type)) {
+                return (ValueSerializer) serializer;
+            }
+            return null;
+        });
     }
 
     /**
@@ -286,7 +293,7 @@ public final class ObjectSerializer {
      * @param provider  the provider that supplies serializers for specific value classes
      */
     public <V, R> void registerSerializerProvider(ValueSerializerProvider<V, R> provider) {
-        generalProviders.add(provider);
+        generalProviders.add(0, provider);
     }
 
     /**

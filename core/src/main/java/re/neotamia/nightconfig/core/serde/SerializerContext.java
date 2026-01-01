@@ -186,15 +186,10 @@ public final class SerializerContext extends AbstractDeSerializerContext {
             Type comp = gat.getGenericComponentType();
             Type newComp = resolveType(comp, typeMap);
             if (newComp != comp) {
-                // There is no easy way to create a GenericArrayType in standard Java,
-                // but TypeConstraint doesn't seem to provide one either except through RefinedWildcard?
-                // Actually, we can just return a new ManuallyParameterized if it was a ParameterizedType, 
-                // but for Array it's different.
-                // Let's see if we can just return the raw array class if it's resolved to a Class.
                 if (newComp instanceof Class<?> cl) {
                     return Array.newInstance(cl, 0).getClass();
                 }
-                // Fallback: stay with the original type if we can't easily represent the new one
+                return new TypeConstraint.ManuallyGenericArray(newComp);
             }
         }
         return type;

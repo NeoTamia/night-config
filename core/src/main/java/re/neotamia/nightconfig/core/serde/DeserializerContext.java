@@ -130,7 +130,7 @@ public final class DeserializerContext extends AbstractDeSerializerContext {
         }
     }
 
-    private Type resolveType(Type type, Map<TypeVariable<?>, Type> typeMap) {
+    Type resolveType(Type type, Map<TypeVariable<?>, Type> typeMap) {
         if (type instanceof TypeVariable<?> tv) {
             return typeMap.getOrDefault(tv, type);
         }
@@ -154,6 +154,7 @@ public final class DeserializerContext extends AbstractDeSerializerContext {
                 if (newComp instanceof Class<?> cl) {
                     return Array.newInstance(cl, 0).getClass();
                 }
+                return new TypeConstraint.ManuallyGenericArray(newComp);
             }
         }
         return type;

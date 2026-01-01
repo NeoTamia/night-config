@@ -90,11 +90,11 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param <V>             type of the values in the collection
 	 * @param configValue     config value to deserialize
 	 * @param collectionClass class of the collection
-	 * @param valueClass      class of the values in the collection
+	 * @param valueType       type of the values in the collection
 	 * @return the deserialized collection
 	 */
-	public <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass, Class<V> valueClass) {
-		return super.deserializeToCollection(configValue, collectionClass, valueClass);
+	public <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass, Type valueType) {
+		return super.deserializeToCollection(configValue, collectionClass, valueType);
 	}
 
 	/**
@@ -104,11 +104,11 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param <V>         type of the values in the map
 	 * @param configValue config value to deserialize
 	 * @param mapClass    class of the map
-	 * @param valueClass  class of the values in the collection
+	 * @param valueType   type of the values in the collection
 	 * @return the deserialized map
 	 */
-	public <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass, Class<V> valueClass) {
-		return super.deserializeToMap(configValue, mapClass, valueClass);
+	public <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass, Type valueType) {
+		return super.deserializeToMap(configValue, mapClass, valueType);
 	}
 
 	/**
@@ -174,12 +174,12 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 *
 	 * @param <V>          type of the config values to deserialize
 	 * @param <R>          resulting type of the deserialization
-	 * @param valueClass   class of the config values to deserialize
+	 * @param valueType    type of the config values to deserialize
 	 * @param resultType   type of the deserialization result
 	 * @param deserializer deserializer to register
 	 */
-	public <V, R> void registerDeserializerForType(Class<V> valueClass, Type resultType, ValueDeserializer<? super V, ? extends R> deserializer) {
-		super.registerDeserializerForType(valueClass, resultType, deserializer);
+	public <V, R> void registerDeserializerForType(Type valueType, Type resultType, ValueDeserializer<? super V, ? extends R> deserializer) {
+		super.registerDeserializerForType(valueType, resultType, deserializer);
 	}
 
 	/**

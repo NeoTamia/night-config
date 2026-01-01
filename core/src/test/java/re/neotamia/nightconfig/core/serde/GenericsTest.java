@@ -314,4 +314,58 @@ public class GenericsTest {
         Container deserialized = deserializer.deserializeFields(config, Container::new);
         assertEquals(new Box<>("universe"), deserialized.box);
     }
+
+    @Test
+    public void testNewTypeBasedAPIs() {
+        Type boxStringType = new TypeConstraint.ManuallyParameterized(Box.class, String.class);
+        ObjectDeserializer deserializer = ObjectDeserializer.builder()
+                .withDeserializerForType(String.class, boxStringType, new BoxDeserializer())
+                .build();
+
+        // Test deserializeToCollection with Type
+        List<String> configValue = Arrays.asList("Boxed:one", "Boxed:two");
+        List<Box<String>> result = deserializer.deserializeToCollection(configValue, List.class, boxStringType);
+
+        assertEquals(Arrays.asList(new Box<>("one"), new Box<>("two")), result);
+
+        // Test deserializeToMap with Type
+        Config mapConfig = Config.inMemory();
+        mapConfig.set("a", "Boxed:apple");
+        mapConfig.set("b", "Boxed:banana");
+        java.util.Map<String, Box<String>> mapResult = deserializer.deserializeToMap(mapConfig, java.util.HashMap.class, boxStringType);
+
+        assertEquals(new Box<>("apple"), mapResult.get("a"));
+        assertEquals(new Box<>("banana"), mapResult.get("b"));
+    }
+
+    @Test
+    public void testPolymorphicGenericRegistration() {
+        Type listStringType = new TypeConstraint.ManuallyParameterized(List.class, String.class);
+        ObjectSerializer serializer = ObjectSerializer.builder()
+                .withSerializerForType(listStringType, (value, ctx) -> "ListSize:" + ((List)value).size())
+                .build();
+
+        // Should match ArrayList<String>
+        ListContainer container = new ListContainer();
+        container.boxes = null; // Wait, I need a field that IS a List<String>.
+        // Let's use GenericContainer<String>
+        GenericContainer<String> stringContainer = new GenericContainer<String>() {};
+        stringContainer.items = Arrays.asList("a", "b", "c");
+
+        Config result = serializer.serializeFields(stringContainer, Config::inMemory);
+        assertEquals("ListSize:3", result.get("items"));
+    }
+
+    @Test
+    public void hmm() {
+        Type boxListType = new TypeConstraint.ManuallyParameterized(Box.class, String.class);
+        var serializer = ObjectSerializer.standard();
+//        serializer.registerSerializerForType(boxListType, new BoxTypeAdapter());
+
+        List<Box<String>> list = new ArrayList<>();
+        list.add(new Box<>("test"));
+
+        Config result = serializer.serializeFields(list, Config::inMemory);
+        assertEquals(List.of("Boxed:test"), result.get(""));
+    }
 }

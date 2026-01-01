@@ -4,12 +4,8 @@ import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.NullObject;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.RecordComponent;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -26,7 +22,7 @@ final class ConfigToPojoDeserializer implements ValueDeserializer<UnmodifiableCo
 		} else {
             Class<?> cls = resultType.getSatisfyingRawType().orElseThrow(() -> new SerdeException("Could not find a concrete type that can satisfy the constraint " + resultType));
 
-			if (cls.isRecord()) return deserializeToRecord(value, cls);
+			if (cls.isRecord()) return deserializeToRecord(value, cls, resultType, ctx);
 			return deserializeToNormalClass(value, cls, ctx);
 		}
 	}
@@ -46,12 +42,29 @@ final class ConfigToPojoDeserializer implements ValueDeserializer<UnmodifiableCo
 		return instance;
 	}
 
-	private Object deserializeToRecord(UnmodifiableConfig value, Class<?> objectClass) {
+	private Object deserializeToRecord(UnmodifiableConfig value, Class<?> objectClass, TypeConstraint resultTypeConstraint, DeserializerContext ctx) {
 		var components = objectClass.getRecordComponents();
 		var constructor = getCanonicalRecordConstructor(objectClass, components);
 		var componentValues = new Object[components.length];
+
+		Map<TypeVariable<?>, Type> typeMap = Collections.emptyMap();
+		TypeConstraint[] typeArgs = resultTypeConstraint.resolveTypeArgumentsFor(objectClass).orElse(null);
+		TypeVariable<?>[] typeVars = objectClass.getTypeParameters();
+		if (typeArgs != null && typeVars.length > 0) {
+			typeMap = new HashMap<>();
+			for (int i = 0; i < typeVars.length; i++) {
+				typeMap.put(typeVars[i], typeArgs[i].getFullType());
+			}
+		}
+
 		for (int i = 0; i < components.length; i++) {
 			RecordComponent comp = components[i];
+			Type compType = comp.getGenericType();
+			if (!typeMap.isEmpty()) {
+				compType = ctx.resolveType(compType, typeMap);
+			}
+			TypeConstraint componentConstraint = new TypeConstraint(compType);
+
 			Object configValue = value.getRaw(Collections.singletonList(comp.getName()));
 			if (configValue == null) {
 				// missing component!
@@ -66,7 +79,7 @@ final class ConfigToPojoDeserializer implements ValueDeserializer<UnmodifiableCo
 				// component of value null
 				configValue = null;
 			}
-			componentValues[i] = configValue;
+			componentValues[i] = (configValue == null) ? null : ctx.deserializeValue(configValue, componentConstraint);
 		}
 		try {
 			return constructor.newInstance(componentValues);

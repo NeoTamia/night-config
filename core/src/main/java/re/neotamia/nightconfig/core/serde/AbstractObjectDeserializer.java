@@ -43,13 +43,13 @@ class AbstractObjectDeserializer {
 	 * @param <V>             type of the values in the collection
 	 * @param configValue     config value to deserialize
 	 * @param collectionClass class of the collection
-	 * @param valueClass      class of the values in the collection
+	 * @param valueType       type of the values in the collection
 	 * @return the deserialized collection
 	 */
 	@SuppressWarnings("unchecked")
-	protected <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass, Class<V> valueClass) {
+	protected <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass, Type valueType) {
 		DeserializerContext ctx = new DeserializerContext(this);
-		TypeConstraint t = new TypeConstraint(new TypeConstraint.ManuallyParameterized(collectionClass, valueClass));
+		TypeConstraint t = new TypeConstraint(new TypeConstraint.ManuallyParameterized(collectionClass, valueType));
 		return (C) ctx.deserializeValue(configValue, t);
 	}
 
@@ -61,13 +61,13 @@ class AbstractObjectDeserializer {
 	 * @param <V>         type of the values in the map
 	 * @param configValue config value to deserialize
 	 * @param mapClass    class of the map
-	 * @param valueClass  class of the values in the collection
+	 * @param valueType   type of the values in the collection
 	 * @return the deserialized map
 	 */
 	@SuppressWarnings("unchecked")
-	protected <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass, Class<V> valueClass) {
+	protected <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass, Type valueType) {
 		DeserializerContext ctx = new DeserializerContext(this);
-		TypeConstraint t = new TypeConstraint(new TypeConstraint.ManuallyParameterized(mapClass, String.class, valueClass));
+		TypeConstraint t = new TypeConstraint(new TypeConstraint.ManuallyParameterized(mapClass, String.class, valueType));
 		return (M) ctx.deserializeValue(configValue, t);
 	}
 
@@ -115,7 +115,7 @@ class AbstractObjectDeserializer {
 		if (maybeDe != null) {
 			return (ValueDeserializer<T, R>) maybeDe;
 		}
-		Class<?> valueClass = (valueType instanceof Class) ? (Class<?>)valueType : null;
+		Class<?> valueClass = (valueType != null) ? (Class<?>)valueType : null;
 		String ofTypeStr = valueClass == null ? "" : " of type " + valueClass;
 		throw new SerdeException("No suitable deserializer found for value" + ofTypeStr + ": "+ value + " and result constraint " + resultType);
 	}
@@ -176,14 +176,20 @@ class AbstractObjectDeserializer {
 	 *
 	 * @param <V>          type of the config values to deserialize
 	 * @param <R>          resulting type of the deserialization
-	 * @param valueClass   class of the config values to deserialize
+	 * @param valueType    type of the config values to deserialize
 	 * @param resultType   type of the deserialization result
 	 * @param deserializer deserializer to register
 	 */
-	protected <V, R> void registerDeserializerForType(Class<V> valueClass, Type resultType, ValueDeserializer<? super V, ? extends R> deserializer) {
-		registerDeserializerProvider((valueType, resultTypeConstraint) -> {
-			Class<?> valueCls = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
-			if (valueCls != null && Util.canAssign(valueClass, valueCls) && resultTypeConstraint.getFullType().equals(resultType))
+	protected <V, R> void registerDeserializerForType(Type valueType, Type resultType, ValueDeserializer<? super V, ? extends R> deserializer) {
+		registerDeserializerProvider((incomingValueType, resultTypeConstraint) -> {
+			boolean valueMatch;
+			if (valueType instanceof Class<?> cls) {
+				Class<?> valueCls = new TypeConstraint(incomingValueType).getSatisfyingRawType().orElse(null);
+				valueMatch = (valueCls != null && Util.canAssign(cls, valueCls));
+			} else {
+				valueMatch = Objects.equals(valueType, incomingValueType);
+			}
+			if (valueMatch && new TypeConstraint(resultType).isAssignableTo(resultTypeConstraint.getFullType()))
 				return deserializer;
 			return null;
 		});
@@ -198,7 +204,7 @@ class AbstractObjectDeserializer {
 	 * @param provider provider to register
 	 */
 	protected <V, R> void registerDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
-		generalProviders.add(provider);
+		generalProviders.addFirst(provider);
 	}
 
     /**

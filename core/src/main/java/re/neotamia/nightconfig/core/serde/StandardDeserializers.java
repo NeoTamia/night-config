@@ -196,10 +196,9 @@ final class StandardDeserializers {
 			Object res;
 			Optional<TypeConstraint> valueType;
 			if (resultType != null) {
-                Class<?> componentType = ((Class<?>) resultType.getFullType()).getComponentType();
-				assert componentType != null;
-				res = Array.newInstance(componentType, size);
-				valueType = Optional.of(new TypeConstraint(componentType));
+				valueType = resultType.getComponentType();
+				Class<?> componentClass = valueType.flatMap(TypeConstraint::getSatisfyingRawType).orElse(Object.class);
+				res = Array.newInstance(componentClass, size);
 			} else {
 				// no constraint, choose arbitrarily: it will be Object[]
 				res = new Object[size];

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
@@ -81,10 +82,27 @@ public final class ObjectDeserializerBuilder {
 		}).orElse(null));
 	}
 
-	public <V, R> ObjectDeserializerBuilder withDeserializerForType(Class<V> valueClass, Type resultType, ValueDeserializer<? super V, ? extends R> deserializer) {
-		return withDeserializerProvider((valueType, resultTypeConstraint) -> {
-			Class<?> valueCls = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
-			if (valueCls != null && Util.canAssign(valueClass, valueCls) && resultTypeConstraint.getFullType().equals(resultType))
+	/**
+	 * Adds a {@link ValueDeserializer} that will be used to deserialize config values
+	 * of a specific type to a specific result type.
+	 *
+	 * @param <V>          type of the config values to deserialize
+	 * @param <R>          resulting type of the deserialization
+	 * @param valueType    type of the config values to deserialize
+	 * @param resultType   type of the deserialization result
+	 * @param deserializer deserializer to register
+	 * @return this builder
+	 */
+	public <V, R> ObjectDeserializerBuilder withDeserializerForType(Type valueType, Type resultType, ValueDeserializer<? super V, ? extends R> deserializer) {
+		return withDeserializerProvider((incomingValueType, resultTypeConstraint) -> {
+			boolean valueMatch;
+			if (valueType instanceof Class<?> cls) {
+				Class<?> valueCls = new TypeConstraint(incomingValueType).getSatisfyingRawType().orElse(null);
+				valueMatch = (valueCls != null && Util.canAssign(cls, valueCls));
+			} else {
+				valueMatch = Objects.equals(valueType, incomingValueType);
+			}
+			if (valueMatch && new TypeConstraint(resultType).isAssignableTo(resultTypeConstraint.getFullType()))
 				return deserializer;
 			return null;
 		});
@@ -99,7 +117,7 @@ public final class ObjectDeserializerBuilder {
 	 * @param provider provider to register
 	 */
 	public <V, R> ObjectDeserializerBuilder withDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
-		deserializerProviders.add(provider);
+		deserializerProviders.add(0, provider);
         return this;
 	}
 

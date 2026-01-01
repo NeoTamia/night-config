@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.serde;
 
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -49,8 +50,12 @@ public final class ObjectSerializerBuilder {
     }
 
     public <V, R> ObjectSerializerBuilder withSerializerForType(Type type, ValueSerializer<? super V, ? extends R> serializer) {
-        classBasedSerializers.put(type, serializer);
-        return this;
+        return withSerializerProvider((valueType, ctx) -> {
+            if (new TypeConstraint(valueType).isAssignableTo(type)) {
+                return (ValueSerializer) serializer;
+            }
+            return null;
+        });
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -66,7 +71,7 @@ public final class ObjectSerializerBuilder {
     }
 
     public <V, R> ObjectSerializerBuilder withSerializerProvider(ValueSerializerProvider<V, R> provider) {
-        generalProviders.add(provider);
+        generalProviders.add(0, provider);
         return this;
     }
 
@@ -182,9 +187,11 @@ public final class ObjectSerializerBuilder {
             if (Enum.class.isAssignableFrom(valueClass)) {
                 return enumSer;
             }
+            if (valueType instanceof GenericArrayType gat) {
+                return new StandardSerializers.ArraySerializer(gat.getGenericComponentType());
+            }
             if (valueClass.isArray()) {
-                Type compType = valueClass.getComponentType();
-                return new StandardSerializers.ArraySerializer(compType);
+                return new StandardSerializers.ArraySerializer(valueClass.getComponentType());
             }
             if (valueClass == UUID.class) {
                 return uuidSer;

@@ -16,9 +16,9 @@ import java.lang.reflect.Type;
  * Example for handling {@code Box<String>}:
  * 
  * <pre>
- * {
+ * {@code
  *     public class BoxTypeAdapter<T> implements TypeAdapter<Box<T>, Object> {
- *         &#64;Override
+ *         @Override
  *         public boolean canHandle(Type type) {
  *             if (type instanceof ParameterizedType pt) {
  *                 return pt.getRawType() == Box.class;
@@ -26,7 +26,7 @@ import java.lang.reflect.Type;
  *             return type == Box.class;
  *         }
  *
- *         &#64;Override
+ *         @Override
  *         public Object serialize(Box<T> value, Type type, SerializerContext ctx) {
  *             return ctx.serializeValue(value.getValue());
  *         }

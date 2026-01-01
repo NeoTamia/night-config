@@ -17,11 +17,12 @@ import re.neotamia.nightconfig.core.serde.StandardDeserializers.RiskyNumberDeser
 public final class ObjectDeserializerBuilder {
 
 	final List<ValueDeserializerProvider<?, ?>> deserializerProviders = new ArrayList<>();
-    /**
-     * strategy for transforming field names, defaults to {@link NamingStrategy#IDENTITY}
-     */
-    @NotNull
-    NamingStrategy namingStrategy = NamingStrategy.IDENTITY;
+	/**
+	 * strategy for transforming field names, defaults to
+	 * {@link NamingStrategy#IDENTITY}
+	 */
+	@NotNull
+	NamingStrategy namingStrategy = NamingStrategy.IDENTITY;
 
 	/** the last-resort serializer provider, used when no other provider matches */
 	ValueDeserializerProvider<?, ?> defaultProvider = NoProvider.INSTANCE;
@@ -44,16 +45,42 @@ public final class ObjectDeserializerBuilder {
 		return new ObjectDeserializer(this);
 	}
 
-    /**
-     * Sets the naming strategy to use for transforming field names.
-     *
-     * @param strategy the naming strategy to use
-     * @return this builder for method chaining
-     */
-    public ObjectDeserializerBuilder withNamingStrategy(@NotNull NamingStrategy strategy) {
-        this.namingStrategy = strategy;
-        return this;
-    }
+	/**
+	 * Sets the naming strategy to use for transforming field names.
+	 *
+	 * @param strategy the naming strategy to use
+	 * @return this builder for method chaining
+	 */
+	public ObjectDeserializerBuilder withNamingStrategy(@NotNull NamingStrategy strategy) {
+		this.namingStrategy = strategy;
+		return this;
+	}
+
+	/**
+	 * Registers a {@link TypeAdapter} that handles both serialization and
+	 * deserialization
+	 * for types that match {@link TypeAdapter#canHandle(java.lang.reflect.Type)}.
+	 * <p>
+	 * The adapter's {@link TypeAdapter#canHandle(java.lang.reflect.Type)} method is
+	 * called with
+	 * the full {@link java.lang.reflect.Type} (including generic parameters) from
+	 * the field declaration.
+	 *
+	 * @param adapter the type adapter to register
+	 * @param <J>     the Java type the adapter handles
+	 * @param <C>     the config value type
+	 * @return this builder for method chaining
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public <J, C> ObjectDeserializerBuilder withTypeAdapter(TypeAdapter<J, C> adapter) {
+		deserializerProviders.add((valueClass, resultType) -> {
+			if (adapter.canHandle(resultType.getFullType())) {
+				return (ValueDeserializer) adapter;
+			}
+			return null;
+		});
+		return this;
+	}
 
 	/**
 	 * Deserialize transient fields instead of ignoring them.
@@ -63,7 +90,8 @@ public final class ObjectDeserializerBuilder {
 	}
 
 	/**
-	 * Adds a {@link ValueDeserializer} that will be used to deserialize config values
+	 * Adds a {@link ValueDeserializer} that will be used to deserialize config
+	 * values
 	 * of type {@code valueClass} to objects of type {@code resultClass}.
 	 *
 	 * @param <V>          type of the config values to deserialize
@@ -72,16 +100,18 @@ public final class ObjectDeserializerBuilder {
 	 * @param resultClass  class of the deserialization result
 	 * @param deserializer deserializer to register
 	 */
-	public <V, R> ObjectDeserializerBuilder withDeserializerForClass(Class<V> valueClass, Class<R> resultClass, ValueDeserializer<? super V, ? extends R> deserializer) {
+	public <V, R> ObjectDeserializerBuilder withDeserializerForClass(Class<V> valueClass, Class<R> resultClass,
+			ValueDeserializer<? super V, ? extends R> deserializer) {
 		return withDeserializerProvider(((valueCls, resultType) -> resultType.getSatisfyingRawType().map(resultCls -> {
-            if (valueCls.isAssignableFrom(valueClass) && resultCls.isAssignableFrom(resultClass))
-                return deserializer;
-            return null;
-        }).orElse(null)));
+			if (valueCls.isAssignableFrom(valueClass) && resultCls.isAssignableFrom(resultClass))
+				return deserializer;
+			return null;
+		}).orElse(null)));
 	}
 
 	/**
-	 * Adds a {@link ValueDeserializerProvider} that provides {@link ValueDeserializer} to
+	 * Adds a {@link ValueDeserializerProvider} that provides
+	 * {@link ValueDeserializer} to
 	 * deserialize config values.
 	 *
 	 * @param <V>      type of the config values to deserialize
@@ -90,12 +120,14 @@ public final class ObjectDeserializerBuilder {
 	 */
 	public <V, R> ObjectDeserializerBuilder withDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
 		deserializerProviders.add(provider);
-        return this;
+		return this;
 	}
 
 	/**
-	 * Sets the default serializer provider, which is called when no other {@link ValueDeserializerProvider} is
-	 * able to give a {@link ValueDeserializer} for the incoming value and result type constraint.
+	 * Sets the default serializer provider, which is called when no other
+	 * {@link ValueDeserializerProvider} is
+	 * able to give a {@link ValueDeserializer} for the incoming value and result
+	 * type constraint.
 	 * <p>
 	 * This will replace any previously set default provider.
 	 *
@@ -105,7 +137,7 @@ public final class ObjectDeserializerBuilder {
 	 */
 	public <V, R> ObjectDeserializerBuilder withDefaultDeserializerProvider(ValueDeserializerProvider<V, R> provider) {
 		defaultProvider = provider;
-        return this;
+		return this;
 	}
 
 	/**
@@ -125,7 +157,7 @@ public final class ObjectDeserializerBuilder {
 				return null;
 			}
 		};
-        return this;
+		return this;
 	}
 
 	/** registers the standard serializers */
@@ -147,8 +179,10 @@ public final class ObjectDeserializerBuilder {
 				if (Util.canAssign(resultClass, valueClass) && (valueClass == null || fullType instanceof Class)) {
 					return trivialDe; // value to value (same type or compatible type)
 
-					// Note that we rule out TypeConstraint where getFullType() is not a simple Class,
-					// which means that there are type parameters and that we cannot just blindly assign.
+					// Note that we rule out TypeConstraint where getFullType() is not a simple
+					// Class,
+					// which means that there are type parameters and that we cannot just blindly
+					// assign.
 				}
 				if (Collection.class.isAssignableFrom(valueClass)) {
 					if (Collection.class.isAssignableFrom(resultClass))
@@ -157,14 +191,15 @@ public final class ObjectDeserializerBuilder {
 						return arrDe; // collection<value> to array<T>
 				}
 				if ((UnmodifiableConfig.class.isAssignableFrom(valueClass) || Map.class.isAssignableFrom(valueClass))
-                        && Map.class.isAssignableFrom(resultClass)) {
+						&& Map.class.isAssignableFrom(resultClass)) {
 					return mapDe; // config to map<K, V>
 				}
 				if (resultClass == UUID.class && valueClass == String.class)
 					return uuidDe;
 				if (valueClass == String.class && Enum.class.isAssignableFrom(resultClass))
 					return enumDe; // value to Enum
-				if (RiskyNumberDeserializer.isNumberTypeSupported(valueClass) && Util.isPrimitiveOrWrapperNumber(resultClass))
+				if (RiskyNumberDeserializer.isNumberTypeSupported(valueClass)
+						&& Util.isPrimitiveOrWrapperNumber(resultClass))
 					return numberDe;
 				return null; // no standard deserializer matches this case
 			}).orElse(null);

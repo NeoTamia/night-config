@@ -26,7 +26,8 @@ public final class ObjectSerializerBuilder {
     boolean applyTransientModifier = true;
 
     /**
-     * strategy for transforming field names, defaults to {@link NamingStrategy#IDENTITY}
+     * strategy for transforming field names, defaults to
+     * {@link NamingStrategy#IDENTITY}
      */
     @NotNull
     NamingStrategy namingStrategy = NamingStrategy.IDENTITY;
@@ -40,13 +41,15 @@ public final class ObjectSerializerBuilder {
         return new ObjectSerializer(this);
     }
 
-    public <V, R> ObjectSerializerBuilder withSerializerForExactClass(Class<V> cls, ValueSerializer<? super V, ? extends R> serializer) {
+    public <V, R> ObjectSerializerBuilder withSerializerForExactClass(Class<V> cls,
+            ValueSerializer<? super V, ? extends R> serializer) {
         classBasedSerializers.put(cls, serializer);
         return this;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public <V, R> ObjectSerializerBuilder withSerializerForClass(Class<V> cls, ValueSerializer<? super V, ? extends R> serializer) {
+    public <V, R> ObjectSerializerBuilder withSerializerForClass(Class<V> cls,
+            ValueSerializer<? super V, ? extends R> serializer) {
         generalProviders.add(
                 (valueClass, ctx) -> valueClass != null && Util.canAssign(cls, valueClass)
                         ? (ValueSerializer) serializer
@@ -75,7 +78,8 @@ public final class ObjectSerializerBuilder {
             ConfigFormat<?> format = ctx.configFormat();
             if (format == null || format.supportsType(valueClass)) {
                 return trivialSer;
-            } else if (valueClass != null && (Util.isPrimitiveOrWrapper(valueClass) || valueClass == String.class || valueClass.isArray())) {
+            } else if (valueClass != null
+                    && (Util.isPrimitiveOrWrapper(valueClass) || valueClass == String.class || valueClass.isArray())) {
                 // Cannot access the fields of the value!
                 // try to convert to int, if supported
                 if (format.supportsType(int.class)) {
@@ -97,9 +101,9 @@ public final class ObjectSerializerBuilder {
         return this;
     }
 
-	/**
-	 * Serialize transient fields instead of ignoring them.
-	 */
+    /**
+     * Serialize transient fields instead of ignoring them.
+     */
     public ObjectSerializerBuilder serializeTransientFields() {
         this.applyTransientModifier = false;
         return this;
@@ -116,6 +120,27 @@ public final class ObjectSerializerBuilder {
         return this;
     }
 
+    /**
+     * Registers a {@link TypeAdapter} that handles both serialization and
+     * deserialization
+     * for types that match {@link TypeAdapter#canHandle(java.lang.reflect.Type)}.
+     *
+     * @param adapter the type adapter to register
+     * @param <J>     the Java type the adapter handles
+     * @param <C>     the config value type
+     * @return this builder for method chaining
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public <J, C> ObjectSerializerBuilder withTypeAdapter(TypeAdapter<J, C> adapter) {
+        generalProviders.add((valueClass, ctx) -> {
+            if (valueClass != null && adapter.canHandle(valueClass)) {
+                return (ValueSerializer) adapter;
+            }
+            return null;
+        });
+        return this;
+    }
+
     /** registers the standard serializers */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void registerStandardSerializers() {
@@ -127,7 +152,7 @@ public final class ObjectSerializerBuilder {
         ValueSerializer arraySer = new StandardSerializers.ArraySerializer();
         ValueSerializer enumSer = new StandardSerializers.EnumSerializer();
         ValueSerializer trivialSer = new StandardSerializers.TrivialSerializer();
-		ValueSerializer uuidSer = new StandardSerializers.UuidSerializer();
+        ValueSerializer uuidSer = new StandardSerializers.UuidSerializer();
 
         withSerializerProvider((valueClass, ctx) -> {
             if (valueClass == null) {
@@ -156,9 +181,9 @@ public final class ObjectSerializerBuilder {
             if (valueClass.isArray()) {
                 return arraySer;
             }
-			if (valueClass == UUID.class) {
-				return uuidSer;
-			}
+            if (valueClass == UUID.class) {
+                return uuidSer;
+            }
             return null;
         });
     }

@@ -9,12 +9,15 @@ import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 
 /**
- * Deserializes configs ({@link UnmodifiableConfig}, {@link Config}, etc.) to Java objects.
+ * Deserializes configs ({@link UnmodifiableConfig}, {@link Config}, etc.) to
+ * Java objects.
  *
  * <h2>Example</h2>
  *
  * Given a class like this:
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * class Position {
  *     private final int x, y, z;
  *
@@ -22,21 +25,28 @@ import re.neotamia.nightconfig.core.UnmodifiableConfig;
  *         this.x=x; this.y=y; this.z=z;
  *     }
  * }
- * </code></pre>
+ * </code>
+ * </pre>
  *
  * And a configuration like this:
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * Config conf = Config.inMemory();
  * conf.set("x", 12);
  * conf.set("y", -20);
  * conf.set("z", 42);
- * </code></pre>
+ * </code>
+ * </pre>
  *
  * You can deserialize the Config to an instance of Position with:
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * Position deserialized = new ObjectDeserializer.standard().deserializeFields(conf, Position::new);
  * // result: Position(12, -20, 42)
- * </code></pre>
+ * </code>
+ * </pre>
  *
  * <p>
  * Use {@link #builder()} or {@link #blankBuilder()} to precisely configure
@@ -44,10 +54,12 @@ import re.neotamia.nightconfig.core.UnmodifiableConfig;
  */
 public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	// This is the Java 8 version of ObjectDeserializer.
-	// Remember to make this version in sync with the version for Java 17+ (methods and comments).
+	// Remember to make this version in sync with the version for Java 17+ (methods
+	// and comments).
 
 	/**
-	 * Creates a new {@link ObjectDeserializerBuilder} with some standard deserializers already registered.
+	 * Creates a new {@link ObjectDeserializerBuilder} with some standard
+	 * deserializers already registered.
 	 *
 	 * @return a new builder
 	 */
@@ -56,7 +68,8 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	}
 
 	/**
-	 * Creates a new {@link ObjectDeserializerBuilder} without the standard deserializers already registered.
+	 * Creates a new {@link ObjectDeserializerBuilder} without the standard
+	 * deserializers already registered.
 	 *
 	 * @return a new builder
 	 */
@@ -77,9 +90,12 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 		super(builder);
 	}
 
-	// NOTE: it would make no sense to provide a method deserialize(Object) -> Object, because
-	// the trivial deserialization can always be applied when there is no constraint on the result.
-	// ObjectSerializer.serialize does exist, however, because there is a constraint on the type of
+	// NOTE: it would make no sense to provide a method deserialize(Object) ->
+	// Object, because
+	// the trivial deserialization can always be applied when there is no constraint
+	// on the result.
+	// ObjectSerializer.serialize does exist, however, because there is a constraint
+	// on the type of
 	// values that the configuration can contain, through its ConfigFormat.
 
 	/**
@@ -92,7 +108,8 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param valueClass      class of the values in the collection
 	 * @return the deserialized collection
 	 */
-	public <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass, Class<V> valueClass) {
+	public <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass,
+			Class<V> valueClass) {
 		return super.deserializeToCollection(configValue, collectionClass, valueClass);
 	}
 
@@ -106,12 +123,14 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param valueClass  class of the values in the collection
 	 * @return the deserialized map
 	 */
-	public <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass, Class<V> valueClass) {
+	public <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass,
+			Class<V> valueClass) {
 		return super.deserializeToMap(configValue, mapClass, valueClass);
 	}
 
 	/**
-	 * Deserializes a {@code Config} as an object by transforming the config entries into fields.
+	 * Deserializes a {@code Config} as an object by transforming the config entries
+	 * into fields.
 	 * The fields of the {@code destination} are modified through reflection.
 	 *
 	 * @param source      config to deserialize
@@ -122,8 +141,10 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	}
 
 	/**
-	 * Deserializes a {@code Config} as an object of type {@code R} by transforming the config entries
-	 * into fields. A new instance of the object is created, and its fields are modified through reflection.
+	 * Deserializes a {@code Config} as an object of type {@code R} by transforming
+	 * the config entries
+	 * into fields. A new instance of the object is created, and its fields are
+	 * modified through reflection.
 	 *
 	 * @param <R>                 type of the resulting object
 	 * @param source              config to deserialize
@@ -135,7 +156,8 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	}
 
 	/**
-	 * Deserializes a {@code Config} to a record of type {@code R} by transforming the config entries
+	 * Deserializes a {@code Config} to a record of type {@code R} by transforming
+	 * the config entries
 	 * into record's components.
 	 *
 	 * @param <R>         type of the record
@@ -146,7 +168,8 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	@SuppressWarnings("unchecked")
 	public <R extends Record> R deserializeToRecord(UnmodifiableConfig source, Class<R> recordClass) {
 		if (!recordClass.isRecord()) {
-			throw new IllegalArgumentException("Argument recordClass = " + recordClass + " is not the class of a record! Please don't silence errors about incompatible types :)");
+			throw new IllegalArgumentException("Argument recordClass = " + recordClass
+					+ " is not the class of a record! Please don't silence errors about incompatible types :)");
 		}
 		DeserializerContext ctx = new DeserializerContext(this);
 		TypeConstraint t = new TypeConstraint(recordClass);
@@ -154,7 +177,8 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	}
 
 	/**
-	 * Adds a {@link ValueDeserializer} that will be used to deserialize config values
+	 * Adds a {@link ValueDeserializer} that will be used to deserialize config
+	 * values
 	 * of type {@code valueClass} to objects of type {@code resultClass}.
 	 *
 	 * @param <V>          type of the config values to deserialize
@@ -163,12 +187,14 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param resultClass  class of the deserialization result
 	 * @param deserializer deserializer to register
 	 */
-	public <V, R> void registerDeserializerForClass(Class<V> valueClass, Class<R> resultClass, ValueDeserializer<? super V, ? extends R> deserializer) {
+	public <V, R> void registerDeserializerForClass(Class<V> valueClass, Class<R> resultClass,
+			ValueDeserializer<? super V, ? extends R> deserializer) {
 		super.registerDeserializerForClass(valueClass, resultClass, deserializer);
 	}
 
 	/**
-	 * Adds a {@link ValueDeserializerProvider} that provides {@link ValueDeserializer} to
+	 * Adds a {@link ValueDeserializerProvider} that provides
+	 * {@link ValueDeserializer} to
 	 * deserialize config values.
 	 *
 	 * @param <V>      type of the config values to deserialize
@@ -179,8 +205,34 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 		super.registerDeserializerProvider(provider);
 	}
 
-    @Override
-    public void setNamingStrategy(@NotNull NamingStrategy namingStrategy) {
-        super.setNamingStrategy(namingStrategy);
-    }
+	@Override
+	public void setNamingStrategy(@NotNull NamingStrategy namingStrategy) {
+		super.setNamingStrategy(namingStrategy);
+	}
+
+	/**
+	 * Registers a {@link TypeAdapter} that handles both serialization and
+	 * deserialization
+	 * for types that match {@link TypeAdapter#canHandle(java.lang.reflect.Type)}.
+	 * <p>
+	 * This is a convenience method that wraps the TypeAdapter as a
+	 * {@link ValueDeserializerProvider}.
+	 * The adapter's {@link TypeAdapter#canHandle(java.lang.reflect.Type)} method is
+	 * called with
+	 * the full {@link java.lang.reflect.Type} (including generic parameters) from
+	 * the field declaration.
+	 *
+	 * @param adapter the type adapter to register
+	 * @param <J>     the Java type the adapter handles
+	 * @param <C>     the config value type
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public <J, C> void registerTypeAdapter(TypeAdapter<J, C> adapter) {
+		super.registerDeserializerProvider((valueClass, resultType) -> {
+			if (adapter.canHandle(resultType.getFullType())) {
+				return (ValueDeserializer) adapter;
+			}
+			return null;
+		});
+	}
 }

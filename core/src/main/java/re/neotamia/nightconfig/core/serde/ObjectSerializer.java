@@ -15,12 +15,15 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Serializes Java objects to NightConfig configurations ({@link UnmodifiableConfig}, {@link Config}, etc.).
+ * Serializes Java objects to NightConfig configurations
+ * ({@link UnmodifiableConfig}, {@link Config}, etc.).
  *
  * <h2>Example</h2>
  * <p>
  * Given a class like this:
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * class Position {
  *     private final int x, y, z;
  *
@@ -28,26 +31,36 @@ import java.util.function.Supplier;
  *         this.x=x; this.y=y; this.z=z;
  *     }
  * }
- * </code></pre>
+ * </code>
+ * </pre>
  * <p>
  * And an instance like this:
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * Position pos = new Position(12, -20, 42);
- * </code></pre>
+ * </code>
+ * </pre>
  * <p>
  * You can serialize your instance of Position to a Config with:
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * Config conf = new ObjectSerializer.standard().serializeFields(pos, Config::inMemory);
  * // result: SimpleConfig{x=12, y=-20, z=42}
- * </code></pre>
+ * </code>
+ * </pre>
  * <p>
  * It is also possible to serialize an object to an existing configuration,
  * which is especially handy if you are working with {@link FileConfig}s.
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * FileConfig myFileConfig = ...; // your FileConfig here
  * new ObjectSerializer().standard().serializeFields(pos, myFileConfig);
  * // the FileConfig is modified with the serialization result
- * </code></pre>
+ * </code>
+ * </pre>
  * <p>
  * Use {@link #builder()} or {@link #blankBuilder()} to precisely configure
  * the serialization process.
@@ -137,7 +150,7 @@ public final class ObjectSerializer {
      * @return the new configuration
      * @see ObjectSerializerBuilder#withSerializerForClass(Class, ValueSerializer)
      * @see ObjectSerializerBuilder#withSerializerForExactClass(Class,
-     * ValueSerializer)
+     *      ValueSerializer)
      * @see ObjectSerializerBuilder#withSerializerProvider(ValueSerializerProvider)
      */
     public <C extends Config> C serializeFields(Object source, Supplier<C> configSupplier) {
@@ -158,7 +171,7 @@ public final class ObjectSerializer {
      * @param destination configuration to store the result in
      * @see ObjectSerializerBuilder#withSerializerForClass(Class, ValueSerializer)
      * @see ObjectSerializerBuilder#withSerializerForExactClass(Class,
-     * ValueSerializer)
+     *      ValueSerializer)
      * @see ObjectSerializerBuilder#withSerializerProvider(ValueSerializerProvider)
      */
     public void serializeFields(Object source, Config destination) {
@@ -195,8 +208,10 @@ public final class ObjectSerializer {
 
     Supplier<?> findDefaultValueSupplier(Object fieldValue, Field field, Object instance) {
         // Start with standalone SerdeDefault annotations
-        EnumMap<SerdePhase, EnumMap<SerdeDefault.WhenValue, SerdeDefault>> defaultAnnotations = AnnotationProcessor.createSerdePhaseEnumMapEnumMap(field);
-        EnumMap<SerdeDefault.WhenValue, SerdeDefault> defaultForSerializing = defaultAnnotations.get(SerdePhase.SERIALIZING);
+        EnumMap<SerdePhase, EnumMap<SerdeDefault.WhenValue, SerdeDefault>> defaultAnnotations = AnnotationProcessor
+                .createSerdePhaseEnumMapEnumMap(field);
+        EnumMap<SerdeDefault.WhenValue, SerdeDefault> defaultForSerializing = defaultAnnotations
+                .get(SerdePhase.SERIALIZING);
 
         if (defaultForSerializing == null) {
             return null; // no default
@@ -232,34 +247,37 @@ public final class ObjectSerializer {
             supportedStr = "The value's type is NOT supported by the ConfigFormat of the current SerializerContext.";
         }
         String ofTypeStr = valueClass == null ? "" : " of type " + valueClass;
-        return new SerdeException("No suitable serializer found for value" + ofTypeStr + ": " + value + ". " + supportedStr);
+        return new SerdeException(
+                "No suitable serializer found for value" + ofTypeStr + ": " + value + ". " + supportedStr);
     }
-
 
     /**
      * Adds a {@link ValueSerializer} that will be used to serialize config values
      * of type {@code valueClass} to objects of type {@code resultClass}.
      *
-     * @param <V>          type of the config values to serialize
-     * @param <R>          resulting type of the serialization
-     * @param cls          class of the config values to serialize
-     * @param serializer   serializer to register
+     * @param <V>        type of the config values to serialize
+     * @param <R>        resulting type of the serialization
+     * @param cls        class of the config values to serialize
+     * @param serializer serializer to register
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public <V, R> void registerSerializerForClass(Class<V> cls, ValueSerializer<? super V, ? extends R> serializer) {
         generalProviders.add((valueClass, ctx) -> valueClass != null && Util.canAssign(cls, valueClass)
-                        ? (ValueSerializer) serializer
-                        : null);
+                ? (ValueSerializer) serializer
+                : null);
     }
 
     /**
-     * Registers a {@link ValueSerializerProvider} to provide serializers for various value types.
-     * The added provider can be used to dynamically supply an appropriate {@link ValueSerializer}
+     * Registers a {@link ValueSerializerProvider} to provide serializers for
+     * various value types.
+     * The added provider can be used to dynamically supply an appropriate
+     * {@link ValueSerializer}
      * by analyzing the value's class type and serialization context.
      *
-     * @param <V>       type of the configuration values to serialize
-     * @param <R>       resulting type of the serialization
-     * @param provider  the provider that supplies serializers for specific value classes
+     * @param <V>      type of the configuration values to serialize
+     * @param <R>      resulting type of the serialization
+     * @param provider the provider that supplies serializers for specific value
+     *                 classes
      */
     public <V, R> void registerSerializerProvider(ValueSerializerProvider<V, R> provider) {
         generalProviders.add(provider);
@@ -272,5 +290,30 @@ public final class ObjectSerializer {
      */
     public void setNamingStrategy(@NotNull NamingStrategy namingStrategy) {
         this.namingStrategy = namingStrategy;
+    }
+
+    /**
+     * Registers a {@link TypeAdapter} that handles both serialization and
+     * deserialization
+     * for types that match {@link TypeAdapter#canHandle(java.lang.reflect.Type)}.
+     * <p>
+     * This is a convenience method that wraps the TypeAdapter as a
+     * {@link ValueSerializerProvider}.
+     * For serialization, the adapter's
+     * {@link TypeAdapter#canHandle(java.lang.reflect.Type)} method
+     * is called with the value's runtime class.
+     *
+     * @param adapter the type adapter to register
+     * @param <J>     the Java type the adapter handles
+     * @param <C>     the config value type
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public <J, C> void registerTypeAdapter(TypeAdapter<J, C> adapter) {
+        generalProviders.add((valueClass, ctx) -> {
+            if (valueClass != null && adapter.canHandle(valueClass)) {
+                return (ValueSerializer) adapter;
+            }
+            return null;
+        });
     }
 }

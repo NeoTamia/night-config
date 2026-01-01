@@ -435,5 +435,10 @@ public final class TypeConstraint {
 					Objects.equals(rawType, other.getRawType()) &&
 					Arrays.equals(arguments, other.getActualTypeArguments());
 		}
+
+		@Override
+		public int hashCode() {
+			return Arrays.hashCode(arguments) ^ Objects.hashCode(rawType);
+		}
 	}
 }

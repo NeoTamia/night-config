@@ -5,10 +5,11 @@ import re.neotamia.nightconfig.core.NullObject;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
 import re.neotamia.nightconfig.core.serde.annotations.*;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -50,8 +51,25 @@ public final class DeserializerContext extends AbstractDeSerializerContext {
      */
     public void deserializeFields(UnmodifiableConfig source, Object destination) {
         // loop through the class hierarchy of the destination type
-        Class<?> cls = destination.getClass();
+        Class<?> destinationClass = destination.getClass();
+        Type destinationType = destinationClass;
+        if (destinationClass.isAnonymousClass()) {
+            destinationType = destinationClass.getGenericSuperclass();
+        }
+        TypeConstraint destinationContext = new TypeConstraint(destinationType);
+
+        Class<?> cls = destinationClass;
         while (cls != Object.class) {
+            TypeConstraint[] typeArgs = destinationContext.resolveTypeArgumentsFor(cls).orElse(null);
+            TypeVariable<?>[] typeVars = cls.getTypeParameters();
+            Map<TypeVariable<?>, Type> typeMap = Collections.emptyMap();
+            if (typeArgs != null && typeVars.length > 0) {
+                typeMap = new HashMap<>();
+                for (int i = 0; i < typeVars.length; i++) {
+                    typeMap.put(typeVars[i], typeArgs[i].getFullType());
+                }
+            }
+
             for (Field field : cls.getDeclaredFields()) {
                 if (preCheck(field)) {
                     // get the config key
@@ -80,7 +98,11 @@ public final class DeserializerContext extends AbstractDeSerializerContext {
                         value = normalizeForDeserialization(value, path, field);
 
                         // find the right deserializer
-                        TypeConstraint resultType = new TypeConstraint(field.getGenericType());
+                        Type fieldType = field.getGenericType();
+                        if (!typeMap.isEmpty()) {
+                            fieldType = resolveType(fieldType, typeMap);
+                        }
+                        TypeConstraint resultType = new TypeConstraint(fieldType);
                         ValueDeserializer<Object, ?> deserializer = settings.findValueDeserializer(value, resultType);
 
                         // deserialize
@@ -106,6 +128,35 @@ public final class DeserializerContext extends AbstractDeSerializerContext {
             }
             cls = cls.getSuperclass();
         }
+    }
+
+    private Type resolveType(Type type, Map<TypeVariable<?>, Type> typeMap) {
+        if (type instanceof TypeVariable<?> tv) {
+            return typeMap.getOrDefault(tv, type);
+        }
+        if (type instanceof ParameterizedType pt) {
+            Type[] args = pt.getActualTypeArguments();
+            boolean changed = false;
+            Type[] newArgs = new Type[args.length];
+            for (int i = 0; i < args.length; i++) {
+                newArgs[i] = resolveType(args[i], typeMap);
+                if (newArgs[i] != args[i]) changed = true;
+            }
+            if (changed) {
+                return new TypeConstraint.ManuallyParameterized(pt.getRawType(), newArgs);
+            }
+            return pt;
+        }
+        if (type instanceof GenericArrayType gat) {
+            Type comp = gat.getGenericComponentType();
+            Type newComp = resolveType(comp, typeMap);
+            if (newComp != comp) {
+                if (newComp instanceof Class<?> cl) {
+                    return Array.newInstance(cl, 0).getClass();
+                }
+            }
+        }
+        return type;
     }
 
     private Object normalizeForDeserialization(Object configValue, List<String> path, Field field) {

@@ -9,9 +9,10 @@ import re.neotamia.nightconfig.core.serde.annotations.SerdeDefault;
 import re.neotamia.nightconfig.core.serde.annotations.SerdePhase;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.EnumMap;
-import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -82,7 +83,7 @@ public final class ObjectSerializer {
         return builder().build();
     }
 
-    private final IdentityHashMap<Class<?>, ValueSerializer<?, ?>> classBasedSerializers;
+    private final Map<Type, ValueSerializer<?, ?>> classBasedSerializers;
     private final List<ValueSerializerProvider<?, ?>> generalProviders;
 
     /**
@@ -157,8 +158,7 @@ public final class ObjectSerializer {
      * @param source      object to serialize
      * @param destination configuration to store the result in
      * @see ObjectSerializerBuilder#withSerializerForClass(Class, ValueSerializer)
-     * @see ObjectSerializerBuilder#withSerializerForExactClass(Class,
-     * ValueSerializer)
+     * @see ObjectSerializerBuilder#withSerializerForExactClass(Class, ValueSerializer)
      * @see ObjectSerializerBuilder#withSerializerProvider(ValueSerializerProvider)
      */
     public void serializeFields(Object source, Config destination) {
@@ -173,20 +173,28 @@ public final class ObjectSerializer {
      * @throws SerdeException if no converter is found
      */
     @SuppressWarnings("unchecked")
-    <T, R> ValueSerializer<T, R> findValueSerializer(Object value, SerializerContext ctx) {
-        Class<?> valueClass = value == null ? null : value.getClass();
+    <T, R> ValueSerializer<T, R> findValueSerializer(Object value, Type valueType, SerializerContext ctx) {
+        if (value == null) {
+            valueType = null;
+        } else if (valueType == null || valueType == Object.class) {
+            valueType = value.getClass();
+        }
         ValueSerializer<?, ?> maybeSe;
         for (ValueSerializerProvider<?, ?> provider : generalProviders) {
-            maybeSe = provider.provide(valueClass, ctx);
+            maybeSe = provider.provide(valueType, ctx);
             if (maybeSe != null) {
                 return (ValueSerializer<T, R>) maybeSe;
             }
         }
-        maybeSe = classBasedSerializers.get(valueClass);
+        Class<?> valueClass = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
+        maybeSe = classBasedSerializers.get(valueType);
+        if (maybeSe == null) {
+            maybeSe = classBasedSerializers.get(valueClass);
+        }
         if (maybeSe != null) {
             return (ValueSerializer<T, R>) maybeSe;
         }
-        maybeSe = defaultProvider.provide(valueClass, ctx);
+        maybeSe = defaultProvider.provide(valueType, ctx);
         if (maybeSe != null) {
             return (ValueSerializer<T, R>) maybeSe;
         }
@@ -247,9 +255,25 @@ public final class ObjectSerializer {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public <V, R> void registerSerializerForClass(Class<V> cls, ValueSerializer<? super V, ? extends R> serializer) {
-        generalProviders.add((valueClass, ctx) -> valueClass != null && Util.canAssign(cls, valueClass)
-                        ? (ValueSerializer) serializer
-                        : null);
+        generalProviders.add((valueType, ctx) -> {
+            Class<?> valueClass = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
+            return valueClass != null && Util.canAssign(cls, valueClass)
+                    ? (ValueSerializer) serializer
+                    : null;
+        });
+    }
+
+    /**
+     * Adds a {@link ValueSerializer} that will be used to serialize values of a specific type.
+     *
+     * @param <V>          type of the values to serialize
+     * @param <R>          resulting type of the serialization
+     * @param type         type of the values to serialize
+     * @param serializer   serializer to register
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public <V, R> void registerSerializerForType(Type type, ValueSerializer<? super V, ? extends R> serializer) {
+        classBasedSerializers.put(type, serializer);
     }
 
     /**

@@ -3,6 +3,7 @@ package re.neotamia.nightconfig.core.serde;
 import java.util.*;
 import java.util.function.Supplier;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.NullObject;
@@ -102,18 +103,19 @@ class AbstractObjectDeserializer {
 
 	@SuppressWarnings("unchecked")
 	protected <T, R> ValueDeserializer<T, R> findValueDeserializer(T value, TypeConstraint resultType) {
-		Class<?> valueClass = value == null ? null : value.getClass();
+		Type valueType = value == null ? null : value.getClass();
 		ValueDeserializer<?, ?> maybeDe;
 		for (ValueDeserializerProvider<?, ?> provider : generalProviders) {
-			maybeDe = provider.provide(valueClass, resultType);
+			maybeDe = provider.provide(valueType, resultType);
 			if (maybeDe != null) {
 				return (ValueDeserializer<T, R>) maybeDe;
 			}
 		}
-		maybeDe = defaultProvider.provide(valueClass, resultType);
+		maybeDe = defaultProvider.provide(valueType, resultType);
 		if (maybeDe != null) {
 			return (ValueDeserializer<T, R>) maybeDe;
 		}
+		Class<?> valueClass = (valueType instanceof Class) ? (Class<?>)valueType : null;
 		String ofTypeStr = valueClass == null ? "" : " of type " + valueClass;
 		throw new SerdeException("No suitable deserializer found for value" + ofTypeStr + ": "+ value + " and result constraint " + resultType);
 	}
@@ -160,11 +162,31 @@ class AbstractObjectDeserializer {
 	 * @param deserializer deserializer to register
 	 */
 	protected <V, R> void registerDeserializerForClass(Class<V> valueClass, Class<R> resultClass, ValueDeserializer<? super V, ? extends R> deserializer) {
-		registerDeserializerProvider((valueCls, resultType) -> resultType.getSatisfyingRawType().map(resultCls -> {
-			if (valueCls != null && valueCls.isAssignableFrom(valueClass) && resultCls.isAssignableFrom(resultClass))
+		registerDeserializerProvider((valueType, resultTypeConstraint) -> resultTypeConstraint.getSatisfyingRawType().map(resultCls -> {
+			Class<?> valueCls = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
+			if (valueCls != null && Util.canAssign(valueClass, valueCls) && resultCls.isAssignableFrom(resultClass))
 				return deserializer;
 			return null;
 		}).orElse(null));
+	}
+
+	/**
+	 * Adds a {@link ValueDeserializer} that will be used to deserialize config values
+	 * of a specific type to a specific result type.
+	 *
+	 * @param <V>          type of the config values to deserialize
+	 * @param <R>          resulting type of the deserialization
+	 * @param valueClass   class of the config values to deserialize
+	 * @param resultType   type of the deserialization result
+	 * @param deserializer deserializer to register
+	 */
+	protected <V, R> void registerDeserializerForType(Class<V> valueClass, Type resultType, ValueDeserializer<? super V, ? extends R> deserializer) {
+		registerDeserializerProvider((valueType, resultTypeConstraint) -> {
+			Class<?> valueCls = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
+			if (valueCls != null && Util.canAssign(valueClass, valueCls) && resultTypeConstraint.getFullType().equals(resultType))
+				return deserializer;
+			return null;
+		});
 	}
 
 	/**

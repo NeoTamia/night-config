@@ -139,6 +139,14 @@ final class Util {
 		return type.isPrimitive() || WRAPPER_TO_PRIMITIVE.get(type) != null;
 	}
 
+	static Class<?> toWrapper(Class<?> type) {
+		if (type != null && type.isPrimitive()) {
+			TypeAndOrder tao = PRIMITIVE_TO_WRAPPER.get(type);
+			return tao == null ? type : tao.type;
+		}
+		return type;
+	}
+
 	/** Checks that {@code type} is a primitive or a wrapper type that is a {@code Number}
 	 * (all primitive types except boolean and char). */
 	static boolean isPrimitiveOrWrapperNumber(Class<?> type) {

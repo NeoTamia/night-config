@@ -1,6 +1,7 @@
 package re.neotamia.nightconfig.core.serde;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +20,15 @@ final class StandardSerializers {
      * converting the entry's value.
      */
     static final class MapSerializer implements ValueSerializer<Map<?, ?>, Config> {
+        private final Type valueType;
+
+        public MapSerializer() {
+            this(null);
+        }
+
+        public MapSerializer(Type valueType) {
+            this.valueType = valueType;
+        }
 
         @Override
         public Config serialize(Map<?, ?> value, SerializerContext ctx) {
@@ -35,7 +45,7 @@ final class StandardSerializers {
                 List<String> path = Collections.singletonList((String) key);
 
                 // convert the value
-                Object serialized = ctx.serializeValue(entry.getValue());
+                Object serialized = ctx.serializeValue(entry.getValue(), valueType);
 
                 // add the value to the config
                 res.set(path, serialized);
@@ -49,12 +59,21 @@ final class StandardSerializers {
      * Serializes a {@code Collection<V>} to a {@code List<R>}.
      */
     static final class CollectionSerializer implements ValueSerializer<Collection<?>, List<?>> {
+        private final Type elementType;
+
+        public CollectionSerializer() {
+            this(null);
+        }
+
+        public CollectionSerializer(Type elementType) {
+            this.elementType = elementType;
+        }
 
         @Override
         public List<?> serialize(Collection<?> value, SerializerContext ctx) {
             List<Object> res = new ArrayList<>(value.size());
             for (Object v : value) {
-                Object serialized = ctx.serializeValue(v);
+                Object serialized = ctx.serializeValue(v, elementType);
                 res.add(serialized);
             }
             return res;
@@ -65,12 +84,21 @@ final class StandardSerializers {
      * Serializes an {@code Iterable<V>} to a {@code List<R>}
      */
     static final class IterableSerializer implements ValueSerializer<Iterable<?>, List<?>> {
+        private final Type elementType;
+
+        public IterableSerializer() {
+            this(null);
+        }
+
+        public IterableSerializer(Type elementType) {
+            this.elementType = elementType;
+        }
 
         @Override
         public List<?> serialize(Iterable<?> value, SerializerContext ctx) {
             List<Object> res = new ArrayList<>();
             for (Object v : value) {
-                Object serialized = ctx.serializeValue(v);
+                Object serialized = ctx.serializeValue(v, elementType);
                 res.add(serialized);
             }
             return res;
@@ -81,6 +109,15 @@ final class StandardSerializers {
      * Serializes an {@code Array<V>} to a {@code List<R>}.
      */
     static final class ArraySerializer implements ValueSerializer<Object, List<?>> {
+        private final Type componentType;
+
+        public ArraySerializer() {
+            this(null);
+        }
+
+        public ArraySerializer(Type componentType) {
+            this.componentType = componentType;
+        }
 
         @Override
         public List<?> serialize(Object arrayValue, SerializerContext ctx) {
@@ -89,7 +126,7 @@ final class StandardSerializers {
             List<Object> res = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 Object element = Array.get(arrayValue, i);
-                Object serialized = ctx.serializeValue(element);
+                Object serialized = ctx.serializeValue(element, componentType);
                 res.add(serialized);
             }
             return res;

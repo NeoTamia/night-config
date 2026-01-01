@@ -73,11 +73,21 @@ public final class ObjectDeserializerBuilder {
 	 * @param deserializer deserializer to register
 	 */
 	public <V, R> ObjectDeserializerBuilder withDeserializerForClass(Class<V> valueClass, Class<R> resultClass, ValueDeserializer<? super V, ? extends R> deserializer) {
-		return withDeserializerProvider(((valueCls, resultType) -> resultType.getSatisfyingRawType().map(resultCls -> {
-            if (valueCls.isAssignableFrom(valueClass) && resultCls.isAssignableFrom(resultClass))
-                return deserializer;
-            return null;
-        }).orElse(null)));
+		return withDeserializerProvider((valueType, resultTypeConstraint) -> resultTypeConstraint.getSatisfyingRawType().map(resultCls -> {
+			Class<?> valueCls = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
+			if (valueCls != null && Util.canAssign(valueClass, valueCls) && resultCls.isAssignableFrom(resultClass))
+				return deserializer;
+			return null;
+		}).orElse(null));
+	}
+
+	public <V, R> ObjectDeserializerBuilder withDeserializerForType(Class<V> valueClass, Type resultType, ValueDeserializer<? super V, ? extends R> deserializer) {
+		return withDeserializerProvider((valueType, resultTypeConstraint) -> {
+			Class<?> valueCls = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
+			if (valueCls != null && Util.canAssign(valueClass, valueCls) && resultTypeConstraint.getFullType().equals(resultType))
+				return deserializer;
+			return null;
+		});
 	}
 
 	/**
@@ -118,8 +128,9 @@ public final class ObjectDeserializerBuilder {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ObjectDeserializerBuilder withDefaultDeserializerProvider() {
 		ValueDeserializer pojoDe = new ConfigToPojoDeserializer();
-		defaultProvider = (valueClass, resultType) -> {
-			if (UnmodifiableConfig.class.isAssignableFrom(valueClass)) {
+		defaultProvider = (valueType, resultType) -> {
+			Class<?> valueClass = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
+			if (valueClass != null && UnmodifiableConfig.class.isAssignableFrom(valueClass)) {
 				return pojoDe;
 			} else {
 				return null;
@@ -141,8 +152,9 @@ public final class ObjectDeserializerBuilder {
 		ValueDeserializer uuidDe = new StandardDeserializers.UuidDeserializer();
 		ValueDeserializer numberDe = new StandardDeserializers.RiskyNumberDeserializer();
 
-		withDeserializerProvider(((valueClass, resultType) -> {
+		withDeserializerProvider(((valueType, resultType) -> {
 			Type fullType = resultType.getFullType();
+			Class<?> valueClass = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
 			return resultType.getSatisfyingRawType().map(resultClass -> {
 				if (Util.canAssign(resultClass, valueClass) && (valueClass == null || fullType instanceof Class)) {
 					return trivialDe; // value to value (same type or compatible type)
@@ -150,13 +162,13 @@ public final class ObjectDeserializerBuilder {
 					// Note that we rule out TypeConstraint where getFullType() is not a simple Class,
 					// which means that there are type parameters and that we cannot just blindly assign.
 				}
-				if (Collection.class.isAssignableFrom(valueClass)) {
+				if (valueClass != null && Collection.class.isAssignableFrom(valueClass)) {
 					if (Collection.class.isAssignableFrom(resultClass))
 						return collDe; // collection<value> to collection<T>
 					else if (resultClass.isArray())
 						return arrDe; // collection<value> to array<T>
 				}
-				if ((UnmodifiableConfig.class.isAssignableFrom(valueClass) || Map.class.isAssignableFrom(valueClass))
+				if (valueClass != null && (UnmodifiableConfig.class.isAssignableFrom(valueClass) || Map.class.isAssignableFrom(valueClass))
                         && Map.class.isAssignableFrom(resultClass)) {
 					return mapDe; // config to map<K, V>
 				}
@@ -164,7 +176,7 @@ public final class ObjectDeserializerBuilder {
 					return uuidDe;
 				if (valueClass == String.class && Enum.class.isAssignableFrom(resultClass))
 					return enumDe; // value to Enum
-				if (RiskyNumberDeserializer.isNumberTypeSupported(valueClass) && Util.isPrimitiveOrWrapperNumber(resultClass))
+				if (valueClass != null && RiskyNumberDeserializer.isNumberTypeSupported(valueClass) && Util.isPrimitiveOrWrapperNumber(resultClass))
 					return numberDe;
 				return null; // no standard deserializer matches this case
 			}).orElse(null);
@@ -176,7 +188,7 @@ public final class ObjectDeserializerBuilder {
 		static final NoProvider INSTANCE = new NoProvider();
 
 		@Override
-		public ValueDeserializer<Object, Object> provide(Class<?> valueClass, TypeConstraint resultType) {
+		public ValueDeserializer<Object, Object> provide(Type valueType, TypeConstraint resultType) {
 			return null;
 		}
 	}

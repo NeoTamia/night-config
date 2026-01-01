@@ -5,10 +5,11 @@ import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.serde.annotations.*;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -60,7 +61,19 @@ public final class SerializerContext extends AbstractDeSerializerContext {
      * @throws SerdeException if no suitable serializer is found
      */
     public Object serializeValue(Object value) {
-        ValueSerializer<Object, ?> serializer = settings.findValueSerializer(value, this);
+        return serializeValue(value, null);
+    }
+
+    /**
+     * Serializes a single value with a specific type constraint.
+     *
+     * @param value value coming from a field that we are serializing
+     * @param valueType type of the value
+     * @return a value that can be added to a config
+     * @throws SerdeException if no suitable serializer is found
+     */
+    public Object serializeValue(Object value, Type valueType) {
+        ValueSerializer<Object, ?> serializer = settings.findValueSerializer(value, valueType, this);
         return serializer.serialize(value, this);
     }
 
@@ -73,8 +86,25 @@ public final class SerializerContext extends AbstractDeSerializerContext {
      */
     public void serializeFields(Object source, Config destination) {
         // loop through the class hierarchy of the source type
-        Class<?> cls = source.getClass();
+        Class<?> sourceClass = source.getClass();
+        Type sourceType = sourceClass;
+        if (sourceClass.isAnonymousClass()) {
+            sourceType = sourceClass.getGenericSuperclass();
+        }
+        TypeConstraint sourceContext = new TypeConstraint(sourceType);
+
+        Class<?> cls = sourceClass;
         while (cls != Object.class) {
+            TypeConstraint[] typeArgs = sourceContext.resolveTypeArgumentsFor(cls).orElse(null);
+            TypeVariable<?>[] typeVars = cls.getTypeParameters();
+            Map<TypeVariable<?>, Type> typeMap = Collections.emptyMap();
+            if (typeArgs != null && typeVars.length > 0) {
+                typeMap = new HashMap<>();
+                for (int i = 0; i < typeVars.length; i++) {
+                    typeMap.put(typeVars[i], typeArgs[i].getFullType());
+                }
+            }
+
             for (Field field : cls.getDeclaredFields()) {
                 if (preCheck(field)) {
                     // read the fields's value
@@ -113,7 +143,11 @@ public final class SerializerContext extends AbstractDeSerializerContext {
                     }
 
                     // find the right serializer
-                    ValueSerializer<Object, ?> serializer = settings.findValueSerializer(value, this);
+                    Type fieldType = field.getGenericType();
+                    if (!typeMap.isEmpty()) {
+                        fieldType = resolveType(fieldType, typeMap);
+                    }
+                    ValueSerializer<Object, ?> serializer = settings.findValueSerializer(value, fieldType, this);
 
                     // serialize the value and modify the destination
                     try {
@@ -129,6 +163,41 @@ public final class SerializerContext extends AbstractDeSerializerContext {
             }
             cls = cls.getSuperclass();
         }
+    }
+
+    private Type resolveType(Type type, Map<TypeVariable<?>, Type> typeMap) {
+        if (type instanceof TypeVariable<?> tv) {
+            return typeMap.getOrDefault(tv, type);
+        }
+        if (type instanceof ParameterizedType pt) {
+            Type[] args = pt.getActualTypeArguments();
+            boolean changed = false;
+            Type[] newArgs = new Type[args.length];
+            for (int i = 0; i < args.length; i++) {
+                newArgs[i] = resolveType(args[i], typeMap);
+                if (newArgs[i] != args[i]) changed = true;
+            }
+            if (changed) {
+                return new TypeConstraint.ManuallyParameterized(pt.getRawType(), newArgs);
+            }
+            return pt;
+        }
+        if (type instanceof GenericArrayType gat) {
+            Type comp = gat.getGenericComponentType();
+            Type newComp = resolveType(comp, typeMap);
+            if (newComp != comp) {
+                // There is no easy way to create a GenericArrayType in standard Java,
+                // but TypeConstraint doesn't seem to provide one either except through RefinedWildcard?
+                // Actually, we can just return a new ManuallyParameterized if it was a ParameterizedType, 
+                // but for Array it's different.
+                // Let's see if we can just return the raw array class if it's resolved to a Class.
+                if (newComp instanceof Class<?> cl) {
+                    return Array.newInstance(cl, 0).getClass();
+                }
+                // Fallback: stay with the original type if we can't easily represent the new one
+            }
+        }
+        return type;
     }
 
     private String configComment(Field field) {

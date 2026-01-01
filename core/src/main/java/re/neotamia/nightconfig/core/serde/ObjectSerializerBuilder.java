@@ -1,7 +1,10 @@
 package re.neotamia.nightconfig.core.serde;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +18,7 @@ import re.neotamia.nightconfig.core.UnmodifiableConfig;
  * Builder for {@link ObjectSerializer}.
  */
 public final class ObjectSerializerBuilder {
-    final IdentityHashMap<Class<?>, ValueSerializer<?, ?>> classBasedSerializers = new IdentityHashMap<>(7);
+    final Map<Type, ValueSerializer<?, ?>> classBasedSerializers = new HashMap<>(7);
 
     final List<ValueSerializerProvider<?, ?>> generalProviders = new ArrayList<>();
 
@@ -45,12 +48,20 @@ public final class ObjectSerializerBuilder {
         return this;
     }
 
+    public <V, R> ObjectSerializerBuilder withSerializerForType(Type type, ValueSerializer<? super V, ? extends R> serializer) {
+        classBasedSerializers.put(type, serializer);
+        return this;
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public <V, R> ObjectSerializerBuilder withSerializerForClass(Class<V> cls, ValueSerializer<? super V, ? extends R> serializer) {
         generalProviders.add(
-                (valueClass, ctx) -> valueClass != null && Util.canAssign(cls, valueClass)
+                (valueType, ctx) -> {
+                    Class<?> valueClass = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
+                    return valueClass != null && Util.canAssign(cls, valueClass)
                         ? (ValueSerializer) serializer
-                        : null);
+                        : null;
+                });
         return this;
     }
 
@@ -71,9 +82,11 @@ public final class ObjectSerializerBuilder {
         ValueSerializer numberToIntSer = (value, ctx) -> ((Number) value).intValue();
         ValueSerializer charToIntSer = (value, ctx) -> (int) (Character) value;
 
-        defaultProvider = (valueClass, ctx) -> {
+        defaultProvider = (valueType, ctx) -> {
             ConfigFormat<?> format = ctx.configFormat();
-            if (format == null || format.supportsType(valueClass)) {
+            Class<?> valueClass = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
+            Class<?> wrapperClass = Util.toWrapper(valueClass);
+            if (format == null || (wrapperClass != null && format.supportsType(wrapperClass))) {
                 return trivialSer;
             } else if (valueClass != null && (Util.isPrimitiveOrWrapper(valueClass) || valueClass == String.class || valueClass.isArray())) {
                 // Cannot access the fields of the value!
@@ -129,7 +142,8 @@ public final class ObjectSerializerBuilder {
         ValueSerializer trivialSer = new StandardSerializers.TrivialSerializer();
 		ValueSerializer uuidSer = new StandardSerializers.UuidSerializer();
 
-        withSerializerProvider((valueClass, ctx) -> {
+        withSerializerProvider((valueType, ctx) -> {
+            Class<?> valueClass = new TypeConstraint(valueType).getSatisfyingRawType().orElse(null);
             if (valueClass == null) {
                 ConfigFormat<?> format = ctx.configFormat();
                 if (format == null || format.supportsType(null)) {
@@ -139,13 +153,28 @@ public final class ObjectSerializerBuilder {
                 }
             }
             if (Map.class.isAssignableFrom(valueClass)) {
-                return mapSer;
+                Type valType = null;
+                if (valueType instanceof ParameterizedType pt) {
+                    Type[] args = pt.getActualTypeArguments();
+                    if (args.length == 2) valType = args[1];
+                }
+                return (ValueSerializer) (valType == null ? mapSer : new StandardSerializers.MapSerializer(valType));
             }
             if (Collection.class.isAssignableFrom(valueClass)) {
-                return collSer;
+                Type elType = null;
+                if (valueType instanceof ParameterizedType pt) {
+                    Type[] args = pt.getActualTypeArguments();
+                    if (args.length == 1) elType = args[0];
+                }
+                return (ValueSerializer) (elType == null ? collSer : new StandardSerializers.CollectionSerializer(elType));
             }
             if (Iterable.class.isAssignableFrom(valueClass)) {
-                return iterSer;
+                Type elType = null;
+                if (valueType instanceof ParameterizedType pt) {
+                    Type[] args = pt.getActualTypeArguments();
+                    if (args.length == 1) elType = args[0];
+                }
+                return (ValueSerializer) (elType == null ? iterSer : new StandardSerializers.IterableSerializer(elType));
             }
             if (UnmodifiableConfig.class.isAssignableFrom(valueClass)) {
                 return trivialSer; // the value is already a config, nothing to serialize
@@ -154,11 +183,12 @@ public final class ObjectSerializerBuilder {
                 return enumSer;
             }
             if (valueClass.isArray()) {
-                return arraySer;
+                Type compType = valueClass.getComponentType();
+                return new StandardSerializers.ArraySerializer(compType);
             }
-			if (valueClass == UUID.class) {
-				return uuidSer;
-			}
+            if (valueClass == UUID.class) {
+                return uuidSer;
+            }
             return null;
         });
     }
@@ -168,7 +198,7 @@ public final class ObjectSerializerBuilder {
         static final NoProvider INSTANCE = new NoProvider();
 
         @Override
-        public ValueSerializer<Object, Object> provide(Class<?> valueClass, SerializerContext ctx) {
+        public ValueSerializer<Object, Object> provide(Type valueType, SerializerContext ctx) {
             return null;
         }
     }

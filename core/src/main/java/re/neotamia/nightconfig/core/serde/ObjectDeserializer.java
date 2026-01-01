@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.serde;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -165,6 +166,20 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 */
 	public <V, R> void registerDeserializerForClass(Class<V> valueClass, Class<R> resultClass, ValueDeserializer<? super V, ? extends R> deserializer) {
 		super.registerDeserializerForClass(valueClass, resultClass, deserializer);
+	}
+
+	/**
+	 * Adds a {@link ValueDeserializer} that will be used to deserialize config values
+	 * of a specific type to a specific result type.
+	 *
+	 * @param <V>          type of the config values to deserialize
+	 * @param <R>          resulting type of the deserialization
+	 * @param valueClass   class of the config values to deserialize
+	 * @param resultType   type of the deserialization result
+	 * @param deserializer deserializer to register
+	 */
+	public <V, R> void registerDeserializerForType(Class<V> valueClass, Type resultType, ValueDeserializer<? super V, ? extends R> deserializer) {
+		super.registerDeserializerForType(valueClass, resultType, deserializer);
 	}
 
 	/**

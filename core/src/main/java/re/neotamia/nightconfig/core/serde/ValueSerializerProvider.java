@@ -1,9 +1,11 @@
 package re.neotamia.nightconfig.core.serde;
 
+import java.lang.reflect.Type;
+
 /**
  * Provides {@link ValueSerializer} to serialize configuration values.
  * <p>
- * The {@link #provide(Class, SerializerContext)} method returns {@code null} when
+ * The {@link #provide(Type, SerializerContext)} method returns {@code null} when
  * it cannot provide a serializer for the given value type.
  * In that case, other providers will be called, until a suitable serializer is found
  * or all the providers have been tried.
@@ -14,13 +16,13 @@ package re.neotamia.nightconfig.core.serde;
 @FunctionalInterface
 public interface ValueSerializerProvider<V, R> {
     /**
-     * Provides a serializer for a value of class {@code valueClass}.
+     * Provides a serializer for a value of type {@code valueType}.
      * The returned serializer must be able to handle a value of this
      * type.
      * 
-     * @param valueClass class of the config values to serialize
+     * @param valueType type of the config values to serialize
      * @return a serializer, or {@code null} to try the next provider
      * @see ValueSerializerProvider
      */
-    ValueSerializer<V, R> provide(Class<?> valueClass, SerializerContext ctx);
+    ValueSerializer<V, R> provide(Type valueType, SerializerContext ctx);
 }

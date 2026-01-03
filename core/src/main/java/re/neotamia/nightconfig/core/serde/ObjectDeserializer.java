@@ -108,8 +108,7 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param valueClass      class of the values in the collection
 	 * @return the deserialized collection
 	 */
-	public <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass,
-			Class<V> valueClass) {
+	public <C extends Collection<V>, V> C deserializeToCollection(Object configValue, Class<C> collectionClass, Class<V> valueClass) {
 		return super.deserializeToCollection(configValue, collectionClass, valueClass);
 	}
 
@@ -123,8 +122,7 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param valueClass  class of the values in the collection
 	 * @return the deserialized map
 	 */
-	public <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass,
-			Class<V> valueClass) {
+	public <M extends Map<String, V>, V> M deserializeToMap(Object configValue, Class<M> mapClass, Class<V> valueClass) {
 		return super.deserializeToMap(configValue, mapClass, valueClass);
 	}
 
@@ -205,7 +203,6 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 		super.registerDeserializerProvider(provider);
 	}
 
-	@Override
 	public void setNamingStrategy(@NotNull NamingStrategy namingStrategy) {
 		super.setNamingStrategy(namingStrategy);
 	}

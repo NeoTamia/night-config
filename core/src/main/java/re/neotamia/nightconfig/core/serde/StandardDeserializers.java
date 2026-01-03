@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.EnumGetMethod;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
@@ -19,7 +20,7 @@ final class StandardDeserializers {
 	 */
     static final class TrivialDeserializer implements ValueDeserializer<Object, Object> {
 		@Override
-		public Object deserialize(Object value, TypeConstraint resultType, DeserializerContext ctx) {
+		public @NotNull Object deserialize(Object value, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 			return value;
 		}
 	}
@@ -30,7 +31,7 @@ final class StandardDeserializers {
 	static final class MapDeserializer implements ValueDeserializer<Object, Map<String, ?>> {
 
 		@Override
-		public Map<String, ?> deserialize(Object mapValue, TypeConstraint resultType, DeserializerContext ctx) {
+		public @NotNull Map<String, ?> deserialize(Object mapValue, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 
 			int size;
 			if (mapValue instanceof UnmodifiableConfig) {
@@ -138,7 +139,7 @@ final class StandardDeserializers {
 	static final class CollectionDeserializer implements ValueDeserializer<Collection<?>, Collection<?>> {
 
 		@Override
-		public Collection<?> deserialize(Collection<?> collectionValue, TypeConstraint resultType, DeserializerContext ctx) {
+		public @NotNull Collection<?> deserialize(Collection<?> collectionValue, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 			int size = collectionValue.size();
 			Collection<Object> res;
 			Optional<TypeConstraint> valueType;
@@ -190,7 +191,7 @@ final class StandardDeserializers {
 	static final class CollectionToArrayDeserializer implements ValueDeserializer<Collection<?>, Object> {
 
 		@Override
-		public Object deserialize(Collection<?> collectionValue, TypeConstraint resultType, DeserializerContext ctx) {
+		public @NotNull Object deserialize(Collection<?> collectionValue, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 
 			int size = collectionValue.size();
 			Object res;
@@ -224,7 +225,7 @@ final class StandardDeserializers {
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public Enum<?> deserialize(String value, TypeConstraint resultType, DeserializerContext ctx) {
+		public @NotNull Enum<?> deserialize(String value, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
             if (resultType == null) {
                 throw new SerdeException("Cannot deserialize a value to an enum without knowing the enum type");
             }
@@ -240,7 +241,7 @@ final class StandardDeserializers {
 	 */
 	static final class UuidDeserializer implements ValueDeserializer<String, UUID> {
 		@Override
-		public UUID deserialize(String value, TypeConstraint resultType, DeserializerContext ctx) {
+		public @NotNull UUID deserialize(String value, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 			return UUID.fromString(value);
 		}
 	}
@@ -260,7 +261,7 @@ final class StandardDeserializers {
 		}
 
 		@Override
-		public Number deserialize(Number value, TypeConstraint resultType, DeserializerContext ctx) {
+		public @NotNull Number deserialize(Number value, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
             if (resultType == null)
                 throw new SerdeException("Cannot deserialize a value with a risky number conversion without knowing the number type");
 			Class<?> resultCls = resultType.getSatisfyingRawType()

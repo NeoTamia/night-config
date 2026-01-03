@@ -2,6 +2,8 @@ package re.neotamia.nightconfig.core.serde;
 
 import org.junit.jupiter.api.Test;
 import re.neotamia.nightconfig.core.Config;
+import re.neotamia.nightconfig.core.serde.annotations.SerdeDefault;
+import re.neotamia.nightconfig.core.serde.annotations.SerdePhase;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -641,5 +643,183 @@ public class TypeAdapterTest {
         assertTrue(adapter.canHandle(boxIntType), "Should handle Box<Integer>");
         assertTrue(adapter.canHandle(boxStringType), "Should handle Box<String>");
         assertNotEquals(boxIntType, boxStringType, "Different parameterized types should not be equal");
+    }
+
+    // ============ Null Handling Tests ============
+
+    /**
+     * Config class with nullable Box fields for null handling tests.
+     */
+    public static class NullableBoxConfig {
+        @SerdeDefault(whenValue = SerdeDefault.WhenValue.IS_NULL, cls = NullableBoxConfig.class, provider = "nullableStringProvider", phase = SerdePhase.DESERIALIZING)
+        public Box<String> nullableString = null;
+        public Box<Integer> nullableInteger = null;
+        public Box<String> boxWithNullValue = new Box<>(null);
+
+        public NullableBoxConfig() {
+        }
+
+        private String nullableStringProvider() {
+            return null;
+        }
+    }
+
+    /**
+     * Config class with nullable List<Box<T>> for null handling tests.
+     */
+    public static class NullableListBoxConfig {
+        public List<Box<String>> nullableList = null;
+        public List<Box<String>> listWithValues = new java.util.ArrayList<>();
+
+        public NullableListBoxConfig() {
+        }
+    }
+
+    @Test
+    public void testTypeAdapter_SerializeNullBoxField() {
+        ObjectSerializer serializer = ObjectSerializer.standard();
+        serializer.registerTypeAdapter(new BoxTypeAdapter());
+
+        NullableBoxConfig config = new NullableBoxConfig();
+        config.nullableString = null; // Box field is null
+        config.nullableInteger = new Box<>(42); // Normal box
+
+        Config result = serializer.serializeFields(config, Config::inMemory);
+
+        // Null Box fields may be omitted or set to null depending on serializer
+        // behavior
+        assertEquals(42, result.getInt("nullableInteger"), "Non-null Box should serialize normally");
+    }
+
+    @Test
+    public void testTypeAdapter_SerializeBoxContainingNullValue() {
+        ObjectSerializer serializer = ObjectSerializer.standard();
+        serializer.registerTypeAdapter(new BoxTypeAdapter());
+
+        NullableBoxConfig config = new NullableBoxConfig();
+        config.nullableString = new Box<>("hello");
+        config.boxWithNullValue = new Box<>(null); // Box contains null
+
+        Config result = serializer.serializeFields(config, Config::inMemory);
+
+        assertEquals("hello", result.get("nullableString"));
+        // Box containing null should serialize the null value
+        assertNull(result.get("boxWithNullValue"), "Box containing null should serialize to null");
+    }
+
+    @Test
+    public void testTypeAdapter_DeserializeNonNullToBoxField() {
+        ObjectDeserializer deserializer = ObjectDeserializer.standard();
+        deserializer.registerTypeAdapter(new BoxTypeAdapter());
+
+        Config config = Config.inMemory();
+        config.set("nullableInteger", 123);
+        config.set("nullableString", "test");
+
+        NullableBoxConfig result = deserializer.deserializeFields(config, NullableBoxConfig::new);
+
+        // Non-null values should create Box instances
+        assertNotNull(result.nullableInteger, "Non-null config value should create Box");
+        assertEquals(123, result.nullableInteger.getValue());
+        assertNotNull(result.nullableString, "Non-null config value should create Box");
+        assertEquals("test", result.nullableString.getValue());
+    }
+
+    @Test
+    public void testTypeAdapter_RoundTripWithNonNullValues() {
+        ObjectSerializer serializer = ObjectSerializer.standard();
+        serializer.registerTypeAdapter(new BoxTypeAdapter());
+
+        ObjectDeserializer deserializer = ObjectDeserializer.standard();
+        deserializer.registerTypeAdapter(new BoxTypeAdapter());
+
+        NullableBoxConfig original = new NullableBoxConfig();
+        original.nullableString = new Box<>("test");
+        original.nullableInteger = new Box<>(999);
+
+        // Serialize
+        Config serialized = serializer.serializeFields(original, Config::inMemory);
+
+        // Deserialize
+        NullableBoxConfig restored = deserializer.deserializeFields(serialized, NullableBoxConfig::new);
+
+        // Verify
+        assertNotNull(restored.nullableString, "Box<String> should be restored");
+        assertEquals("test", restored.nullableString.getValue());
+        assertNotNull(restored.nullableInteger, "Box<Integer> should be restored");
+        assertEquals(999, restored.nullableInteger.getValue());
+    }
+
+    @Test
+    public void testTypeAdapter_NullListOfBoxes() {
+        ObjectSerializer serializer = ObjectSerializer.standard();
+        serializer.registerTypeAdapter(new BoxTypeAdapter());
+
+        NullableListBoxConfig original = new NullableListBoxConfig();
+        original.nullableList = null;
+
+        // Serialize
+        Config serialized = serializer.serializeFields(original, Config::inMemory);
+
+        // Null list may be omitted or serialized as null
+        assertTrue(serialized.get("nullableList") == null || !serialized.contains("nullableList"),
+                "Null list should serialize to null or be omitted");
+    }
+
+    @Test
+    public void testTypeAdapter_ListOfBoxesWithValues() {
+        ObjectSerializer serializer = ObjectSerializer.standard();
+        serializer.registerTypeAdapter(new BoxTypeAdapter());
+
+        ObjectDeserializer deserializer = ObjectDeserializer.standard();
+        deserializer.registerTypeAdapter(new BoxTypeAdapter());
+
+        NullableListBoxConfig original = new NullableListBoxConfig();
+        original.listWithValues = new java.util.ArrayList<>();
+        original.listWithValues.add(new Box<>("first"));
+        original.listWithValues.add(new Box<>("second"));
+        original.listWithValues.add(new Box<>("third"));
+
+        // Serialize
+        Config serialized = serializer.serializeFields(original, Config::inMemory);
+
+        List<?> serializedList = serialized.get("listWithValues");
+        assertNotNull(serializedList, "List should not be null");
+        assertEquals(3, serializedList.size(), "List should have 3 elements");
+        assertEquals("first", serializedList.get(0));
+        assertEquals("second", serializedList.get(1));
+        assertEquals("third", serializedList.get(2));
+
+        // Deserialize
+        NullableListBoxConfig restored = deserializer.deserializeFields(serialized, NullableListBoxConfig::new);
+
+        assertNotNull(restored.listWithValues);
+        assertEquals(3, restored.listWithValues.size());
+        assertEquals("first", restored.listWithValues.get(0).getValue());
+        assertEquals("second", restored.listWithValues.get(1).getValue());
+        assertEquals("third", restored.listWithValues.get(2).getValue());
+    }
+
+    @Test
+    public void testGenericBoxTypeAdapter_RoundTripWithEnumValue() {
+        ObjectSerializer serializer = ObjectSerializer.standard();
+        serializer.registerTypeAdapter(new GenericBoxTypeAdapter<Status>());
+
+        ObjectDeserializer deserializer = ObjectDeserializer.standard();
+        deserializer.registerTypeAdapter(new GenericBoxTypeAdapter<Status>());
+
+        ConfigWithEnumBoxes original = new ConfigWithEnumBoxes();
+        original.currentStatus = new Box<>(Status.COMPLETED);
+
+        // Serialize
+        Config serialized = serializer.serializeFields(original, Config::inMemory);
+
+        assertEquals("COMPLETED", serialized.get("currentStatus"), "Enum should serialize to name");
+
+        // Deserialize
+        ConfigWithEnumBoxes restored = deserializer.deserializeFields(serialized, ConfigWithEnumBoxes::new);
+
+        assertNotNull(restored.currentStatus, "Box should be restored");
+        assertEquals(Status.COMPLETED, restored.currentStatus.getValue(), "Enum value should be restored");
     }
 }

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.jetbrains.annotations.NotNull;
 import re.neotamia.nightconfig.core.Config;
 
 final class StandardSerializers {
@@ -21,7 +22,7 @@ final class StandardSerializers {
     static final class MapSerializer implements ValueSerializer<Map<?, ?>, Config> {
 
         @Override
-        public Config serialize(Map<?, ?> value, SerializerContext ctx) {
+        public @NotNull Config serialize(Map<?, ?> value, @NotNull SerializerContext ctx) {
             Config res = ctx.createConfig();
 
             // serialize each entry as a config entry
@@ -51,7 +52,7 @@ final class StandardSerializers {
     static final class CollectionSerializer implements ValueSerializer<Collection<?>, List<?>> {
 
         @Override
-        public List<?> serialize(Collection<?> value, SerializerContext ctx) {
+        public @NotNull List<?> serialize(Collection<?> value, @NotNull SerializerContext ctx) {
             List<Object> res = new ArrayList<>(value.size());
             for (Object v : value) {
                 Object serialized = ctx.serializeValue(v);
@@ -67,7 +68,7 @@ final class StandardSerializers {
     static final class IterableSerializer implements ValueSerializer<Iterable<?>, List<?>> {
 
         @Override
-        public List<?> serialize(Iterable<?> value, SerializerContext ctx) {
+        public @NotNull List<?> serialize(Iterable<?> value, @NotNull SerializerContext ctx) {
             List<Object> res = new ArrayList<>();
             for (Object v : value) {
                 Object serialized = ctx.serializeValue(v);
@@ -83,7 +84,7 @@ final class StandardSerializers {
     static final class ArraySerializer implements ValueSerializer<Object, List<?>> {
 
         @Override
-        public List<?> serialize(Object arrayValue, SerializerContext ctx) {
+        public @NotNull List<?> serialize(Object arrayValue, @NotNull SerializerContext ctx) {
             int size = Array.getLength(arrayValue);
 
             List<Object> res = new ArrayList<>(size);
@@ -102,7 +103,7 @@ final class StandardSerializers {
     static final class EnumSerializer implements ValueSerializer<Enum<?>, String> {
 
         @Override
-        public String serialize(Enum<?> value, SerializerContext ctx) {
+        public @NotNull String serialize(Enum<?> value, @NotNull SerializerContext ctx) {
             return value.name();
         }
     }
@@ -113,7 +114,7 @@ final class StandardSerializers {
     static final class TrivialSerializer implements ValueSerializer<Object, Object> {
 
         @Override
-        public Object serialize(Object value, SerializerContext ctx) {
+        public @NotNull Object serialize(Object value, @NotNull SerializerContext ctx) {
             return value;
         }
     }
@@ -124,7 +125,7 @@ final class StandardSerializers {
     static final class FieldsToConfigSerializer implements ValueSerializer<Object, Config> {
 
         @Override
-        public Config serialize(Object value, SerializerContext ctx) {
+        public @NotNull Config serialize(Object value, @NotNull SerializerContext ctx) {
             Config sub = ctx.createConfig();
             ctx.serializeFields(value, sub);
             return sub;
@@ -136,7 +137,7 @@ final class StandardSerializers {
 	 */
 	static final class UuidSerializer implements ValueSerializer<UUID, String> {
 		@Override
-		public String serialize(UUID value, SerializerContext ctx) {
+		public @NotNull String serialize(UUID value, @NotNull SerializerContext ctx) {
 			return value.toString();
 		}
 	}

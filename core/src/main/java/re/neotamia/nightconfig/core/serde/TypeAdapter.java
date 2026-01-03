@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.serde;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -55,7 +56,7 @@ public interface TypeAdapter<J, C> extends ValueSerializer<J, C>, ValueDeseriali
      *             GenericArrayType, etc.)
      * @return true if this adapter can handle the type
      */
-    boolean canHandle(Type type);
+    boolean canHandle(@NotNull Type type);
 
     /**
      * Serializes a Java object to a configuration value with full type information.
@@ -66,7 +67,7 @@ public interface TypeAdapter<J, C> extends ValueSerializer<J, C>, ValueDeseriali
      * @param ctx   the serializer context
      * @return the serialized config value
      */
-    C serialize(J value, Type type, SerializerContext ctx);
+    @NotNull C serialize(J value, Type type, @NotNull SerializerContext ctx);
 
     /**
      * Deserializes a config value to a Java object with full type information.
@@ -76,18 +77,18 @@ public interface TypeAdapter<J, C> extends ValueSerializer<J, C>, ValueDeseriali
      * @param ctx   the deserializer context
      * @return the deserialized Java object
      */
-    J deserialize(C value, Type type, DeserializerContext ctx);
+    @NotNull J deserialize(C value, @NotNull Type type, @NotNull DeserializerContext ctx);
 
     // Default implementations to satisfy ValueSerializer and ValueDeserializer
 
     @Override
-    default C serialize(J value, SerializerContext ctx) {
+    default @NotNull C serialize(J value, @NotNull SerializerContext ctx) {
         // Fallback: use value's runtime class if type isn't provided
         return serialize(value, value.getClass(), ctx);
     }
 
     @Override
-    default J deserialize(C value, @Nullable TypeConstraint resultType, DeserializerContext ctx) {
+    default @NotNull J deserialize(C value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
         Type type = (resultType != null) ? resultType.getFullType() : Object.class;
         return deserialize(value, type, ctx);
     }

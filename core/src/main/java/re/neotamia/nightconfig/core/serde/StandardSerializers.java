@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.Config;
 
 final class StandardSerializers {
@@ -114,7 +115,7 @@ final class StandardSerializers {
     static final class TrivialSerializer implements ValueSerializer<Object, Object> {
 
         @Override
-        public @NotNull Object serialize(Object value, @NotNull SerializerContext ctx) {
+        public @Nullable Object serialize(Object value, @NotNull SerializerContext ctx) {
             return value;
         }
     }

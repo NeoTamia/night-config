@@ -67,7 +67,7 @@ public interface TypeAdapter<J, C> extends ValueSerializer<J, C>, ValueDeseriali
      * @param ctx   the serializer context
      * @return the serialized config value
      */
-    @NotNull C serialize(J value, Type type, @NotNull SerializerContext ctx);
+    @Nullable  C serialize(J value, Type type, @NotNull SerializerContext ctx);
 
     /**
      * Deserializes a config value to a Java object with full type information.
@@ -82,7 +82,7 @@ public interface TypeAdapter<J, C> extends ValueSerializer<J, C>, ValueDeseriali
     // Default implementations to satisfy ValueSerializer and ValueDeserializer
 
     @Override
-    default @NotNull C serialize(J value, @NotNull SerializerContext ctx) {
+    default @Nullable C serialize(J value, @NotNull SerializerContext ctx) {
         // Fallback: use value's runtime class if type isn't provided
         return serialize(value, value.getClass(), ctx);
     }

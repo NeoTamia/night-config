@@ -224,7 +224,7 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 * @param <C>     the config value type
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <J, C> void registerTypeAdapter(TypeAdapter<J, C> adapter) {
+	public <J, C> void registerTypeAdapter(@NotNull TypeAdapter<J, C> adapter) {
 		super.registerDeserializerProvider((valueClass, resultType) -> {
 			if (adapter.canHandle(resultType.getFullType())) {
 				return (ValueDeserializer) adapter;

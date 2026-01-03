@@ -308,7 +308,7 @@ public final class ObjectSerializer {
      * @param <C>     the config value type
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public <J, C> void registerTypeAdapter(TypeAdapter<J, C> adapter) {
+    public <J, C> void registerTypeAdapter(@NotNull TypeAdapter<J, C> adapter) {
         generalProviders.add((valueClass, ctx) -> {
             if (valueClass != null && adapter.canHandle(valueClass)) {
                 return (ValueSerializer) adapter;

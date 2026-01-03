@@ -115,7 +115,7 @@ final class StandardSerializers {
     static final class TrivialSerializer implements ValueSerializer<Object, Object> {
 
         @Override
-        public @NotNull Object serialize(@NotNull Object value, @NotNull SerializerContext ctx) {
+        public @Nullable Object serialize(@Nullable Object value, @NotNull SerializerContext ctx) {
             return value;
         }
     }

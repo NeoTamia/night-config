@@ -21,7 +21,7 @@ final class StandardDeserializers {
 	 */
     static final class TrivialDeserializer implements ValueDeserializer<Object, Object> {
 		@Override
-		public @NotNull Object deserialize(@NotNull Object value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+		public @Nullable Object deserialize(@Nullable Object value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 			return value;
 		}
 	}
@@ -32,7 +32,7 @@ final class StandardDeserializers {
 	static final class MapDeserializer implements ValueDeserializer<Object, Map<String, ?>> {
 
 		@Override
-		public @Nullable Map<String, ?> deserialize(@NotNull Object mapValue, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+		public @NotNull Map<String, ?> deserialize(@NotNull Object mapValue, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 
 			int size;
 			if (mapValue instanceof UnmodifiableConfig) {

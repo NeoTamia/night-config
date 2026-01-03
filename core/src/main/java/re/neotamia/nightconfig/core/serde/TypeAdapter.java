@@ -83,6 +83,9 @@ public interface TypeAdapter<J, C> extends ValueSerializer<J, C>, ValueDeseriali
 
     @Override
     default @Nullable C serialize(J value, @NotNull SerializerContext ctx) {
+        if (value == null) {
+            return null;
+        }
         // Fallback: use value's runtime class if type isn't provided
         return serialize(value, value.getClass(), ctx);
     }

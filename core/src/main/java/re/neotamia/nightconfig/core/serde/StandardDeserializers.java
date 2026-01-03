@@ -21,7 +21,7 @@ final class StandardDeserializers {
 	 */
     static final class TrivialDeserializer implements ValueDeserializer<Object, Object> {
 		@Override
-		public @Nullable Object deserialize(@NotNull Object value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+		public @NotNull Object deserialize(@NotNull Object value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 			return value;
 		}
 	}
@@ -140,7 +140,7 @@ final class StandardDeserializers {
 	static final class CollectionDeserializer implements ValueDeserializer<Collection<?>, Collection<?>> {
 
 		@Override
-		public @NotNull Collection<?> deserialize(@NotNull Collection<?> collectionValue, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+		public @NotNull Collection<?> deserialize(@NotNull Collection<?> collectionValue, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 			int size = collectionValue.size();
 			Collection<Object> res;
 			Optional<TypeConstraint> valueType;
@@ -192,7 +192,7 @@ final class StandardDeserializers {
 	static final class CollectionToArrayDeserializer implements ValueDeserializer<Collection<?>, Object> {
 
 		@Override
-		public @NotNull Object deserialize(@NotNull Collection<?> collectionValue, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+		public @NotNull Object deserialize(@NotNull Collection<?> collectionValue, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 
 			int size = collectionValue.size();
 			Object res;
@@ -226,7 +226,7 @@ final class StandardDeserializers {
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public @NotNull Enum<?> deserialize(@NotNull String value, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+		public @NotNull Enum<?> deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
             if (resultType == null) {
                 throw new SerdeException("Cannot deserialize a value to an enum without knowing the enum type");
             }
@@ -242,7 +242,7 @@ final class StandardDeserializers {
 	 */
 	static final class UuidDeserializer implements ValueDeserializer<String, UUID> {
 		@Override
-		public @NotNull UUID deserialize(@NotNull String value, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+		public @NotNull UUID deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 			return UUID.fromString(value);
 		}
 	}
@@ -262,7 +262,7 @@ final class StandardDeserializers {
 		}
 
 		@Override
-		public @NotNull Number deserialize(@NotNull Number value, TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+		public @NotNull Number deserialize(@NotNull Number value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
             if (resultType == null)
                 throw new SerdeException("Cannot deserialize a value with a risky number conversion without knowing the number type");
 			Class<?> resultCls = resultType.getSatisfyingRawType()

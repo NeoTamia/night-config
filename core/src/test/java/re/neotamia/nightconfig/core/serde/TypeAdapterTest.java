@@ -651,16 +651,16 @@ public class TypeAdapterTest {
      * Config class with nullable Box fields for null handling tests.
      */
     public static class NullableBoxConfig {
-        @SerdeDefault(whenValue = SerdeDefault.WhenValue.IS_NULL, cls = NullableBoxConfig.class, provider = "nullableStringProvider", phase = SerdePhase.DESERIALIZING)
         public Box<String> nullableString = null;
         public Box<Integer> nullableInteger = null;
+        @SerdeDefault(whenValue = SerdeDefault.WhenValue.IS_MISSING, cls = NullableBoxConfig.class, provider = "nullableBoxProvider", phase = SerdePhase.DESERIALIZING)
         public Box<String> boxWithNullValue = new Box<>(null);
 
         public NullableBoxConfig() {
         }
 
-        private String nullableStringProvider() {
-            return null;
+        private static Box<String> nullableBoxProvider() {
+            return new Box<>(null);
         }
     }
 

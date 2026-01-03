@@ -5,5 +5,5 @@ import org.jetbrains.annotations.Nullable;
 
 /** Turns a Java object of type {@code T} into a Config value of type {@code R}. */
 public interface ValueSerializer<T, R> {
-   @Nullable R serialize(T value, @NotNull SerializerContext ctx);
+   @Nullable R serialize(@NotNull T value, @NotNull SerializerContext ctx);
 }

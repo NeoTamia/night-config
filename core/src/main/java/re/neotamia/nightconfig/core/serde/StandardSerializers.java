@@ -23,7 +23,7 @@ final class StandardSerializers {
     static final class MapSerializer implements ValueSerializer<Map<?, ?>, Config> {
 
         @Override
-        public @NotNull Config serialize(Map<?, ?> value, @NotNull SerializerContext ctx) {
+        public @NotNull Config serialize(@NotNull Map<?, ?> value, @NotNull SerializerContext ctx) {
             Config res = ctx.createConfig();
 
             // serialize each entry as a config entry
@@ -53,7 +53,7 @@ final class StandardSerializers {
     static final class CollectionSerializer implements ValueSerializer<Collection<?>, List<?>> {
 
         @Override
-        public @NotNull List<?> serialize(Collection<?> value, @NotNull SerializerContext ctx) {
+        public @NotNull List<?> serialize(@NotNull Collection<?> value, @NotNull SerializerContext ctx) {
             List<Object> res = new ArrayList<>(value.size());
             for (Object v : value) {
                 Object serialized = ctx.serializeValue(v);
@@ -69,7 +69,7 @@ final class StandardSerializers {
     static final class IterableSerializer implements ValueSerializer<Iterable<?>, List<?>> {
 
         @Override
-        public @NotNull List<?> serialize(Iterable<?> value, @NotNull SerializerContext ctx) {
+        public @NotNull List<?> serialize(@NotNull Iterable<?> value, @NotNull SerializerContext ctx) {
             List<Object> res = new ArrayList<>();
             for (Object v : value) {
                 Object serialized = ctx.serializeValue(v);
@@ -85,7 +85,7 @@ final class StandardSerializers {
     static final class ArraySerializer implements ValueSerializer<Object, List<?>> {
 
         @Override
-        public @NotNull List<?> serialize(Object arrayValue, @NotNull SerializerContext ctx) {
+        public @NotNull List<?> serialize(@NotNull Object arrayValue, @NotNull SerializerContext ctx) {
             int size = Array.getLength(arrayValue);
 
             List<Object> res = new ArrayList<>(size);
@@ -104,7 +104,7 @@ final class StandardSerializers {
     static final class EnumSerializer implements ValueSerializer<Enum<?>, String> {
 
         @Override
-        public @NotNull String serialize(Enum<?> value, @NotNull SerializerContext ctx) {
+        public @NotNull String serialize(@NotNull Enum<?> value, @NotNull SerializerContext ctx) {
             return value.name();
         }
     }
@@ -115,7 +115,7 @@ final class StandardSerializers {
     static final class TrivialSerializer implements ValueSerializer<Object, Object> {
 
         @Override
-        public @Nullable Object serialize(Object value, @NotNull SerializerContext ctx) {
+        public @Nullable Object serialize(@NotNull Object value, @NotNull SerializerContext ctx) {
             return value;
         }
     }
@@ -126,7 +126,7 @@ final class StandardSerializers {
     static final class FieldsToConfigSerializer implements ValueSerializer<Object, Config> {
 
         @Override
-        public @NotNull Config serialize(Object value, @NotNull SerializerContext ctx) {
+        public @NotNull Config serialize(@NotNull Object value, @NotNull SerializerContext ctx) {
             Config sub = ctx.createConfig();
             ctx.serializeFields(value, sub);
             return sub;
@@ -138,7 +138,7 @@ final class StandardSerializers {
 	 */
 	static final class UuidSerializer implements ValueSerializer<UUID, String> {
 		@Override
-		public @NotNull String serialize(UUID value, @NotNull SerializerContext ctx) {
+		public @NotNull String serialize(@NotNull UUID value, @NotNull SerializerContext ctx) {
 			return value.toString();
 		}
 	}

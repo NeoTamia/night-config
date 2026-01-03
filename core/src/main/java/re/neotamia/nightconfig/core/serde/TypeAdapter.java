@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
  * {@code
  *     public class BoxTypeAdapter<T> implements TypeAdapter<Box<T>, Object> {
  *         @Override
- *         public boolean canHandle(Type type) {
+ *         public boolean canHandle(@NotNull Type type) {
  *             if (type instanceof ParameterizedType pt) {
  *                 return pt.getRawType() == Box.class;
  *             }
@@ -28,12 +28,12 @@ import java.lang.reflect.Type;
  *         }
  *
  *         @Override
- *         public Object serialize(Box<T> value, Type type, SerializerContext ctx) {
+ *         public @Nullable Object serialize(@NotNull Box<T> value, @NotNull Type type, @NotNull SerializerContext ctx) {
  *             return ctx.serializeValue(value.getValue());
  *         }
  *
  *         @Override
- *         public Box<T> deserialize(Object value, Type type, DeserializerContext ctx) {
+ *         public @Nullable Box<T> deserialize(@NotNull Object value, @NotNull Type type, @NotNull DeserializerContext ctx) {
  *             Type valueType = ((ParameterizedType) type).getActualTypeArguments()[0];
  *             T inner = ctx.deserializeValue(value, new TypeConstraint(valueType));
  *             return new Box<>(inner);
@@ -67,7 +67,7 @@ public interface TypeAdapter<J, C> extends ValueSerializer<J, C>, ValueDeseriali
      * @param ctx   the serializer context
      * @return the serialized config value
      */
-    @Nullable  C serialize(J value, Type type, @NotNull SerializerContext ctx);
+    @Nullable C serialize(@NotNull J value, @NotNull Type type, @NotNull SerializerContext ctx);
 
     /**
      * Deserializes a config value to a Java object with full type information.
@@ -77,21 +77,17 @@ public interface TypeAdapter<J, C> extends ValueSerializer<J, C>, ValueDeseriali
      * @param ctx   the deserializer context
      * @return the deserialized Java object
      */
-    @NotNull J deserialize(C value, @NotNull Type type, @NotNull DeserializerContext ctx);
+    @NotNull J deserialize(@NotNull C value, @NotNull Type type, @NotNull DeserializerContext ctx);
 
     // Default implementations to satisfy ValueSerializer and ValueDeserializer
 
     @Override
-    default @Nullable C serialize(J value, @NotNull SerializerContext ctx) {
-        if (value == null) {
-            return null;
-        }
-        // Fallback: use value's runtime class if type isn't provided
+    default @Nullable C serialize(@NotNull J value, @NotNull SerializerContext ctx) {
         return serialize(value, value.getClass(), ctx);
     }
 
     @Override
-    default @NotNull J deserialize(C value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+    default @NotNull J deserialize(@NotNull C value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
         Type type = (resultType != null) ? resultType.getFullType() : Object.class;
         return deserialize(value, type, ctx);
     }

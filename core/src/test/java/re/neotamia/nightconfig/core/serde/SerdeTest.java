@@ -2,13 +2,7 @@ package re.neotamia.nightconfig.core.serde;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -645,4 +639,62 @@ public final class SerdeTest {
 		var serialized2 = ser.serialize(new EnumValues(), Config::inMemory);
 		assertEquals(EnumValues.SERIALIZED, serialized2);
 	}
+
+    public static class FloatConfig {
+        float f;
+        Float wrappedF;
+    }
+
+    public static class OtherNumbersConfig {
+        int i;
+        long l;
+        byte b;
+        short s;
+    }
+
+    @Test
+    public void testSerialize() {
+        FloatConfig floatConfig = new FloatConfig();
+        floatConfig.f = 0.5f;
+        floatConfig.wrappedF = null;
+
+        var config = Config.inMemory();
+        ObjectSerializer.standard().serializeFields(floatConfig, config);
+        assertEquals(0.5f, config.getFloat("f"));
+        assertEquals(Optional.empty(), config.getOptional("wrappedF"));
+
+        var newConfig = ObjectDeserializer.standard().deserializeFields(config, FloatConfig::new);
+        assertEquals(0.5f, newConfig.f);
+        assertNull(newConfig.wrappedF);
+    }
+
+    @Test
+    public void testDoubleToFloat() {
+        Config config = Config.inMemory();
+        config.set("f", 0.5); // Double by default in many cases, here we force it
+        config.set("wrappedF", 0.5);
+
+        ObjectDeserializer deserializer = ObjectDeserializer.standard();
+        FloatConfig floatConfig = deserializer.deserializeFields(config, FloatConfig::new);
+
+        assertEquals(0.5f, floatConfig.f);
+        assertEquals(0.5f, floatConfig.wrappedF);
+    }
+
+    @Test
+    public void testDoubleToOtherNumbers() {
+        Config config = Config.inMemory();
+        config.set("i", 42.0);
+        config.set("l", 100.0);
+        config.set("b", 10.0);
+        config.set("s", 20.0);
+
+        ObjectDeserializer deserializer = ObjectDeserializer.standard();
+        OtherNumbersConfig numberConfig = deserializer.deserializeFields(config, OtherNumbersConfig::new);
+
+        assertEquals(42, numberConfig.i);
+        assertEquals(100L, numberConfig.l);
+        assertEquals((byte)10, numberConfig.b);
+        assertEquals((short)20, numberConfig.s);
+    }
 }

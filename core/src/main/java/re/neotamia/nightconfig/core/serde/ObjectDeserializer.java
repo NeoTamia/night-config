@@ -225,6 +225,8 @@ public final class ObjectDeserializer extends AbstractObjectDeserializer {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <J, C> void registerTypeAdapter(@NotNull TypeAdapter<J, C> adapter) {
+		if (adapter == null) throw new IllegalArgumentException("adapter must not be null");
+
 		super.registerDeserializerProvider((valueClass, resultType) -> {
 			if (adapter.canHandle(resultType.getFullType())) {
 				return (ValueDeserializer) adapter;

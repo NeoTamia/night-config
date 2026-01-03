@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 final class ConfigToPojoDeserializer implements ValueDeserializer<UnmodifiableConfig, Object> {
 
 	@Override
-	public @NotNull Object deserialize(UnmodifiableConfig value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+	public @NotNull Object deserialize(@NotNull UnmodifiableConfig value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 		if (resultType == null) {
 			// no constraint, we don't know the type of the POJO!
 			// Assume the easiest result: return the value as is

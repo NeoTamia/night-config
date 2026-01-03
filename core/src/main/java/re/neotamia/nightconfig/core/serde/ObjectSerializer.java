@@ -309,6 +309,8 @@ public final class ObjectSerializer {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public <J, C> void registerTypeAdapter(@NotNull TypeAdapter<J, C> adapter) {
+        if (adapter == null) throw new IllegalArgumentException("adapter must not be null");
+
         generalProviders.add((valueClass, ctx) -> {
             if (valueClass != null && adapter.canHandle(valueClass)) {
                 return (ValueSerializer) adapter;

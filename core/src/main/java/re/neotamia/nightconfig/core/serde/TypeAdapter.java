@@ -1,0 +1,94 @@
+package re.neotamia.nightconfig.core.serde;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Type;
+
+/**
+ * A type adapter that handles both serialization and deserialization for a
+ * specific type.
+ * This interface combines {@link ValueSerializer} and {@link ValueDeserializer}
+ * functionality,
+ * with support for precise generic type handling via {@link Type} and
+ * {@link java.lang.reflect.ParameterizedType}.
+ *
+ * <p>
+ * Example for handling {@code Box<String>}:
+ * 
+ * <pre>
+ * {@code
+ *     public class BoxTypeAdapter<T> implements TypeAdapter<Box<T>, Object> {
+ *         @Override
+ *         public boolean canHandle(@NotNull Type type) {
+ *             if (type instanceof ParameterizedType pt) {
+ *                 return pt.getRawType() == Box.class;
+ *             }
+ *             return type == Box.class;
+ *         }
+ *
+ *         @Override
+ *         public @Nullable Object serialize(@NotNull Box<T> value, @NotNull Type type, @NotNull SerializerContext ctx) {
+ *             return ctx.serializeValue(value.getValue());
+ *         }
+ *
+ *         @Override
+ *         public @Nullable Box<T> deserialize(@NotNull Object value, @NotNull Type type, @NotNull DeserializerContext ctx) {
+ *             Type valueType = ((ParameterizedType) type).getActualTypeArguments()[0];
+ *             T inner = ctx.deserializeValue(value, new TypeConstraint(valueType));
+ *             return new Box<>(inner);
+ *         }
+ *     }
+ * }
+ * </pre>
+ *
+ * @param <J> the Java type this adapter handles (e.g., {@code Box<T>})
+ * @param <C> the config value type (e.g., Object, String, Number)
+ */
+public interface TypeAdapter<J, C> extends ValueSerializer<J, C>, ValueDeserializer<C, J> {
+
+    /**
+     * Checks if this adapter can handle the given type.
+     * This allows checking for generic types like {@code Box<String>} or
+     * {@code List<Box<Integer>>}.
+     *
+     * @param type the type to check (can be Class, ParameterizedType,
+     *             GenericArrayType, etc.)
+     * @return true if this adapter can handle the type
+     */
+    boolean canHandle(@NotNull Type type);
+
+    /**
+     * Serializes a Java object to a configuration value with full type information.
+     * The type parameter provides the declared generic type.
+     *
+     * @param value the value to serialize
+     * @param type  the declared type (may be a ParameterizedType with generic info)
+     * @param ctx   the serializer context
+     * @return the serialized config value
+     */
+    @Nullable C serialize(@NotNull J value, @NotNull Type type, @NotNull SerializerContext ctx);
+
+    /**
+     * Deserializes a config value to a Java object with full type information.
+     *
+     * @param value the config value to deserialize
+     * @param type  the target type (may be a ParameterizedType with generic info)
+     * @param ctx   the deserializer context
+     * @return the deserialized Java object
+     */
+    @NotNull J deserialize(@NotNull C value, @NotNull Type type, @NotNull DeserializerContext ctx);
+
+    // Default implementations to satisfy ValueSerializer and ValueDeserializer
+
+    @Override
+    default @Nullable C serialize(@NotNull J value, @NotNull SerializerContext ctx) {
+        return serialize(value, value.getClass(), ctx);
+    }
+
+    @Override
+    default @NotNull J deserialize(@NotNull C value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+        Type type = (resultType != null) ? resultType.getFullType() : Object.class;
+        return deserialize(value, type, ctx);
+    }
+}

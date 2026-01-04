@@ -1,5 +1,6 @@
 package re.neotamia.nightconfig.core.serde;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.NullObject;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 final class ConfigToPojoDeserializer implements ValueDeserializer<UnmodifiableConfig, Object> {
 
 	@Override
-	public Object deserialize(UnmodifiableConfig value, @Nullable TypeConstraint resultType, DeserializerContext ctx) {
+	public @NotNull Object deserialize(@NotNull UnmodifiableConfig value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 		if (resultType == null) {
 			// no constraint, we don't know the type of the POJO!
 			// Assume the easiest result: return the value as is

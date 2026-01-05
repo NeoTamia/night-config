@@ -5,12 +5,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.concurrent.ConcurrentConfig;
+import re.neotamia.nightconfig.core.serde.SerdeContext;
 
 import static re.neotamia.nightconfig.core.utils.StringUtils.split;
 
 /**
- * A (modifiable) configuration that contains key/value mappings. Configurations are generally
+ * A (modifiable) configuration that contains key/value mappings. Configurations
+ * are generally
  * <b>not</b> thread-safe.
  *
  * @author TheElectronWill
@@ -32,7 +35,8 @@ public interface Config extends UnmodifiableConfig {
 	/**
 	 * Sets a config value.
 	 *
-	 * @param path  the value's path, each element of the list is a different part of the path.
+	 * @param path  the value's path, each element of the list is a different part
+	 *              of the path.
 	 * @param value the value to set
 	 * @param <T>   the type of the old value
 	 * @return the old value if any, or {@code null}
@@ -40,21 +44,26 @@ public interface Config extends UnmodifiableConfig {
 	<T> T set(List<String> path, Object value);
 
 	/**
-	 * Adds a config value. The value is set iff there is no value associated with the given path.
+	 * Adds a config value. The value is set iff there is no value associated with
+	 * the given path.
 	 *
-	 * @param path  the value's path, each element of the list is a different part of the path.
+	 * @param path  the value's path, each element of the list is a different part
+	 *              of the path.
 	 * @param value the value to set
-	 * @return true if the value has been added, false if a value is already associated with the
+	 * @return true if the value has been added, false if a value is already
+	 *         associated with the
 	 *         given path
 	 */
 	boolean add(List<String> path, Object value);
 
 	/**
-	 * Adds a config value. The value is set iff there is no value associated with the given path.
+	 * Adds a config value. The value is set iff there is no value associated with
+	 * the given path.
 	 *
 	 * @param path  the value's path, each part separated by a dot. Example "a.b.c"
 	 * @param value the value to set
-	 * @return true if the value has been added, false if a value is already associated with the
+	 * @return true if the value has been added, false if a value is already
+	 *         associated with the
 	 *         given path
 	 */
 	default boolean add(String path, Object value) {
@@ -62,7 +71,8 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Adds all the values of a config to this config, without replacing existing entries.
+	 * Adds all the values of a config to this config, without replacing existing
+	 * entries.
 	 *
 	 * @param config the source config
 	 */
@@ -78,7 +88,8 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Copies all the values of a config into this config. Existing entries are replaced, missing
+	 * Copies all the values of a config into this config. Existing entries are
+	 * replaced, missing
 	 * entries are created.
 	 *
 	 * @param config the source config
@@ -101,7 +112,8 @@ public interface Config extends UnmodifiableConfig {
 	/**
 	 * Removes a value from the config.
 	 *
-	 * @param path the value's path, each element of the list is a different part of the path.
+	 * @param path the value's path, each element of the list is a different part of
+	 *             the path.
 	 * @param <T>  the type of the old value
 	 * @return the old value if any, or {@code null}
 	 */
@@ -122,8 +134,10 @@ public interface Config extends UnmodifiableConfig {
 	void clear();
 
 	/**
-	 * Returns an Unmodifiable view of the config. Any change to the original (modifiable) config
-	 * is still reflected to the returned UnmodifiableConfig, so it's unmodifiable but not
+	 * Returns an Unmodifiable view of the config. Any change to the original
+	 * (modifiable) config
+	 * is still reflected to the returned UnmodifiableConfig, so it's unmodifiable
+	 * but not
 	 * immutable.
 	 *
 	 * @return an Unmodifiable view of the config.
@@ -163,11 +177,15 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Returns a checked view of the config. It checks that all the values put into the config are
-	 * supported by the config's format (as per the {@link ConfigFormat#supportsType(Class)}
-	 * method. Trying to insert an unsupported value throws an IllegalArgumentException.
+	 * Returns a checked view of the config. It checks that all the values put into
+	 * the config are
+	 * supported by the config's format (as per the
+	 * {@link ConfigFormat#supportsType(Class)}
+	 * method. Trying to insert an unsupported value throws an
+	 * IllegalArgumentException.
 	 * <p>
-	 * The values that are in the config when this method is called are also checked.
+	 * The values that are in the config when this method is called are also
+	 * checked.
 	 *
 	 * @return a checked view of the config.
 	 */
@@ -180,15 +198,18 @@ public interface Config extends UnmodifiableConfig {
 	 * in the config and vice-versa.
 	 *
 	 * @return a Map view of the config's values.
-	 * @deprecated valueMap() may not work exactly as a regular Map for some config types, in
-	 *             particular {@link ConcurrentConfig}, and may be removed in a future version.
-	 * 			   Prefer to use {@link #entrySet()} instead.
+	 * @deprecated valueMap() may not work exactly as a regular Map for some config
+	 *             types, in
+	 *             particular {@link ConcurrentConfig}, and may be removed in a
+	 *             future version.
+	 *             Prefer to use {@link #entrySet()} instead.
 	 */
 	@Deprecated
 	Map<String, Object> valueMap();
 
 	/**
-	 * Returns a Set view of the config's entries. Any change to the set or to the entries is
+	 * Returns a Set view of the config's entries. Any change to the set or to the
+	 * entries is
 	 * reflected in the config, and vice-versa.
 	 */
 	@Override
@@ -209,7 +230,8 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Creates a new sub config of this config, as created when a subconfig's creation is
+	 * Creates a new sub config of this config, as created when a subconfig's
+	 * creation is
 	 * implied by {@link #set(List, Object)} or {@link #add(List, Object)}.
 	 *
 	 * @return a new sub config
@@ -232,7 +254,8 @@ public interface Config extends UnmodifiableConfig {
 	/**
 	 * For scala: sets a config value.
 	 *
-	 * @param path  the value's path, each element of the list is a different part of the path.
+	 * @param path  the value's path, each element of the list is a different part
+	 *              of the path.
 	 * @param value the value to set
 	 * @see #set(List, Object)
 	 */
@@ -255,10 +278,12 @@ public interface Config extends UnmodifiableConfig {
 	/**
 	 * Creates a Config backed by a certain kind of map, given by a supplier.
 	 *
-	 * If you wish all your configs to preserve insertion order, please have a look at the more
+	 * If you wish all your configs to preserve insertion order, please have a look
+	 * at the more
 	 * practical setting {@link #setInsertionOrderPreserved(boolean)}.
 	 *
-	 * @param mapCreator a supplier which will be called to create all backing maps for this config (including
+	 * @param mapCreator a supplier which will be called to create all backing maps
+	 *                   for this config (including
 	 *                   sub-configs)
 	 * @param format     the config's format
 	 * @return a new config backed by the map
@@ -272,7 +297,8 @@ public interface Config extends UnmodifiableConfig {
 	 *
 	 * @param format the config's format
 	 * @return a new empty, thread-safe config
-	 * @deprecated A concurrent HashMap is not enough to make the whole configuration robust to
+	 * @deprecated A concurrent HashMap is not enough to make the whole
+	 *             configuration robust to
 	 *             multi-threaded
 	 *             use. Prefer to use a {@link ConcurrentConfig}
 	 *             instead.
@@ -301,10 +327,12 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Creates a thread-safe Config with format {@link InMemoryFormat#defaultInstance()}.
+	 * Creates a thread-safe Config with format
+	 * {@link InMemoryFormat#defaultInstance()}.
 	 *
 	 * @return a new empty config
-	 * @deprecated A concurrent HashMap is not enough to make the whole configuration robust to multi-threaded
+	 * @deprecated A concurrent HashMap is not enough to make the whole
+	 *             configuration robust to multi-threaded
 	 *             use. Prefer to use a {@link ConcurrentConfig}
 	 *             instead.
 	 */
@@ -314,10 +342,12 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Creates a thread-safe Config with format {@link InMemoryFormat#withUniversalSupport()}.
+	 * Creates a thread-safe Config with format
+	 * {@link InMemoryFormat#withUniversalSupport()}.
 	 *
 	 * @return a new empty config
-	 * @deprecated A concurrent HashMap is not enough to make the whole configuration robust to multi-threaded
+	 * @deprecated A concurrent HashMap is not enough to make the whole
+	 *             configuration robust to multi-threaded
 	 *             use. Prefer to use a {@link ConcurrentConfig}
 	 *             instead.
 	 */
@@ -327,10 +357,12 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Creates a Config backed by a Map. Any change to the map is reflected in the config and
+	 * Creates a Config backed by a Map. Any change to the map is reflected in the
+	 * config and
 	 * vice-versa.
 	 *
-	 * If you wish all your configs to preserve insertion order, please have a look at the more
+	 * If you wish all your configs to preserve insertion order, please have a look
+	 * at the more
 	 * practical setting {@link #setInsertionOrderPreserved(boolean)}.
 	 *
 	 * @param map    the Map to use
@@ -342,7 +374,8 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Creates a new Config with the content of the given config. The returned config will have
+	 * Creates a new Config with the content of the given config. The returned
+	 * config will have
 	 * the same format as the copied config.
 	 *
 	 * @param config the config to copy
@@ -353,16 +386,19 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Creates a new Config with the content of the given config. The returned config will have
+	 * Creates a new Config with the content of the given config. The returned
+	 * config will have
 	 * the same format as the copied config, and be backed by the given supplier.
 	 *
-	 * If you wish all your configs to preserve insertion order, please have a look at the more
+	 * If you wish all your configs to preserve insertion order, please have a look
+	 * at the more
 	 * practical setting {@link #setInsertionOrderPreserved(boolean)}.
 	 *
 	 * @see #of(Supplier, ConfigFormat)
 	 *
 	 * @param config     the config to copy
-	 * @param mapCreator a supplier which will be called to create all backing maps for this config (including
+	 * @param mapCreator a supplier which will be called to create all backing maps
+	 *                   for this config (including
 	 *                   sub-configs)
 	 * @return a copy of the config
 	 */
@@ -385,13 +421,15 @@ public interface Config extends UnmodifiableConfig {
 	 * Creates a new Config with the content of the given config.
 	 * The returned config will be backed by the given map supplier.
 	 *
-	 * If you wish all your configs to preserve insertion order, please have a look at the more
+	 * If you wish all your configs to preserve insertion order, please have a look
+	 * at the more
 	 * practical setting {@link #setInsertionOrderPreserved(boolean)}.
 	 *
 	 * @see #of(Supplier, ConfigFormat)
 	 *
 	 * @param config     the config to copy
-	 * @param mapCreator a supplier which will be called to create all backing maps for this config (including
+	 * @param mapCreator a supplier which will be called to create all backing maps
+	 *                   for this config (including
 	 *                   sub-configs)
 	 * @param format     the config's format
 	 * @return a copy of the config
@@ -401,12 +439,14 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Creates a new Config with the content of the given config. The returned config will have
+	 * Creates a new Config with the content of the given config. The returned
+	 * config will have
 	 * the same format as the copied config.
 	 *
 	 * @param config the config to copy
 	 * @return a thread-safe copy of the config
-	 * @deprecated A concurrent HashMap is not enough to make the whole configuration robust to multi-threaded
+	 * @deprecated A concurrent HashMap is not enough to make the whole
+	 *             configuration robust to multi-threaded
 	 *             use. Prefer to use a {@link ConcurrentConfig}
 	 *             instead.
 	 */
@@ -421,7 +461,8 @@ public interface Config extends UnmodifiableConfig {
 	 * @param config the config to copy
 	 * @param format the config's format
 	 * @return a thread-safe copy of the config
-	 * @deprecated A concurrent HashMap is not enough to make the whole configuration robust to multi-threaded
+	 * @deprecated A concurrent HashMap is not enough to make the whole
+	 *             configuration robust to multi-threaded
 	 *             use. Prefer to use a {@link ConcurrentConfig}
 	 *             instead.
 	 */
@@ -431,30 +472,38 @@ public interface Config extends UnmodifiableConfig {
 	}
 
 	/**
-	 * Checks if the newly created configs keep the insertion order of their content.
-	 * By default this is the case. This can be controlled with the `nightconfig.ordered`
+	 * Checks if the newly created configs keep the insertion order of their
+	 * content.
+	 * By default this is the case. This can be controlled with the
+	 * `nightconfig.ordered`
 	 * system property or by calling {@link #setInsertionOrderPreserved(boolean)}.
 	 * <p>
-	 * This setting does not apply to configurations created from a Map, from another Config,
+	 * This setting does not apply to configurations created from a Map, from
+	 * another Config,
 	 * or with a specific map supplier.
 	 *
-	 * @return true if the new configs preserve the insertion order of their values, false to
+	 * @return true if the new configs preserve the insertion order of their values,
+	 *         false to
 	 *         give no guarantee about the values ordering.
 	 */
 	static boolean isInsertionOrderPreserved() {
 		String prop = System.getProperty("nightconfig.preserveInsertionOrder");
-        return prop == null || Boolean.parseBoolean(prop);
+		return prop == null || Boolean.parseBoolean(prop);
 	}
 
 	/**
-	 * Modifies the behavior of the new configurations with regards to the preservation of the
+	 * Modifies the behavior of the new configurations with regards to the
+	 * preservation of the
 	 * order of config values.
 	 * <p>
-	 * This setting does not apply to configurations created from a Map, from another Config,
+	 * This setting does not apply to configurations created from a Map, from
+	 * another Config,
 	 * or with a specific map supplier.
 	 *
-	 * @param orderPreserved true to make the new configs preserve the insertion order of their
-	 *                       values, false to give no guarantee about the values ordering.
+	 * @param orderPreserved true to make the new configs preserve the insertion
+	 *                       order of their
+	 *                       values, false to give no guarantee about the values
+	 *                       ordering.
 	 * @see #isInsertionOrderPreserved()
 	 */
 	static void setInsertionOrderPreserved(boolean orderPreserved) {
@@ -465,9 +514,11 @@ public interface Config extends UnmodifiableConfig {
 	 * Returns a map supplier that fulfills the given requirements.
 	 *
 	 * @param concurrent              true to make the maps thread-safe
-	 * @param insertionOrderPreserved true to make the maps preserve the insertion order of values
+	 * @param insertionOrderPreserved true to make the maps preserve the insertion
+	 *                                order of values
 	 * @return a map supplier corresponding to the given settings
-	 * @deprecated A concurrent HashMap is not enough to make the whole configuration robust to multi-threaded
+	 * @deprecated A concurrent HashMap is not enough to make the whole
+	 *             configuration robust to multi-threaded
 	 *             use. Prefer to use a {@link ConcurrentConfig}
 	 *             instead.
 	 */
@@ -486,12 +537,74 @@ public interface Config extends UnmodifiableConfig {
 	 *
 	 * @param concurrent true to make the maps thread-safe
 	 * @return a map supplier corresponding to the given settings
-	 * @deprecated A concurrent HashMap is not enough to make the whole configuration robust to multi-threaded
+	 * @deprecated A concurrent HashMap is not enough to make the whole
+	 *             configuration robust to multi-threaded
 	 *             use. Prefer to use a {@link ConcurrentConfig}
 	 *             instead.
 	 */
 	@Deprecated
 	static <T> Supplier<Map<String, T>> getDefaultMapCreator(boolean concurrent) {
 		return getDefaultMapCreator(concurrent, Config.isInsertionOrderPreserved());
+	}
+
+	// ---- SerdeContext and typed setters ----
+
+	/**
+	 * Attaches a SerdeContext to this config for type-aware operations.
+	 * <p>
+	 * Once attached, you can use {@link #setTyped(String, Object)} and
+	 * {@link UnmodifiableConfig#getTyped(String, Class)} for automatic type
+	 * conversion.
+	 * <p>
+	 * The default implementation throws {@link UnsupportedOperationException}.
+	 * Configs extending AbstractConfig support this method.
+	 *
+	 * @param ctx the SerdeContext to attach, or null to remove
+	 * @throws UnsupportedOperationException if this config doesn't support
+	 *                                       SerdeContext
+	 */
+	default void setSerdeContext(@Nullable SerdeContext ctx) {
+		throw new UnsupportedOperationException(
+				"This config does not support SerdeContext. Use a config that extends AbstractConfig.");
+	}
+
+	/**
+	 * Serializes and sets a value using the attached SerdeContext.
+	 * <p>
+	 * This method uses the TypeAdapters registered in the SerdeContext to convert
+	 * the value to a config-compatible form before storing it.
+	 *
+	 * @param path  the value's path, each part separated by a dot. Example "a.b.c"
+	 * @param value the value to serialize and set
+	 * @param <T>   the type of the old value
+	 * @return the old value if any, or null
+	 * @throws IllegalStateException if no SerdeContext is attached
+	 */
+	default <T> T setTyped(@NotNull String path, @Nullable Object value) {
+		SerdeContext ctx = getSerdeContext();
+		if (ctx == null) {
+			throw new IllegalStateException("No SerdeContext attached. Call setSerdeContext() first.");
+		}
+		Object serialized = ctx.serialize(value);
+		return set(path, serialized);
+	}
+
+	/**
+	 * Serializes and sets a value using the attached SerdeContext.
+	 *
+	 * @param path  the value's path, each element of the list is a different part
+	 *              of the path
+	 * @param value the value to serialize and set
+	 * @param <T>   the type of the old value
+	 * @return the old value if any, or null
+	 * @throws IllegalStateException if no SerdeContext is attached
+	 */
+	default <T> T setTyped(@NotNull List<String> path, @Nullable Object value) {
+		SerdeContext ctx = getSerdeContext();
+		if (ctx == null) {
+			throw new IllegalStateException("No SerdeContext attached. Call setSerdeContext() first.");
+		}
+		Object serialized = ctx.serialize(value);
+		return set(path, serialized);
 	}
 }

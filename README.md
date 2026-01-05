@@ -26,6 +26,7 @@ It supports the following formats:
   - [ConfigSpec: Validation & Correction](#configspec-validation--correction)
   - [Serde System: Advanced Serialization/Deserialization](#serde-system-advanced-serializationdeserialization)
   - [TypeAdapter: Custom Generic Type Handling](#typeadapter-custom-generic-type-handling)
+  - [SerdeContext: Type-Aware Config Operations](#serdecontext-type-aware-config-operations)
   - [Concurrent Configurations](#concurrent-configurations)
 - [Modules and Dependencies](#modules-and-dependencies)
 - [Running the Examples](#running-the-examples)
@@ -551,6 +552,74 @@ ObjectDeserializer deserializer = ObjectDeserializer.builder()
 
 ---
 
+## SerdeContext: Type-Aware Config Operations
+
+`SerdeContext` allows you to use TypeAdapters directly with `Config.get()` and `Config.set()` methods, enabling automatic type conversion without manual handling.
+
+### Basic Usage
+
+```java
+// Create context with TypeAdapters
+SerdeContext ctx = SerdeContext.builder()
+    .withTypeAdapter(new ResourceLocationTypeAdapter())
+    .build();
+
+// Attach to any Config
+Config config = Config.inMemory();
+config.setSerdeContext(ctx);
+
+// Use setTyped/getTyped for automatic conversion
+ResourceLocation loc = new ResourceLocation("minecraft", "stone");
+config.setTyped("block", loc);  // Automatically serializes to String
+
+ResourceLocation retrieved = config.getTyped("block", ResourceLocation.class);
+// Automatically deserializes back to ResourceLocation
+```
+
+### With Default Values
+
+```java
+ResourceLocation defaultLoc = new ResourceLocation("minecraft", "air");
+ResourceLocation result = config.getTypedOrElse("missing", ResourceLocation.class, defaultLoc);
+```
+
+### Runtime Registration
+
+You can register TypeAdapters at runtime:
+
+```java
+SerdeContext ctx = SerdeContext.builder().build();
+config.setSerdeContext(ctx);
+
+// Register later
+ctx.registerTypeAdapter(new MyTypeAdapter());
+
+// Now it works
+config.setTyped("key", myCustomObject);
+```
+
+### Integration with FileConfig
+
+Works seamlessly with FileConfig and other Config implementations:
+
+```java
+FileConfig config = FileConfig.of("config.toml");
+config.load();
+
+SerdeContext ctx = SerdeContext.builder()
+    .withTypeAdapter(new ResourceLocationTypeAdapter())
+    .build();
+
+config.setSerdeContext(ctx);
+
+// Save custom types
+config.setTyped("spawn.location", new ResourceLocation("minecraft", "plains"));
+config.save();
+config.close();
+```
+
+---
+
 ## Concurrent Configurations
 
 For multi-threaded applications, use thread-safe configurations from the `concurrent` package.
@@ -704,6 +773,7 @@ Available examples:
 - `ConfigSpecExample` - Configuration validation and correction
 - `TypeAdapterExample` - Custom generic type handling
 - `TypeAdapterWithListExample` - TypeAdapter with collections
+- `SerdeContextExample` - Type-aware get/set with TypeAdapters
 - `CommentedConfigExample` - Working with comments
 
 ---

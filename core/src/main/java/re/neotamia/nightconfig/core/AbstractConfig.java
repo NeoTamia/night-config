@@ -1,6 +1,8 @@
 package re.neotamia.nightconfig.core;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import re.neotamia.nightconfig.core.serde.SerdeContext;
 import re.neotamia.nightconfig.core.utils.TransformingSet;
 
 import java.util.*;
@@ -10,8 +12,10 @@ import java.util.function.Supplier;
 import static re.neotamia.nightconfig.core.NullObject.NULL_OBJECT;
 
 /**
- * An abstract Config that uses a {@link java.util.Map} to store its values. In practice it's
- * often a HashMap, or a ConcurrentHashMap if the config is concurrent, but it accepts any type
+ * An abstract Config that uses a {@link java.util.Map} to store its values. In
+ * practice it's
+ * often a HashMap, or a ConcurrentHashMap if the config is concurrent, but it
+ * accepts any type
  * of Map.
  *
  * @author TheElectronWill
@@ -23,6 +27,19 @@ public abstract class AbstractConfig implements Config, Cloneable {
 
 	protected final Map<String, Object> map;
 
+	/** SerdeContext for type-aware get/set operations */
+	protected SerdeContext serdeContext;
+
+	@Override
+	public @Nullable SerdeContext getSerdeContext() {
+		return serdeContext;
+	}
+
+	@Override
+	public void setSerdeContext(@Nullable SerdeContext ctx) {
+		this.serdeContext = ctx;
+	}
+
 	/**
 	 * Creates a new AbstractConfig backed by a new {@link Map}.
 	 */
@@ -32,7 +49,8 @@ public abstract class AbstractConfig implements Config, Cloneable {
 	}
 
 	/**
-	 * Creates a new AbstractConfig with all backing maps supplied by the given {@link Supplier}.
+	 * Creates a new AbstractConfig with all backing maps supplied by the given
+	 * {@link Supplier}.
 	 *
 	 * @param mapCreator A supplier that will be called to create all config maps
 	 */
@@ -89,8 +107,9 @@ public abstract class AbstractConfig implements Config, Cloneable {
 	protected static <T> Supplier<Map<String, T>> getWildcardMapCreator(Supplier<Map<String, Object>> mapCreator) {
 		return () -> {
 			Map<String, Object> map = mapCreator.get();
-			map.clear(); // Make sure there's no naughty people putting starting entries in the map, so we can unsafely cast
-			return (Map<String, T>)map;
+			map.clear(); // Make sure there's no naughty people putting starting entries in the map, so
+							// we can unsafely cast
+			return (Map<String, T>) map;
 		};
 	}
 
@@ -102,7 +121,7 @@ public abstract class AbstractConfig implements Config, Cloneable {
 			return null;
 		}
 		String lastKey = path.get(lastIndex);
-		return (T)parentMap.get(lastKey);
+		return (T) parentMap.get(lastKey);
 	}
 
 	@Override
@@ -111,7 +130,7 @@ public abstract class AbstractConfig implements Config, Cloneable {
 		Map<String, Object> parentMap = getOrCreateMap(path.subList(0, lastIndex));
 		String lastKey = path.get(lastIndex);
 		Object nonNull = (value == null) ? NULL_OBJECT : value;
-		return (T)parentMap.put(lastKey, nonNull);
+		return (T) parentMap.put(lastKey, nonNull);
 	}
 
 	@Override
@@ -131,7 +150,7 @@ public abstract class AbstractConfig implements Config, Cloneable {
 			return null;
 		}
 		String lastKey = path.get(lastIndex);
-		return (T)parentMap.remove(lastKey);
+		return (T) parentMap.remove(lastKey);
 	}
 
 	@Override
@@ -174,9 +193,9 @@ public abstract class AbstractConfig implements Config, Cloneable {
 			} else if (!(currentValue instanceof Config)) {// incompatible intermediary level
 				throw new IncompatibleIntermediaryLevelException(
 						"Cannot add an element to an intermediary value of type: "
-						+ currentValue.getClass());
-			} else {//existing intermediary level
-				config = (Config)currentValue;
+								+ currentValue.getClass());
+			} else {// existing intermediary level
+				config = (Config) currentValue;
 			}
 			currentMap = config.valueMap();
 		}
@@ -196,7 +215,7 @@ public abstract class AbstractConfig implements Config, Cloneable {
 			if (!(value instanceof Config)) {// missing or incompatible intermediary level
 				return null;// the specified path doesn't exist -> stop here
 			}
-			currentMap = ((Config)value).valueMap();
+			currentMap = ((Config) value).valueMap();
 		}
 		return currentMap;
 	}
@@ -219,8 +238,11 @@ public abstract class AbstractConfig implements Config, Cloneable {
 	@Override
 	public Set<? extends Entry> entrySet() {
 		return new TransformingSet<>(map.entrySet(), EntryWrapper::new, o -> null, o -> o);
-		/* the writeTransformation is not important because we can't write to the set anyway,
-		   since it's a generic Set<? extends Entry> */
+		/*
+		 * the writeTransformation is not important because we can't write to the set
+		 * anyway,
+		 * since it's a generic Set<? extends Entry>
+		 */
 	}
 
 	/**
@@ -238,11 +260,13 @@ public abstract class AbstractConfig implements Config, Cloneable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == this) { return true; }
+		if (obj == this) {
+			return true;
+		}
 		if (obj instanceof AbstractConfig) {
-			return map.equals(((AbstractConfig)obj).map);
+			return map.equals(((AbstractConfig) obj).map);
 		} else if (obj instanceof UnmodifiableConfig conf) {
-            if (conf.size() != size()) {
+			if (conf.size() != size()) {
 				return false;
 			}
 			for (UnmodifiableConfig.Entry entry : entrySet()) {
@@ -288,12 +312,12 @@ public abstract class AbstractConfig implements Config, Cloneable {
 
 		@Override
 		public <T> T getRawValue() {
-			return (T)mapEntry.getValue();
+			return (T) mapEntry.getValue();
 		}
 
 		@Override
 		public <T> T setValue(Object value) {
-			return (T)mapEntry.setValue(value);
+			return (T) mapEntry.setValue(value);
 		}
 
 		@Override
@@ -302,8 +326,8 @@ public abstract class AbstractConfig implements Config, Cloneable {
 				return true;
 			}
 			if (obj instanceof EntryWrapper other) {
-                return Objects.equals(getKey(), other.getKey())
-					&& Objects.equals(getValue(), other.getValue());
+				return Objects.equals(getKey(), other.getKey())
+						&& Objects.equals(getValue(), other.getValue());
 			}
 			return false;
 		}

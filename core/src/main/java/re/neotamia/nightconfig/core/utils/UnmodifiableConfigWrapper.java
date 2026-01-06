@@ -1,8 +1,10 @@
 package re.neotamia.nightconfig.core.utils;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
+import re.neotamia.nightconfig.core.serde.SerdeContext;
 
 import java.util.List;
 import java.util.Map;
@@ -12,9 +14,9 @@ import java.util.Set;
 /**
  * @author TheElectronWill
  */
-public abstract class UnmodifiableConfigWrapper<C extends UnmodifiableConfig>
-		implements UnmodifiableConfig {
+public abstract class UnmodifiableConfigWrapper<C extends UnmodifiableConfig> implements UnmodifiableConfig {
 	protected final C config;
+    protected SerdeContext serdeContext;
 
 	protected UnmodifiableConfigWrapper(C config) {
 		this.config = Objects.requireNonNull(config, "The wrapped config must not be null");
@@ -64,4 +66,9 @@ public abstract class UnmodifiableConfigWrapper<C extends UnmodifiableConfig>
 	public ConfigFormat<?> configFormat() {
 		return config.configFormat();
 	}
+
+    @Override
+    public @Nullable SerdeContext getSerdeContext() {
+        return serdeContext;
+    }
 }

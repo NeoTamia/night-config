@@ -23,6 +23,7 @@ import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.InMemoryCommentedFormat;
 import re.neotamia.nightconfig.core.UnmodifiableCommentedConfig;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
+import re.neotamia.nightconfig.core.serde.SerdeContext;
 import re.neotamia.nightconfig.core.utils.TransformingMap;
 
 /**
@@ -264,6 +265,13 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
     }
 
     @Override
+    public @Nullable SerdeContext getSerdeContext() {
+        synchronized (rootMonitor) {
+            return dataHolder.getSerdeContext();
+        }
+    }
+
+    @Override
     public ConfigFormat<?> configFormat() {
         synchronized (rootMonitor) {
             return dataHolder.configFormat();
@@ -409,6 +417,13 @@ public final class SynchronizedConfig implements ConcurrentCommentedConfig {
     public <T> T set(String path, Object value) {
         synchronized (rootMonitor) {
             return dataHolder.set(path, value);
+        }
+    }
+
+    @Override
+    public void setSerdeContext(@Nullable SerdeContext ctx) {
+        synchronized (rootMonitor) {
+            dataHolder.setSerdeContext(ctx);
         }
     }
 

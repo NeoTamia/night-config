@@ -1,10 +1,12 @@
 package re.neotamia.nightconfig.core.conversion;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.Config;
 import re.neotamia.nightconfig.core.ConfigFormat;
 import re.neotamia.nightconfig.core.EnumGetMethod;
 import re.neotamia.nightconfig.core.InMemoryFormat;
+import re.neotamia.nightconfig.core.serde.SerdeContext;
 import re.neotamia.nightconfig.core.utils.TransformingMap;
 import re.neotamia.nightconfig.core.utils.TransformingSet;
 
@@ -165,6 +167,7 @@ public final class ObjectBinder {
 		private final Map<String, Object> dataMap;// contains FieldInfos and subconfigs
 		private final ConfigFormat<?> configFormat;
 		private final boolean bypassFinal;
+        private SerdeContext serdeContext;
 
 		private BoundConfig(Object object, Map<String, Object> dataMap,
 							ConfigFormat<?> configFormat, boolean bypassFinal) {
@@ -245,7 +248,12 @@ public final class ObjectBinder {
 			}
 		}
 
-		@Override
+        @Override
+        public @Nullable SerdeContext getSerdeContext() {
+            return serdeContext;
+        }
+
+        @Override
 		public boolean contains(@NotNull List<String> path) {
 			return searchInfosOrConfig(path) != null;
 		}
@@ -264,7 +272,12 @@ public final class ObjectBinder {
 			}
 		}
 
-		@Override
+        @Override
+        public void setSerdeContext(@Nullable SerdeContext ctx) {
+            this.serdeContext = ctx;
+        }
+
+        @Override
 		public boolean add(List<String> path, Object value) {
 			throw new UnsupportedOperationException("Cannot add elements to a bound config");
 		}

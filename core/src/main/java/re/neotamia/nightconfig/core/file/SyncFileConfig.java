@@ -15,8 +15,7 @@ import re.neotamia.nightconfig.core.utils.ConcurrentCommentedConfigWrapper;
 /**
  * @author TheElectronWill
  */
-final class SyncFileConfig extends ConcurrentCommentedConfigWrapper<SynchronizedConfig>
-		implements CommentedFileConfig {
+final class SyncFileConfig extends ConcurrentCommentedConfigWrapper<SynchronizedConfig> implements CommentedFileConfig {
 	private final Path nioPath;
 	private final Charset charset;
 	private volatile boolean closed;

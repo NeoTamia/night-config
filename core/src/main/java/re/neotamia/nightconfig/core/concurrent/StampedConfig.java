@@ -21,6 +21,7 @@ import re.neotamia.nightconfig.core.InMemoryCommentedFormat;
 import re.neotamia.nightconfig.core.IncompatibleIntermediaryLevelException;
 import re.neotamia.nightconfig.core.UnmodifiableCommentedConfig;
 import re.neotamia.nightconfig.core.UnmodifiableConfig;
+import re.neotamia.nightconfig.core.serde.SerdeContext;
 import re.neotamia.nightconfig.core.utils.TransformingSet;
 
 /**
@@ -36,6 +37,7 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
     private Map<String, Object> values;
     private Map<String, String> comments;
     private String headerComment = null;
+    private SerdeContext serdeContext;
 
     private final StampedLock lock = new StampedLock();
 
@@ -684,6 +686,16 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         } finally {
             lock.unlockWrite(stamp);
         }
+    }
+
+    @Override
+    public void setSerdeContext(@Nullable SerdeContext ctx) {
+        this.serdeContext = ctx;
+    }
+
+    @Override
+    public @Nullable SerdeContext getSerdeContext() {
+        return this.serdeContext;
     }
 
     // ----- CommentedConfig -----
@@ -1534,6 +1546,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
         }
 
         @Override
+        public @Nullable SerdeContext getSerdeContext() {
+            checkValid();
+            return StampedConfig.this.serdeContext;
+        }
+
+        @Override
         public int size() {
             checkValid();
             return StampedConfig.this.values.size();
@@ -1586,6 +1604,8 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                 return true;
             }
         }
+
+
     }
 
     /**
@@ -1865,6 +1885,12 @@ public final class StampedConfig implements ConcurrentCommentedConfig {
                     }
                 }
             }
+        }
+
+        @Override
+        public void setSerdeContext(@Nullable SerdeContext ctx) {
+            checkValid();
+            StampedConfig.this.serdeContext = ctx;
         }
     }
 

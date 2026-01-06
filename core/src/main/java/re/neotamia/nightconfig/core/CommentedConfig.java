@@ -3,6 +3,7 @@ package re.neotamia.nightconfig.core;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.concurrent.ConcurrentConfig;
+import re.neotamia.nightconfig.core.serde.SerdeContext;
 import re.neotamia.nightconfig.core.utils.FakeCommentedConfig;
 
 import java.util.*;
@@ -187,6 +188,11 @@ public interface CommentedConfig extends UnmodifiableCommentedConfig, Config {
 			public ConfigFormat<?> configFormat() {
 				return CommentedConfig.this.configFormat();
 			}
+
+            @Override
+            public @Nullable SerdeContext getSerdeContext() {
+                return CommentedConfig.this.getSerdeContext();
+            }
 		};
 	}
 

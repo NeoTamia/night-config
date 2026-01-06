@@ -12,8 +12,7 @@ import java.util.Set;
 /**
  * @author TheElectronWill
  */
-public abstract class CommentedConfigWrapper<C extends CommentedConfig> extends ConfigWrapper<C>
-        implements CommentedConfig {
+public abstract class CommentedConfigWrapper<C extends CommentedConfig> extends ConfigWrapper<C> implements CommentedConfig {
 
     protected CommentedConfigWrapper(C config) {
         super(config);

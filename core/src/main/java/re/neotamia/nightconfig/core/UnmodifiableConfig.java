@@ -1523,18 +1523,14 @@ public interface UnmodifiableConfig {
     // ---- SerdeContext and typed getters ----
 
     /**
-     * Returns the SerdeContext attached to this config, or null if none is
-     * attached.
+     * Returns the SerdeContext attached to this config, or null if none is attached.
      * <p>
-     * The SerdeContext enables type-aware operations like
-     * {@link #getTyped(String, Class)}
+     * The SerdeContext enables type-aware operations like {@link #getTyped(String, Class)}
      * and {@link Config#setTyped(String, Object)}.
      *
      * @return the attached SerdeContext, or null
      */
-    default @Nullable SerdeContext getSerdeContext() {
-        return null;
-    }
+    @Nullable SerdeContext getSerdeContext();
 
     /**
      * Gets a value from the config and deserializes it using the attached

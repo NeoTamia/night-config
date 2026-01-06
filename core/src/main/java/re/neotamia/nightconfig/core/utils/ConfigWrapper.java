@@ -1,6 +1,8 @@
 package re.neotamia.nightconfig.core.utils;
 
+import org.jetbrains.annotations.Nullable;
 import re.neotamia.nightconfig.core.Config;
+import re.neotamia.nightconfig.core.serde.SerdeContext;
 
 import java.util.List;
 import java.util.Set;
@@ -8,8 +10,7 @@ import java.util.Set;
 /**
  * @author TheElectronWill
  */
-public abstract class ConfigWrapper<C extends Config> extends UnmodifiableConfigWrapper<C>
-		implements Config {
+public abstract class ConfigWrapper<C extends Config> extends UnmodifiableConfigWrapper<C> implements Config {
 
 	protected ConfigWrapper(C config) {
 		super(config);
@@ -49,4 +50,9 @@ public abstract class ConfigWrapper<C extends Config> extends UnmodifiableConfig
 	public String toString() {
 		return getClass().getSimpleName() + ':' + config;
 	}
+
+    @Override
+    public void setSerdeContext(@Nullable SerdeContext ctx) {
+        this.serdeContext = ctx;
+    }
 }

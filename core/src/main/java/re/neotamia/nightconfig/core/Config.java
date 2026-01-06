@@ -173,7 +173,12 @@ public interface Config extends UnmodifiableConfig {
 			public ConfigFormat<?> configFormat() {
 				return Config.this.configFormat();
 			}
-		};
+
+            @Override
+            public @Nullable SerdeContext getSerdeContext() {
+                return Config.this.getSerdeContext();
+            }
+        };
 	}
 
 	/**
@@ -552,21 +557,13 @@ public interface Config extends UnmodifiableConfig {
 	/**
 	 * Attaches a SerdeContext to this config for type-aware operations.
 	 * <p>
-	 * Once attached, you can use {@link #setTyped(String, Object)} and
-	 * {@link UnmodifiableConfig#getTyped(String, Class)} for automatic type
-	 * conversion.
+	 * Once attached, you can use {@link #setTyped(String, Object)} and {@link UnmodifiableConfig#getTyped(String, Class)} for automatic type conversion.
 	 * <p>
-	 * The default implementation throws {@link UnsupportedOperationException}.
-	 * Configs extending AbstractConfig support this method.
 	 *
 	 * @param ctx the SerdeContext to attach, or null to remove
-	 * @throws UnsupportedOperationException if this config doesn't support
-	 *                                       SerdeContext
+	 * @throws UnsupportedOperationException if this config doesn't support SerdeContext
 	 */
-	default void setSerdeContext(@Nullable SerdeContext ctx) {
-		throw new UnsupportedOperationException(
-				"This config does not support SerdeContext. Use a config that extends AbstractConfig.");
-	}
+	void setSerdeContext(@Nullable SerdeContext ctx);
 
 	/**
 	 * Serializes and sets a value using the attached SerdeContext.

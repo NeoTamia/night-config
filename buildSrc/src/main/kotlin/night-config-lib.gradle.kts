@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.configurationcache.extensions.capitalized
 
 plugins {
     `java-library`
@@ -145,12 +146,14 @@ publishing {
         }
     }
     repositories {
+        mavenLocal()
         maven {
-			name = "neotamiaSnapshots"
-            url = uri("https://repo.neotamia.re/snapshots")
+            var repository = System.getProperty("repository.name", "snapshots")
+            name = "neotamia${repository.capitalized()}"
+            url = uri("https://repo.neotamia.re/${repository}")
             credentials(PasswordCredentials::class) {
-                username = property("${name}Username") as String
-                password = property("${name}Password") as String
+                username = (findProperty("${name}Username") ?: System.getenv("MAVEN_USERNAME")) as String?
+                password = (findProperty("${name}Password") ?: System.getenv("MAVEN_PASSWORD")) as String?
             }
         }
     }

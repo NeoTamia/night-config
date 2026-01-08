@@ -107,7 +107,7 @@ project.afterEvaluate {
 }
 
 group = "re.neotamia.night-config"
-version = "3.10.4"
+version = findProperty("version")!!
 
 publishing {
     publications {

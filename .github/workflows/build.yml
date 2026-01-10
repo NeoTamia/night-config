@@ -41,5 +41,6 @@ jobs:
     name: Build and Publish
     uses: NeoTamia/actions/.github/workflows/jvm-build-and-publish.yml@main
     with:
+      build-command: './gradlew build -x test'
       release: ${{ startsWith(github.ref, 'refs/tags/v') || github.event.inputs.release == 'true' }}
     secrets: inherit

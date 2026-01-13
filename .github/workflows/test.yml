@@ -36,5 +36,7 @@ jobs:
     permissions:
       checks: write
       pull-requests: write
+    secrets: inherit
     with:
       submodules: 'recursive'
+      codecov: true

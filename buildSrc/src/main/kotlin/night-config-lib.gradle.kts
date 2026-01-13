@@ -54,6 +54,7 @@ project.afterEvaluate {
 		testLogging {
 			events(TestLogEvent.SKIPPED, TestLogEvent.FAILED, TestLogEvent.PASSED)
 		}
+        finalizedBy(tasks.jacocoTestReport)
 	}
 
 	// Configure Jacoco with the multi-release Java versions
@@ -104,6 +105,10 @@ project.afterEvaluate {
 	}
 	tasks.jacocoTestReport {
 		dependsOn(tasks.test)
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+        }
 	}
 }
 

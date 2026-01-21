@@ -142,4 +142,11 @@ final class StandardSerializers {
 			return value.toString();
 		}
 	}
+
+	static final class ToStringSerializer implements ValueSerializer<Object, String> {
+		@Override
+		public @NotNull String serialize(@NotNull Object value, @NotNull SerializerContext ctx) {
+			return value.toString();
+		}
+	}
 }

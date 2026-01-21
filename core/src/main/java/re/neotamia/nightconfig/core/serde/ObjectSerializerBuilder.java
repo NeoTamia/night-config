@@ -153,6 +153,7 @@ public final class ObjectSerializerBuilder {
         ValueSerializer enumSer = new StandardSerializers.EnumSerializer();
         ValueSerializer trivialSer = new StandardSerializers.TrivialSerializer();
         ValueSerializer uuidSer = new StandardSerializers.UuidSerializer();
+        ValueSerializer toStringSer = new StandardSerializers.ToStringSerializer();
 
         withSerializerProvider((valueClass, ctx) -> {
             if (valueClass == null) {
@@ -163,27 +164,19 @@ public final class ObjectSerializerBuilder {
                     return null;
                 }
             }
-            if (Map.class.isAssignableFrom(valueClass)) {
-                return mapSer;
+            if (valueClass == UUID.class) return uuidSer;
+            if (valueClass == java.math.BigInteger.class || valueClass == java.math.BigDecimal.class
+                    || java.time.temporal.Temporal.class.isAssignableFrom(valueClass)
+                    || valueClass == java.io.File.class || java.nio.file.Path.class.isAssignableFrom(valueClass)
+                    || valueClass == java.net.URL.class || valueClass == java.net.URI.class) {
+                return toStringSer;
             }
-            if (Collection.class.isAssignableFrom(valueClass)) {
-                return collSer;
-            }
-            if (Iterable.class.isAssignableFrom(valueClass)) {
-                return iterSer;
-            }
-            if (UnmodifiableConfig.class.isAssignableFrom(valueClass)) {
-                return trivialSer; // the value is already a config, nothing to serialize
-            }
-            if (Enum.class.isAssignableFrom(valueClass)) {
-                return enumSer;
-            }
-            if (valueClass.isArray()) {
-                return arraySer;
-            }
-            if (valueClass == UUID.class) {
-                return uuidSer;
-            }
+            if (Map.class.isAssignableFrom(valueClass)) return mapSer;
+            if (Collection.class.isAssignableFrom(valueClass)) return collSer;
+            if (Iterable.class.isAssignableFrom(valueClass)) return iterSer;
+            if (UnmodifiableConfig.class.isAssignableFrom(valueClass)) return trivialSer; // the value is already a config, nothing to serialize
+            if (Enum.class.isAssignableFrom(valueClass)) return enumSer;
+            if (valueClass.isArray()) return arraySer;
             return null;
         });
     }

@@ -1,6 +1,17 @@
 package re.neotamia.nightconfig.core.serde;
 
+import java.io.File;
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -166,6 +177,9 @@ final class StandardDeserializers {
 			if (cls.isAssignableFrom(java.util.ArrayList.class)) {
 				return new java.util.ArrayList<>(sizeHint);
 			}
+			if (cls.isAssignableFrom(java.util.HashSet.class)) {
+				return new java.util.HashSet<>(sizeHint);
+			}
 			if (cls.isAssignableFrom(java.util.LinkedList.class)) {
 				return new java.util.LinkedList<>();
 			}
@@ -244,6 +258,80 @@ final class StandardDeserializers {
 		@Override
 		public @NotNull UUID deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
 			return UUID.fromString(value);
+		}
+	}
+
+	static final class BigIntegerDeserializer implements ValueDeserializer<Object, BigInteger> {
+		@Override
+		public @NotNull BigInteger deserialize(@NotNull Object value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			return new BigInteger(value.toString());
+		}
+	}
+
+	static final class BigDecimalDeserializer implements ValueDeserializer<Object, BigDecimal> {
+		@Override
+		public @NotNull BigDecimal deserialize(@NotNull Object value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			return new BigDecimal(value.toString());
+		}
+	}
+
+	static final class LocalDateDeserializer implements ValueDeserializer<String, LocalDate> {
+		@Override
+		public @NotNull LocalDate deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			return LocalDate.parse(value);
+		}
+	}
+
+	static final class LocalTimeDeserializer implements ValueDeserializer<String, LocalTime> {
+		@Override
+		public @NotNull LocalTime deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			return LocalTime.parse(value);
+		}
+	}
+
+	static final class LocalDateTimeDeserializer implements ValueDeserializer<String, LocalDateTime> {
+		@Override
+		public @NotNull LocalDateTime deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			return LocalDateTime.parse(value);
+		}
+	}
+
+	static final class InstantDeserializer implements ValueDeserializer<String, Instant> {
+		@Override
+		public @NotNull Instant deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			return Instant.parse(value);
+		}
+	}
+
+	static final class FileDeserializer implements ValueDeserializer<String, File> {
+		@Override
+		public @NotNull File deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			return new File(value);
+		}
+	}
+
+	static final class PathDeserializer implements ValueDeserializer<String, Path> {
+		@Override
+		public @NotNull Path deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			return Paths.get(value);
+		}
+	}
+
+	static final class UrlDeserializer implements ValueDeserializer<String, URL> {
+		@Override
+		public @NotNull URL deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			try {
+				return new URI(value).toURL();
+			} catch (Exception e) {
+				throw new SerdeException("Invalid URL: " + value, e);
+			}
+		}
+	}
+
+	static final class UriDeserializer implements ValueDeserializer<String, URI> {
+		@Override
+		public @NotNull URI deserialize(@NotNull String value, @Nullable TypeConstraint resultType, @NotNull DeserializerContext ctx) {
+			return URI.create(value);
 		}
 	}
 

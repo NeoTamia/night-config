@@ -172,6 +172,17 @@ public final class ObjectDeserializerBuilder {
 		ValueDeserializer enumDe = new StandardDeserializers.EnumDeserializer();
 		ValueDeserializer uuidDe = new StandardDeserializers.UuidDeserializer();
 		ValueDeserializer numberDe = new StandardDeserializers.RiskyNumberDeserializer();
+        // more type support
+		ValueDeserializer bigIntDe = new StandardDeserializers.BigIntegerDeserializer();
+		ValueDeserializer bigDecDe = new StandardDeserializers.BigDecimalDeserializer();
+		ValueDeserializer localDateDe = new StandardDeserializers.LocalDateDeserializer();
+		ValueDeserializer localTimeDe = new StandardDeserializers.LocalTimeDeserializer();
+		ValueDeserializer localDateTimeDe = new StandardDeserializers.LocalDateTimeDeserializer();
+		ValueDeserializer instantDe = new StandardDeserializers.InstantDeserializer();
+		ValueDeserializer fileDe = new StandardDeserializers.FileDeserializer();
+		ValueDeserializer pathDe = new StandardDeserializers.PathDeserializer();
+		ValueDeserializer urlDe = new StandardDeserializers.UrlDeserializer();
+		ValueDeserializer uriDe = new StandardDeserializers.UriDeserializer();
 
 		withDeserializerProvider(((valueClass, resultType) -> {
 			Type fullType = resultType.getFullType();
@@ -198,9 +209,18 @@ public final class ObjectDeserializerBuilder {
 					return uuidDe;
 				if (valueClass == String.class && Enum.class.isAssignableFrom(resultClass))
 					return enumDe; // value to Enum
-				if (RiskyNumberDeserializer.isNumberTypeSupported(valueClass)
-						&& Util.isPrimitiveOrWrapperNumber(resultClass))
+				if (RiskyNumberDeserializer.isNumberTypeSupported(valueClass) && Util.isPrimitiveOrWrapperNumber(resultClass))
 					return numberDe;
+				if (resultClass == java.math.BigInteger.class) return bigIntDe;
+				if (resultClass == java.math.BigDecimal.class) return bigDecDe;
+				if (resultClass == java.time.LocalDate.class) return localDateDe;
+				if (resultClass == java.time.LocalTime.class) return localTimeDe;
+				if (resultClass == java.time.LocalDateTime.class) return localDateTimeDe;
+				if (resultClass == java.time.Instant.class) return instantDe;
+				if (resultClass == java.io.File.class) return fileDe;
+				if (java.nio.file.Path.class.isAssignableFrom(resultClass)) return pathDe;
+				if (resultClass == java.net.URL.class) return urlDe;
+				if (resultClass == java.net.URI.class) return uriDe;
 				return null; // no standard deserializer matches this case
 			}).orElse(null);
 		}));

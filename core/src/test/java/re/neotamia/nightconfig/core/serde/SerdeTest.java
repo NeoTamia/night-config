@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import re.neotamia.nightconfig.core.CommentedConfig;
@@ -696,5 +697,124 @@ public final class SerdeTest {
         assertEquals(100L, numberConfig.l);
         assertEquals((byte)10, numberConfig.b);
         assertEquals((short)20, numberConfig.s);
+    }
+
+    public static class Base {
+        public String baseField = "base";
+    }
+
+    public static class Derived extends Base {
+        public String derivedField = "derived";
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Derived derived = (Derived) o;
+            return Objects.equals(baseField, derived.baseField) &&
+                    Objects.equals(derivedField, derived.derivedField);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(baseField, derivedField);
+        }
+    }
+
+    @Test
+    public void testInheritance() {
+        ObjectSerializer serializer = ObjectSerializer.builder().build();
+        ObjectDeserializer deserializer = ObjectDeserializer.builder().build();
+
+        Derived derived = new Derived();
+        derived.baseField = "newBase";
+        derived.derivedField = "newDerived";
+
+        Config config = serializer.serializeFields(derived, InMemoryFormat.defaultInstance()::createConfig);
+
+        assertEquals("newBase", config.get("baseField"));
+        assertEquals("newDerived", config.get("derivedField"));
+
+        Derived deserialized = deserializer.deserializeFields(config, Derived::new);
+        assertEquals(derived, deserialized);
+    }
+
+    public static class AllTypes {
+        public java.math.BigInteger bi;
+        public java.math.BigDecimal bd;
+        public java.time.LocalDate localDate;
+        public java.time.LocalTime localTime;
+        public java.time.LocalDateTime localDateTime;
+        public java.time.Instant instant;
+        public java.io.File file;
+        public java.nio.file.Path path;
+        public java.net.URL url;
+        public java.net.URI uri;
+    }
+
+    @Test
+    public void testAllTypes() throws Exception {
+        ObjectSerializer serializer = ObjectSerializer.builder().build();
+        ObjectDeserializer deserializer = ObjectDeserializer.builder().build();
+
+        AllTypes obj = new AllTypes();
+        obj.bi = new java.math.BigInteger("12345");
+        obj.bd = new java.math.BigDecimal("12.345");
+        obj.localDate = java.time.LocalDate.now();
+        obj.localTime = java.time.LocalTime.now().withNano(0);
+        obj.localDateTime = java.time.LocalDateTime.now().withNano(0);
+        obj.instant = java.time.Instant.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
+        obj.file = new java.io.File("test.txt");
+        obj.path = java.nio.file.Paths.get("test.path");
+        obj.url = new java.net.URL("https://example.com");
+        obj.uri = new java.net.URI("https://example.com/uri");
+
+        Config config = serializer.serializeFields(obj, InMemoryFormat.defaultInstance()::createConfig);
+
+        AllTypes deserialized = deserializer.deserializeFields(config, AllTypes::new);
+        assertEquals(obj.bi, deserialized.bi);
+        assertEquals(obj.bd, deserialized.bd);
+        assertEquals(obj.localDate, deserialized.localDate);
+        assertEquals(obj.localTime, deserialized.localTime);
+        assertEquals(obj.localDateTime, deserialized.localDateTime);
+        assertEquals(obj.instant, deserialized.instant);
+        assertEquals(obj.file.getAbsoluteFile(), deserialized.file.getAbsoluteFile());
+        assertEquals(obj.path.toAbsolutePath(), deserialized.path.toAbsolutePath());
+        assertEquals(obj.url, deserialized.url);
+        assertEquals(obj.uri, deserialized.uri);
+    }
+
+    public static class CollectionsTest {
+        public List<String> list = Arrays.asList("a", "b");
+        public Set<Integer> set = new HashSet<>(Arrays.asList(1, 2));
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            CollectionsTest that = (CollectionsTest) o;
+            return Objects.equals(list, that.list) &&
+                    Objects.equals(set, that.set);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(list, set);
+        }
+    }
+
+    @Test
+    public void testCollections() {
+        ObjectSerializer serializer = ObjectSerializer.builder().build();
+        ObjectDeserializer deserializer = ObjectDeserializer.builder().build();
+
+        CollectionsTest collections = new CollectionsTest();
+        Config config = serializer.serializeFields(collections, InMemoryFormat.defaultInstance()::createConfig);
+
+        Assertions.assertInstanceOf(List.class, config.get("list"));
+        Assertions.assertInstanceOf(List.class, config.get("set")); // Sets are often serialized as lists in configs
+
+        CollectionsTest deserialized = deserializer.deserializeFields(config, CollectionsTest::new);
+        Assertions.assertEquals(collections, deserialized);
     }
 }

@@ -73,8 +73,9 @@ final class StandardDeserializers {
 			if (mapKeyType.isPresent()) {
 				if (!mapKeyType.get().getSatisfyingRawType().equals(Optional.of(String.class))) {
 					throw new SerdeException(
-							"Invalid map type for deserialization, the keys should be of type String instead of "
-									+ mapKeyType.get() + ". Full map type: " + resultType);
+							"Invalid map type for deserialization: expected keys of type String but found "
+									+ mapKeyType.get() + ". Full map type: " + resultType
+									+ ". Use Map<String, ?> for config values.");
 				}
 			}
 
@@ -89,14 +90,8 @@ final class StandardDeserializers {
 			} else {
 				// deserialize map entries to map values, converting each value
 				for (Map.Entry<?, ?> entry : ((Map<?, ?>) mapValue).entrySet()) {
-					Object key = entry.getKey();
-					if (!(key instanceof String)) {
-						String keyClassStr = key == null ? "null" : key.getClass().toString();
-						throw new SerdeException(
-								"Invalid map type for deserialization, the keys should be of type String instead of "
-										+ keyClassStr + ". Full map type: " + resultType);
-					}
-					Object value = entry.getValue();
+                    Object key = extractStringKey(mapValue, resultType, entry);
+                    Object value = entry.getValue();
 					Object deserialized = ctx.deserializeValue(value, mapValueType.orElse(null));
 					res.put((String) key, deserialized);
 				}
@@ -143,9 +138,32 @@ final class StandardDeserializers {
 				throw new SerdeException("Failed to create an instance of " + cls, ex);
 			}
 		}
-	}
 
-	/**
+        /**
+         * Extracts the key from a given map entry, ensuring it is a string.
+         *
+         * @param mapValue the original map object being deserialized
+         * @param resultType optional type constraint for the resulting deserialized map
+         * @param entry the map entry from which the key will be extracted
+         * @return the key of the map entry if it is of type String
+         * @throws SerdeException if the key is not of type String
+         */
+        private static @NotNull Object extractStringKey(@NotNull Object mapValue, @Nullable TypeConstraint resultType, @NotNull Map.Entry<?, ?> entry)
+                throws SerdeException {
+            Object key = entry.getKey();
+            if (!(key instanceof String)) {
+                String keyClassStr = key == null ? "null" : key.getClass().getName();
+                String keyValueString = String.valueOf(key);
+                String mapValType = mapValue.getClass().getName();
+                throw new SerdeException(
+                        "Map keys must be strings for config deserialization. Found key of type "
+                                + keyClassStr + " (value: " + keyValueString + ") in map " + mapValType
+                                + ". Full map type: " + resultType + ". Use Map<String, ?> or convert keys.");
+            }
+            return key;
+        }
+    }
+    /**
 	 * Deserializes {@code Collection<Value>} to {@code Collection<Result>}.
 	 */
 	static final class CollectionDeserializer implements ValueDeserializer<Collection<?>, Collection<?>> {

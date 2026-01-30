@@ -29,11 +29,7 @@ final class StandardSerializers {
             // serialize each entry as a config entry
             for (Entry<?, ?> entry : value.entrySet()) {
                 // get the path
-                Object key = entry.getKey();
-                if (!(key instanceof String)) {
-                    String keyTypeString = key == null ? "null" : key.getClass().toString();
-                    throw new SerdeException("Map keys must be strings, invalid key type " + keyTypeString + " in value.");
-                }
+                Object key = extractStringKey(value, entry);
                 List<String> path = Collections.singletonList((String) key);
 
                 // convert the value
@@ -43,6 +39,20 @@ final class StandardSerializers {
                 res.set(path, serialized);
             }
             return res;
+        }
+
+        private static @NotNull Object extractStringKey(@NotNull Map<?, ?> value, Entry<?, ?> entry) throws SerdeException {
+            Object key = entry.getKey();
+            if (!(key instanceof String)) {
+                String keyTypeString = key == null ? "null" : key.getClass().getName();
+                String keyValueString = String.valueOf(key);
+                String mapTypeString = value.getClass().getName();
+                throw new SerdeException("Map keys must be strings for config serialization. Found key of type "
+                        + keyTypeString + " (value: " + keyValueString + ") in map " + mapTypeString
+                        + ". Use Map<String, ?> or convert keys to strings before serialization."
+                );
+            }
+            return key;
         }
 
     }
@@ -133,20 +143,20 @@ final class StandardSerializers {
         }
     }
 
-	/**
-	 * Serializes a UUID to a String.
-	 */
-	static final class UuidSerializer implements ValueSerializer<UUID, String> {
-		@Override
-		public @NotNull String serialize(@NotNull UUID value, @NotNull SerializerContext ctx) {
-			return value.toString();
-		}
-	}
+    /**
+     * Serializes a UUID to a String.
+     */
+    static final class UuidSerializer implements ValueSerializer<UUID, String> {
+        @Override
+        public @NotNull String serialize(@NotNull UUID value, @NotNull SerializerContext ctx) {
+            return value.toString();
+        }
+    }
 
-	static final class ToStringSerializer implements ValueSerializer<Object, String> {
-		@Override
-		public @NotNull String serialize(@NotNull Object value, @NotNull SerializerContext ctx) {
-			return value.toString();
-		}
-	}
+    static final class ToStringSerializer implements ValueSerializer<Object, String> {
+        @Override
+        public @NotNull String serialize(@NotNull Object value, @NotNull SerializerContext ctx) {
+            return value.toString();
+        }
+    }
 }

@@ -1,3 +1,6 @@
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import re.neotamia.nightconfig.core.concurrent.SynchronizedConfig;
 import re.neotamia.nightconfig.core.file.CommentedFileConfig;
 import re.neotamia.nightconfig.core.file.FileConfig;
@@ -5,8 +8,6 @@ import re.neotamia.nightconfig.core.file.FormatDetector;
 import re.neotamia.nightconfig.core.serde.ObjectSerializer;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeComment;
 import re.neotamia.nightconfig.core.serde.annotations.SerdeKey;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import re.neotamia.nightconfig.json.JsonFormat;
 import re.neotamia.nightconfig.toml.TomlFormat;
 import re.neotamia.nightconfig.yaml.YamlFormat;
@@ -20,6 +21,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SerializerTest {
+    @TempDir
+    Path tempDir;
+
     @BeforeAll
     public static void setup() {
         FormatDetector.registerExtension("yaml", YamlFormat.defaultInstance());
@@ -143,7 +147,33 @@ public class SerializerTest {
 
         config.save();
         var configState2 = Files.readString(path);
-        assertEquals(configState, configState2);    }
+        assertEquals(configState, configState2);
+    }
+
+    @Test
+    public void serializeHexBinaryOctal() {
+        var path = tempDir.resolve("config.yaml");
+        System.out.println(path);
+        var config = FileConfig.builder(path).sync().build();
+        config.set("hex", 0x1A);
+        config.set("binary", 0b1101);
+        config.set("octal", 032);
+        assertEquals(0x1A, config.getInt("hex"));
+        assertEquals(0b1101, config.getInt("binary"));
+        assertEquals(032, config.getInt("octal"));
+
+        config.save();
+        config.set("hex", 0);
+        config.set("binary", 0);
+        config.set("octal", 0);
+        config.load();
+
+        assertEquals(0x1A, config.getInt("hex"));
+        assertEquals(0b1101, config.getInt("binary"));
+        assertEquals(032, config.getInt("octal"));
+
+        config.close();
+    }
 
     public static class Config {
         private final String name = "Config";

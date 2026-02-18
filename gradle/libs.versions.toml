@@ -2,7 +2,7 @@
 junit5 = "5.10.2"
 snakeYamlEngine = "2.10"
 typesafeConfig = "1.4.3"
-jetbrainsAnnotations = "26.0.2"
+jetbrainsAnnotations = "26.1.0"
 
 [libraries]
 snakeYamlEngine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "snakeYamlEngine" }

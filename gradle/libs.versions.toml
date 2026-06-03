@@ -1,7 +1,7 @@
 [versions]
 junit5 = "5.10.2"
 snakeYamlEngine = "2.10"
-typesafeConfig = "1.4.3"
+typesafeConfig = "1.4.9"
 jetbrainsAnnotations = "26.0.2"
 
 [libraries]

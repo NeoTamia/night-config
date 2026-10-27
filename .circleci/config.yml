@@ -8,7 +8,7 @@ jobs:
     # See: https://circleci.com/docs/configuration-reference/#docker-machine-macos-windows-executor
     docker:
       # specify the version you desire here
-      - image: cimg/openjdk:17.0@sha256:381003f76634759af53f200d7d70966cc2d22f100e489e8b8a5a3a96b0676e94
+      - image: cimg/openjdk:17.0.21@sha256:5e03ff3d2e6f863cdb37c51b4fa8a34e2519392d914ccd324b1d5efb23970420
 
     working_directory: ~/repo
 
